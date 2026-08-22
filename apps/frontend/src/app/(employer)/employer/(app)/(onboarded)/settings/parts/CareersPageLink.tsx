@@ -1,18 +1,18 @@
 'use client';
 // FILE: settings/parts/CareersPageLink.tsx
-// The company's public careers URL (/apply/{slug}) with Copy + Visit. Shared by
-// the Company and Branding pages. The origin comes from NEXT_PUBLIC_SITE_URL
-// when configured (C10) and falls back to the live origin in the browser.
+// The company's public careers URL with Copy + Visit. Shared by the Company and
+// Branding pages. The origin comes from NEXT_PUBLIC_APPLY_URL (§17): this runs on
+// the EMPLOYER host, so window.location.origin would build
+// hire.jobmesh.in/apply/{slug} — a 404, since /apply lives on apply.jobmesh.in.
 
 import { useState } from 'react';
 import { Copy, Check, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { copyToClipboard } from '@/lib/clipboard';
-import { SITE_URL } from '@/lib/site-url';
+import { getApplyUrl } from '@/lib/subdomain-urls';
 
 export function careersPageUrl(slug: string): string {
-  const origin = SITE_URL || (typeof window === 'undefined' ? '' : window.location.origin);
-  return `${origin}/apply/${slug}`;
+  return getApplyUrl(`/${slug}`);
 }
 
 export default function CareersPageLink({ slug, onCopied }: {

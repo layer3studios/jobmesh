@@ -2,11 +2,10 @@
 // Application entry. Wires middleware, routes, and scheduled tasks.
 
 import express from 'express';
-import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import cron from 'node-cron';
 
-import { PORT, FRONTEND_URL, RUN_SCRAPER_ON_START, SYNC_ENABLED } from './env.js';
+import { PORT, RUN_SCRAPER_ON_START, SYNC_ENABLED } from './env.js';
 import { connectToDb, closeDb } from './Db/connection.js';
 import { ensureUserIndexes } from './models/seeker/index.js';
 import { ensureJobIndexes } from './models/shared/job-model.js';
@@ -85,6 +84,8 @@ import {
 import {
   reconcileAssignmentFiles, collectReferencedStagingPaths,
 } from './services/public/assignment-file-reconciler.js';
+import healthRouter from './api/health-routes.js';
+import healthDetailedRouter from './api/health-detailed-routes.js';
 import dpdpRouter from './api/dpdp/dpdp-routes.js';
 import seekerResumeRouter from './api/seeker/seeker-resume-routes.js';
 import seekerProfileRouter from './api/seeker/seeker-profile-routes.js';
@@ -111,16 +112,22 @@ import { requireConsentForPurpose } from './middleware/require-consent-middlewar
 import { requireEmployer } from './middleware/require-employer-middleware.js';
 import { requireEmployerCompany } from './middleware/require-employer-company-middleware.js';
 import { notFound, errorHandler } from './middleware/error-handler-middleware.js';
+import { corsMiddleware } from './middleware/cors-middleware.js';
 
 const app = express();
 
 // ─── Middleware ───────────────────────────────────────────────────
-app.use(cors({ origin: FRONTEND_URL, credentials: true }));
+app.use(corsMiddleware);
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 
 // ─── Health ───────────────────────────────────────────────────────
+// Mounted ahead of every auth middleware: monitoring and health.jobmesh.in must
+// reach /api/health with no credentials, and it must answer even when Mongo is
+// down. /api/health/detailed carries its own requireAdmin guard.
 app.get('/', (_req, res) => res.send('Job Scraper Backend running.'));
+app.use('/api/health', healthDetailedRouter);
+app.use('/api/health', healthRouter);
 
 // ─── Routes ───────────────────────────────────────────────────────
 app.use('/api/seeker/auth', authRouter);

@@ -3,7 +3,7 @@
 // description, datePosted, validThrough, employmentType, hiringOrganization,
 // jobLocation. Optional baseSalary is emitted ONLY when a salary is present
 // (never emit null — Google drops postings with malformed fields).
-import { absoluteUrl } from '../site-url';
+import { getApplyUrl } from '../subdomain-urls';
 
 export interface JobPostingSchemaInput {
   title: string;
@@ -36,7 +36,7 @@ export function buildJobPostingSchema(job: JobPostingSchemaInput, company: JobPo
     hiringOrganization: {
       '@type': 'Organization',
       name: company.name,
-      sameAs: absoluteUrl(`/apply/${job.companySlug}`),
+      sameAs: getApplyUrl(`/${job.companySlug}`),
       ...(company.logoUrl ? { logo: company.logoUrl } : {}),
     },
     jobLocation: {

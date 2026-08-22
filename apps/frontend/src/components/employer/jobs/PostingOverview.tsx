@@ -10,10 +10,8 @@ import { Stack, useToast } from '@/components/ui';
 import { useEmployer } from '@/context/employer/EmployerContext';
 import { canEditPosting, canClosePosting } from '@/lib/team-permissions';
 import PostingEditView from './parts/PostingEditView';
-import { isoToDeadlineInput } from './posting-form-helpers';
-import type { PostingFormValues } from './posting-form-helpers';
-import PostingConfirmDialog from './PostingConfirmDialog';
-import type { ConfirmAction } from './PostingConfirmDialog';
+import { isoToDeadlineInput, type PostingFormValues } from './posting-form-helpers';
+import PostingConfirmDialog, { type ConfirmAction } from './PostingConfirmDialog';
 import PostingActionBar from './parts/PostingActionBar';
 import PostingFillDialog from './parts/PostingFillDialog';
 import PostingKpiTiles from './PostingKpiTiles';
@@ -27,6 +25,7 @@ import {
 import { listInterviewTimes } from '@/api/employer-interview-times-api';
 import type { Posting, PostingCreateInput } from '@/types/employer-jobs';
 import { trackEvent } from '@/lib/analytics-events';
+import { getApplyUrl } from '@/lib/subdomain-urls';
 
 const daysOpen = (createdAt: string): number => Math.max(0, Math.floor((Date.now() - new Date(createdAt).getTime()) / 86400000));
 
@@ -54,7 +53,8 @@ export default function PostingOverview({ posting, onReload }: {
   const [isFillOpen, setIsFillOpen] = useState(false);
   const data = usePostingOverviewData(posting.id);
 
-  const applyUrl = `${window.location.origin}/apply/${company?.slug ?? ''}/${posting.slug}`;
+  // Apply pages live on apply.jobmesh.in, not this (employer) host — §17.
+  const applyUrl = getApplyUrl(`/${company?.slug ?? ''}/${posting.slug}`);
   // Re-seed the preview each time edit opens so it reflects the saved posting.
   const openEdit = () => { setPreviewValues(toFormValues(posting)); setMode('edit'); };
 

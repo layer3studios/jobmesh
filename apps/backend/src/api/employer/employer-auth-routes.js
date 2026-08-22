@@ -14,7 +14,6 @@ import {
   EMPLOYER_JWT_SECRET,
   EMPLOYER_JWT_EXPIRY,
   EMPLOYER_COOKIE_NAME,
-  IS_PRODUCTION,
 } from '../../env.js';
 import {
   isEmployerSignupAllowed,
@@ -24,6 +23,7 @@ import {
   toPublicCompany,
 } from '../../models/employer/index.js';
 import { verifyEmployerGoogleIdToken } from '../../services/auth/verify-google-token-service.js';
+import { authCookieOptions, clearAuthCookieOptions } from '../../services/auth/auth-cookie-options.js';
 import { toPublicEmployerUser } from './employer-user-projection.js';
 import { asyncHandler } from '../../middleware/async-handler-middleware.js';
 import { HttpError } from '../../middleware/error-handler-middleware.js';
@@ -31,13 +31,10 @@ import { HttpError } from '../../middleware/error-handler-middleware.js';
 const SIGNUP_GATED_MESSAGE =
   'Employer signup is not yet open. Contact support@jobmesh.in if you would like early access.';
 
-const cookieOptions = () => ({
-  httpOnly: true,
-  secure: IS_PRODUCTION,
-  sameSite: IS_PRODUCTION ? 'none' : 'lax', // SameSite=None requires Secure (R4)
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-  path: '/',
-});
+// Cross-subdomain attributes (domain, sameSite) live in auth-cookie-options.js so
+// all three audiences stay in lockstep; only the lifetime differs per audience.
+const EMPLOYER_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const cookieOptions = () => authCookieOptions(EMPLOYER_TOKEN_TTL_MS);
 
 function signEmployerToken(user) {
   return jwt.sign(
@@ -100,12 +97,7 @@ export function createEmployerAuthRouter({ verifyToken = verifyEmployerGoogleIdT
 
   // POST /api/employer/auth/logout
   router.post('/logout', (_req, res) => {
-    res.clearCookie(EMPLOYER_COOKIE_NAME, {
-      httpOnly: true,
-      secure: IS_PRODUCTION,
-      sameSite: IS_PRODUCTION ? 'none' : 'lax',
-      path: '/',
-    });
+    res.clearCookie(EMPLOYER_COOKIE_NAME, clearAuthCookieOptions());
     res.json({ success: true });
   });
 

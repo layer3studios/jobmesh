@@ -9,6 +9,7 @@ import { Container, Card, Button, Stack } from '@/components/ui';
 import ApplySuccessTracker from '@/components/apply/ApplySuccessTracker';
 import SocialLinks from '@/components/apply/SocialLinks';
 import { getPublicCompanyServer } from '@/lib/server-api/public';
+import { getSeekerUrl } from '@/lib/subdomain-urls';
 
 export const metadata: Metadata = {
   title: 'Application submitted',
@@ -84,9 +85,10 @@ export default async function ApplySuccessPage({
                 {companyName ? `Browse more jobs at ${companyName}` : 'Browse more jobs'}
               </Button>
             </Link>
-            <Link href="/" style={{ fontSize: '0.825rem', color: 'var(--link)' }}>
+            {/* Cross-audience: apply.jobmesh.in → jobmesh.in in production. */}
+            <a href={getSeekerUrl('/')} style={{ fontSize: '0.825rem', color: 'var(--link)' }}>
               Back to JobMesh
-            </Link>
+            </a>
           </Stack>
         </Stack>
       </Card>

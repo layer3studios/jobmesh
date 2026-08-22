@@ -8,23 +8,19 @@
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 
-import { JWT_SECRET, ADMIN_JWT_TTL_HOURS, IS_PRODUCTION } from '../../env.js';
+import { JWT_SECRET, ADMIN_JWT_TTL_HOURS } from '../../env.js';
 import { findAdminByEmail, markAdminLoggedIn, activateAdminByInviteToken } from '../../models/admin/index.js';
 import { verifyEmployerGoogleIdToken } from '../../services/auth/verify-google-token-service.js';
+import { authCookieOptions, clearAuthCookieOptions } from '../../services/auth/auth-cookie-options.js';
 import { requireAdmin } from '../../middleware/require-admin-middleware.js';
 import { asyncHandler } from '../../middleware/async-handler-middleware.js';
 import { HttpError } from '../../middleware/error-handler-middleware.js';
 
 const ADMIN_COOKIE_NAME = 'jm_admin_token';
 
-// COPIED EXACTLY from jm_employer_token cookieOptions (C9); only maxAge differs.
-const cookieOptions = () => ({
-  httpOnly: true,
-  secure: IS_PRODUCTION,
-  sameSite: IS_PRODUCTION ? 'none' : 'lax', // SameSite=None requires Secure
-  maxAge: ADMIN_JWT_TTL_HOURS * 60 * 60 * 1000,
-  path: '/',
-});
+// Shares jm_employer_token's cross-subdomain attributes via auth-cookie-options.js
+// (C9); only the lifetime differs.
+const cookieOptions = () => authCookieOptions(ADMIN_JWT_TTL_HOURS * 60 * 60 * 1000);
 
 // Never expose internal fields — only the identity contract the frontend needs.
 function toPublicAdmin(admin) {
@@ -83,12 +79,7 @@ export function createAdminAuthRouter({ verifyToken = verifyEmployerGoogleIdToke
 
   // POST /api/admin/auth/logout — clear options mirror set options minus maxAge.
   router.post('/logout', (_req, res) => {
-    res.clearCookie(ADMIN_COOKIE_NAME, {
-      httpOnly: true,
-      secure: IS_PRODUCTION,
-      sameSite: IS_PRODUCTION ? 'none' : 'lax',
-      path: '/',
-    });
+    res.clearCookie(ADMIN_COOKIE_NAME, clearAuthCookieOptions());
     res.json({ ok: true });
   });
 

@@ -1,10 +1,35 @@
-// FILE: src/app/robots.ts — SEO-PLAN §4. Index the public funnel; block auth/utility
-// surfaces. The apply FORM pages stay indexable (Google-for-Jobs landing); only the
-// post-submit /apply/*/success is disallowed.
+// FILE: src/app/robots.ts — SEO-PLAN §4 + NAMING-CONVENTIONS §17. Index the public
+// funnel; block auth/utility surfaces. The apply FORM pages stay indexable
+// (Google-for-Jobs landing); only the post-submit /apply/*/success is disallowed.
+//
+// robots.txt is per-HOST, and one Next process serves five hosts, so the rules
+// must depend on which subdomain asked. health.* and api.* are operational
+// surfaces with nothing to index; hire.* and admin.* are behind auth entirely.
+import { headers } from 'next/headers';
 import type { MetadataRoute } from 'next';
 import { absoluteUrl } from '@/lib/site-url';
 
-export default function robots(): MetadataRoute.Robots {
+/** Hosts where nothing at all should be crawled. */
+const FULLY_DISALLOWED_SUBDOMAINS = ['health', 'api', 'admin', 'hire'];
+
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  // Set by middleware.ts on every proxied request; absent in dev (no subdomains).
+  const subdomain = (await headers()).get('x-subdomain') ?? '';
+
+  if (FULLY_DISALLOWED_SUBDOMAINS.includes(subdomain)) {
+    return { rules: { userAgent: '*', disallow: '/' } };
+  }
+
+  // apply.jobmesh.in: careers + job pages are the whole point of the host, so
+  // they stay crawlable — only the post-submit confirmation is hidden.
+  if (subdomain === 'apply') {
+    return {
+      rules: { userAgent: '*', allow: '/', disallow: ['/*/success', '/interview/'] },
+      sitemap: absoluteUrl('/sitemap.xml'),
+    };
+  }
+
+  // Bare domain (seeker), and every dev request.
   return {
     rules: {
       userAgent: '*',
@@ -18,6 +43,7 @@ export default function robots(): MetadataRoute.Robots {
         '/profile',
         '/account/',
         '/login',
+        '/status',
         '/apply/*/success',
         // Booking tokens are live credentials — never crawled. The page ALSO
         // exports noindex metadata: robots.txt alone cannot stop indexing of a

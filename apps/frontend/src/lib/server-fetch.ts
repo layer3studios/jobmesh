@@ -9,10 +9,16 @@
 // ./public-server-fetch instead: reading cookies() here forces the whole route
 // dynamic, which defeats ISR/data-cache (NAV-PERF-AUDIT §5).
 import { cookies } from 'next/headers';
-import { API_BASE } from './api-base';
+import { API_PATH_PREFIX } from './api-base';
 
 // Origin comes ONLY from env (C10) — the dev default lives in .env.example, not
 // here. Empty when unset (server code must set it in every real environment).
+//
+// DELIBERATELY NOT NEXT_PUBLIC_API_URL. That is the PUBLIC API origin the browser
+// uses (api.jobmesh.in); SSR runs on the same box as Express and must reach it
+// INTERNALLY (127.0.0.1:3000). Sending server-side reads back out through public
+// DNS + Nginx would add a full round trip to every render and makes the app
+// depend on its own edge being up to render a page.
 const SERVER_API_ORIGIN =
   process.env.SERVER_API_ORIGIN ?? process.env.DEV_API_PROXY_ORIGIN ?? '';
 
@@ -45,9 +51,13 @@ export async function parseServerResponse<T>(response: Response): Promise<T> {
   return body as T;
 }
 
-/** Full request URL for a backend `/api` path. Shared with publicServerFetch. */
+/**
+ * Full request URL for a backend `/api` path. Shared with publicServerFetch.
+ * Uses API_PATH_PREFIX, not API_BASE: API_BASE now carries the public API origin
+ * for the browser, and concatenating it here would produce a doubled origin.
+ */
 export function serverApiUrl(path: string): string {
-  return `${SERVER_API_ORIGIN}${API_BASE}${path}`;
+  return `${SERVER_API_ORIGIN}${API_PATH_PREFIX}${path}`;
 }
 
 /**

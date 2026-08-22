@@ -3,9 +3,9 @@
 // footer. Deliberately understated: it signals to an employer who lands here
 // that there is a real product behind the aggregator, without turning the
 // seeker landing page into an employer pitch. Stacks vertically under 640px.
-import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { COPY } from '../../../theme/brand';
+import { getEmployerUrl } from '../../../lib/subdomain-urls';
 
 export default function EmployerCTA() {
   return (
@@ -15,10 +15,12 @@ export default function EmployerCTA() {
         <p className="hm-employer__sub">{COPY.home.employerCTASubtitle}</p>
       </div>
 
-      <Link href="/employer/login" className="hm-ghost">
+      {/* Cross-audience: hire.jobmesh.in in production, /employer in dev. A plain
+          next/link would 404 in prod — /employer does not exist on this host. */}
+      <a href={getEmployerUrl('/login')} className="hm-ghost">
         {COPY.home.employerCTAButton}
         <ArrowRight size={13} aria-hidden="true" />
-      </Link>
+      </a>
     </section>
   );
 }

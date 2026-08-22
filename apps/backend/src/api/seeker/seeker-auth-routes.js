@@ -2,7 +2,8 @@
 import { Router } from 'express';
 import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
-import { GOOGLE_CLIENT_ID, JWT_SECRET, IS_PRODUCTION } from '../../env.js';
+import { GOOGLE_CLIENT_ID, JWT_SECRET } from '../../env.js';
+import { authCookieOptions, clearAuthCookieOptions } from '../../services/auth/auth-cookie-options.js';
 import { findOrCreateGoogleUser, getUserById } from '../../models/seeker/index.js';
 import { asyncHandler } from '../../middleware/async-handler-middleware.js';
 import { HttpError } from '../../middleware/error-handler-middleware.js';
@@ -10,13 +11,7 @@ import { HttpError } from '../../middleware/error-handler-middleware.js';
 const router = Router();
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
-const COOKIE_OPTS = {
-  httpOnly: true,
-  secure: IS_PRODUCTION,
-  sameSite: IS_PRODUCTION ? 'none' : 'lax',
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-  path: '/',
-};
+const SEEKER_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 function publicUser(user) {
   return {
@@ -48,13 +43,13 @@ router.post('/google', asyncHandler(async (req, res) => {
     JWT_SECRET,
     { expiresIn: '7d' },
   );
-  res.cookie('tj_token', token, COOKIE_OPTS);
+  res.cookie('tj_token', token, authCookieOptions(SEEKER_TOKEN_TTL_MS));
   res.json({ user: publicUser(user) });
 }));
 
 // POST /api/auth/logout
 router.post('/logout', (_req, res) => {
-  res.clearCookie('tj_token', { httpOnly: true, secure: IS_PRODUCTION, sameSite: IS_PRODUCTION ? 'none' : 'lax', path: '/' });
+  res.clearCookie('tj_token', clearAuthCookieOptions());
   res.json({ success: true });
 });
 

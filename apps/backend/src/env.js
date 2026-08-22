@@ -43,6 +43,21 @@ export const PORT = parseInt(process.env.PORT, 10) || 3000;
 
 export const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
+// ─── Subdomain routing (NAMING-CONVENTIONS §17) ───────────────────
+// Cookie scope. '.jobmesh.in' (leading dot) makes one session valid across every
+// *.jobmesh.in host, so a seeker stays signed in walking from jobmesh.in to
+// apply.jobmesh.in. MUST stay unset in local dev — a domain attribute on
+// localhost is rejected by some browsers and would silently break login.
+export const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || '';
+
+// Extra browser origins allowed to call the API with credentials, comma-separated.
+// Every *.jobmesh.in host is already allowed by pattern in server.js; this exists
+// for one-off origins (a staging host, a preview deploy) without a code change.
+export const CORS_ALLOWED_ORIGINS = (process.env.CORS_ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 // Admin identity is MongoDB-backed (admin_users collection) + jm_admin_token
 // cookie — no longer env-based. ADMIN_JWT_TTL_HOURS sets the admin session length
 // (short, mature-SaaS style; defaults 8h). INITIAL_ADMIN_EMAILS is bootstrap-only:

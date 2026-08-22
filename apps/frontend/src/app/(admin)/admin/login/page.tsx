@@ -5,7 +5,6 @@
 // endpoint; on success the (app) layout re-runs and hydrates AdminContext from the
 // fresh jm_admin_token cookie. Reuses AuthLayout so it looks like a JobMesh page.
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { GoogleLogin } from '@react-oauth/google';
 import AuthLayout from '@/components/layouts/AuthLayout';
@@ -13,6 +12,7 @@ import { Button, Spinner, Alert, Stack } from '@/components/ui';
 import { TYPE } from '@/theme/tokens';
 import { loginAdmin, AdminApiError } from '@/api/admin-api';
 import { isSafeAdminNextPath } from '@/context/admin/admin-context-types';
+import { getSeekerUrl } from '@/lib/subdomain-urls';
 
 const DEFAULT_ADMIN_PATH = '/admin';
 
@@ -98,9 +98,10 @@ export default function AdminLoginPage() {
         )}
 
         <div style={{ textAlign: 'center' }}>
-          <Link href="/" style={{ textDecoration: 'none' }}>
+          {/* Cross-audience: admin.jobmesh.in → jobmesh.in in production. */}
+          <a href={getSeekerUrl('/')} style={{ textDecoration: 'none' }}>
             <Button variant="link">← Back to JobMesh</Button>
-          </Link>
+          </a>
         </div>
       </Stack>
     </AuthLayout>

@@ -2,6 +2,7 @@
 // plus an ItemList of its open JobPostings. Pure function → plain object.
 import { buildOrganizationSchema } from './organization';
 import { buildItemListSchema } from './item-list';
+import { getApplyUrl } from '../subdomain-urls';
 
 export interface CompanySchemaInput {
   name: string;
@@ -21,7 +22,7 @@ export function buildCompanySchema(company: CompanySchemaInput) {
   };
   const jobList = buildItemListSchema(
     company.jobs.map((job) => ({
-      path: `/apply/${company.slug}/${job.jobSlug}`,
+      path: getApplyUrl(`/${company.slug}/${job.jobSlug}`),
       name: job.title,
     })),
   );
