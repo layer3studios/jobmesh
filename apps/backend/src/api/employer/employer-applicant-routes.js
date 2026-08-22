@@ -1,0 +1,155 @@
+// FILE: src/api/employer/employer-applicant-routes.js
+// Applicant detail + actions. Mounted at /api/employer/applicants behind
+// requireEmployer + requireEmployerCompany (server.js). requireEmployerApplicant
+// tenant-verifies :applicationId and attaches req.application before any handler.
+// The company is always read from req.employerCompanyId — never from input (§6.5).
+
+import { Router } from 'express';
+import { asyncHandler } from '../../middleware/async-handler-middleware.js';
+import { requireEmployerApplicant } from '../../middleware/require-employer-applicant-middleware.js';
+import {
+  requireInterviewerOrHigher, requireMemberOrHigher, requireOwnerOrHigher,
+  requireCanMoveApplicants, requireCanArchiveApplicants,
+} from '../../middleware/require-company-role-middleware.js';
+import {
+  previewCandidateAnonymization, anonymizeCandidateForApplication,
+} from '../../services/employer/candidate-anonymize-service.js';
+import { getApplicantDetailForCompany } from '../../services/employer/applicant-detail-service.js';
+import { moveApplicantToStage } from '../../services/employer/applicant-move-service.js';
+import { archiveApplicant, unarchiveApplicant, bulkArchiveApplicants } from '../../services/employer/applicant-archive-service.js';
+import { rescoreApplicantForCompany } from '../../services/employer/rescore-service.js';
+import { signResumeToken, RESUME_URL_TTL_MS } from '../../services/employer/signed-url-service.js';
+import {
+  createApplicantNoteForApplicant, listApplicantNotesForApplicant,
+} from '../../services/employer/applicant-notes-service.js';
+import { buildCandidateTimeline } from '../../services/employer/candidate-timeline-service.js';
+import { getInterviewSummary } from '../../services/interview/interview-summary-service.js';
+import { bulkMoveStage } from '../../services/employer/bulk-stage-move-service.js';
+
+const router = Router();
+
+// POST /api/employer/applicants/bulk-move — { applicationIds, targetStageId }.
+// Static path, so it MUST precede the /:applicationId routes (Express matches
+// in declaration order). Per-item ownership checks live in the service.
+router.post('/bulk-move', requireMemberOrHigher, asyncHandler(async (req, res) => {
+  const { applicationIds, targetStageId } = req.body || {};
+  const data = await bulkMoveStage(
+    req.employerCompanyId,
+    { applicationIds, targetStageId, actorUserId: req.employerUser.employerUserId },
+  );
+  res.json({ data });
+}));
+
+// POST /api/employer/applicants/bulk/archive — { applicationIds, reasonId, note? }.
+// MUST precede the /:applicationId routes: Express matches in declaration order, so a
+// static path after a parameterized one would be captured as an applicationId (R2).
+// No requireEmployerApplicant — the service does its own per-item ownership check.
+router.post('/bulk/archive', requireCanArchiveApplicants, asyncHandler(async (req, res) => {
+  const { applicationIds, reasonId, note } = req.body || {};
+  const result = await bulkArchiveApplicants(
+    req.employerCompanyId, { applicationIds, reasonId, note }, req.employerUser.employerUserId,
+  );
+  res.json(result);
+}));
+
+// GET /api/employer/applicants/:applicationId/timeline — merged event history.
+router.get('/:applicationId/timeline', requireInterviewerOrHigher, requireEmployerApplicant, asyncHandler(async (req, res) => {
+  const data = await buildCandidateTimeline(req.employerCompanyId, req.application._id);
+  res.json({ data });
+}));
+
+// GET /api/employer/applicants/:applicationId — full detail (D2).
+router.get('/:applicationId', requireInterviewerOrHigher, requireEmployerApplicant, asyncHandler(async (req, res) => {
+  const applicant = await getApplicantDetailForCompany(req.employerCompanyId, req.application._id);
+  res.json({ applicant });
+}));
+
+// POST /api/employer/applicants/:applicationId/move — { stageId, note? }.
+router.post('/:applicationId/move', requireCanMoveApplicants, requireEmployerApplicant, asyncHandler(async (req, res) => {
+  const { stageId, note } = req.body || {};
+  const result = await moveApplicantToStage(
+    req.employerCompanyId, req.application._id, { stageId, note }, req.employerUser.employerUserId,
+  );
+  res.json(result);
+}));
+
+// POST /api/employer/applicants/:applicationId/archive — { reasonId, note?, skipEmail? }.
+router.post('/:applicationId/archive', requireCanArchiveApplicants, requireEmployerApplicant, asyncHandler(async (req, res) => {
+  const { reasonId, note, skipEmail } = req.body || {};
+  const result = await archiveApplicant(
+    req.employerCompanyId, req.application._id,
+    { reasonId, note, skipEmail: skipEmail === true }, req.employerUser.employerUserId,
+  );
+  res.json(result);
+}));
+
+// POST /api/employer/applicants/:applicationId/unarchive.
+router.post('/:applicationId/unarchive', requireCanArchiveApplicants, requireEmployerApplicant, asyncHandler(async (req, res) => {
+  const result = await unarchiveApplicant(
+    req.employerCompanyId, req.application._id, req.employerUser.employerUserId,
+  );
+  res.json(result);
+}));
+
+// POST /api/employer/applicants/:applicationId/rescore — requeue AI scoring.
+// 202 when a job was reset or inserted; 200 when one was already in flight (C9/C10).
+router.post('/:applicationId/rescore', requireMemberOrHigher, requireEmployerApplicant, asyncHandler(async (req, res) => {
+  const result = await rescoreApplicantForCompany(req.employerCompanyId, req.application._id);
+  res.status(result.rescored ? 202 : 200).json(result);
+}));
+
+// GET /api/employer/applicants/:applicationId/resume-url — signed 15-min URL.
+router.get('/:applicationId/resume-url', requireInterviewerOrHigher, requireEmployerApplicant, asyncHandler(async (req, res) => {
+  const token = signResumeToken(req.application._id, RESUME_URL_TTL_MS);
+  res.json({
+    url: `/api/public/resume-download?token=${token}`,
+    expiresAt: new Date(Date.now() + RESUME_URL_TTL_MS),
+  });
+}));
+
+// GET /api/employer/applicants/:applicationId/notes — newest first (C3/D5).
+router.get('/:applicationId/notes', requireInterviewerOrHigher, requireEmployerApplicant, asyncHandler(async (req, res) => {
+  const notes = await listApplicantNotesForApplicant(req.employerCompanyId, req.application._id);
+  res.json({ notes });
+}));
+
+// POST /api/employer/applicants/:applicationId/notes — { body, mentionedUserIds? }.
+// 201 with the new note. Unknown or cross-tenant mention ids are dropped by the
+// service, not rejected — a stale roster must never cost the author their note.
+router.post('/:applicationId/notes', requireInterviewerOrHigher, requireEmployerApplicant, asyncHandler(async (req, res) => {
+  const note = await createApplicantNoteForApplicant(
+    req.employerCompanyId, req.application._id, req.employerUser.employerUserId,
+    req.body?.body, req.body?.mentionedUserIds,
+  );
+  res.status(201).json({ note });
+}));
+
+// GET /api/employer/applicants/:applicationId/feedback-summary — the panel's
+// aggregated verdicts. Interviewer+ so a panel member can see their own summary;
+// the anti-bias hold is applied per viewer inside the service, not by role.
+router.get('/:applicationId/feedback-summary', requireInterviewerOrHigher, requireEmployerApplicant, asyncHandler(async (req, res) => {
+  const summary = await getInterviewSummary(req.employerCompanyId, req.application._id, {
+    viewerEmployerUserId: req.employerUser.employerUserId,
+  });
+  res.json({ summary });
+}));
+
+// GET /api/employer/applicants/:applicationId/anonymize-preview — what the action
+// would touch. Owner+, same as the action itself: a count of someone's applications
+// is not a number a viewer who cannot act on it needs.
+router.get('/:applicationId/anonymize-preview', requireOwnerOrHigher, requireEmployerApplicant, asyncHandler(async (req, res) => {
+  const preview = await previewCandidateAnonymization(req.employerCompanyId, req.application._id);
+  res.json({ preview });
+}));
+
+// POST /api/employer/applicants/:applicationId/anonymize — irreversible erasure of
+// this candidate's personal data across EVERY application they made at this company.
+// Idempotent: a second call answers 200 with alreadyAnonymized: true.
+router.post('/:applicationId/anonymize', requireOwnerOrHigher, requireEmployerApplicant, asyncHandler(async (req, res) => {
+  const result = await anonymizeCandidateForApplication(
+    req.employerCompanyId, req.application._id, req.employerUser.employerUserId,
+  );
+  res.json({ result });
+}));
+
+export default router;

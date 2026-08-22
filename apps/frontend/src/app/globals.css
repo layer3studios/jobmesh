@@ -1,0 +1,54 @@
+@import "tailwindcss";
+@import "../styles/theme-tokens.css";
+@import "../styles/base.css";
+@import "../styles/primitives.css";
+@import "../styles/home.css";
+@import "../styles/apply.css";
+@import "../styles/careers.css";
+@import "../styles/quick-archive.css";
+@import "../styles/jobs-table.css";
+
+/* Tailwind v4 CSS-first tokens (R7). Mapped from frontend/src/theme/tokens.ts +
+   themes.ts. Colors reference the runtime CSS vars in theme-tokens.css so both
+   light and dark resolve automatically. Fonts are provided by next/font as CSS
+   variables (--font-sans / --font-serif / --font-mono) in the root layout. */
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: var(--font-source-serif), 'Iowan Old Style', Georgia, ui-serif, serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-paper-3: var(--paper-3);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-brand-50: var(--brand-50);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
+
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+}

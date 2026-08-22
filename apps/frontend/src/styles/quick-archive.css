@@ -1,0 +1,52 @@
+/* FILE: src/styles/quick-archive.css
+   The ✕ quick-archive trigger on ranked rows and pipeline cards.
+
+   Hover-reveal is CSS, not React state: the ranked table can hold hundreds of
+   rows, and a hover handler per row re-renders on every mouse move across the
+   list. `opacity` also keeps the control in the layout, so revealing it never
+   shifts the row's other columns. */
+
+.quick-archive-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms ease, color 120ms ease, background-color 120ms ease;
+}
+
+/* Revealed by hovering the row/card, by keyboard focus, or while the popover is
+   open — otherwise the trigger would vanish under the panel it just opened. */
+.ranked-row:hover .quick-archive-trigger,
+.pipeline-card:hover .quick-archive-trigger,
+.quick-archive-trigger:focus-visible,
+.quick-archive-trigger[data-always-visible='true'] {
+  opacity: 1;
+}
+
+.quick-archive-trigger:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.quick-archive-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* No hover on touch, so the control is permanently visible there. Without this it
+   would be unreachable on a phone. */
+@media (hover: none) {
+  .quick-archive-trigger { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quick-archive-trigger { transition: none; }
+}

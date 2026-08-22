@@ -1,0 +1,107 @@
+/* FILE: src/styles/jobs-table.css
+   The actions menu and the mobile card layout for the employer jobs list.
+
+   In CSS rather than inline styles because both need hover, focus-visible and a
+   media query — none of which an inline style can express. Every colour is a token,
+   so light and dark both work with no second ruleset. */
+
+.actions-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+  transition: color 120ms ease, background-color 120ms ease;
+}
+
+/* Always visible, never hover-revealed: this is a table, and a control that
+   appears only under the cursor is invisible to keyboard and touch users. */
+.actions-menu-trigger:hover {
+  color: var(--ink);
+  background: var(--surface-sunken);
+}
+
+.actions-menu-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.actions-menu-item {
+  display: block;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.actions-menu-item:hover:not(:disabled),
+.actions-menu-item:focus-visible {
+  background: var(--surface-sunken);
+  outline: none;
+}
+
+.actions-menu-item[data-danger='true'] { color: var(--danger); }
+
+.actions-menu-item[data-danger='true']:hover:not(:disabled),
+.actions-menu-item[data-danger='true']:focus-visible {
+  background: var(--danger-soft);
+}
+
+.actions-menu-item:disabled {
+  color: var(--ink-faint);
+  cursor: default;
+}
+
+/* ── Mobile cards ──────────────────────────────────────────────────────────
+   Below 768px a six-column table cannot be read without horizontal scrolling,
+   so the same rows render as stacked cards. Both trees are always in the DOM and
+   CSS picks one: swapping them in JS would need a width hook, and a resize across
+   the breakpoint would remount the list. */
+.jobs-table-desktop { display: none; }
+.jobs-cards-mobile { display: flex; flex-direction: column; gap: 10px; }
+
+@media (min-width: 768px) {
+  .jobs-table-desktop { display: block; }
+  .jobs-cards-mobile { display: none; }
+}
+
+.jobs-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-raised);
+}
+
+.jobs-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.jobs-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .actions-menu-trigger { transition: none; }
+}

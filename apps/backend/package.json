@@ -1,0 +1,46 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "scrape": "node src/tasks/runScraper.js",
+    "audit:assignments": "node src/scripts/audit-assignments.js",
+    "migrate:auto-tags": "node scripts/migrate-auto-tags.js",
+    "migrate:clean-descriptions": "node scripts/migrate-clean-descriptions.js",
+    "test:backend": "node --test --test-concurrency=1 \"tests/**/*.test.js\"",
+    "test": "npm run test:backend"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@touch4it/ical-timezones": "^1.9.0",
+    "abort-controller": "^3.0.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.5.2",
+    "fast-xml-parser": "^5.8.0",
+    "google-auth-library": "^10.6.2",
+    "he": "^1.2.0",
+    "ical-generator": "^11.1.0",
+    "jsdom": "^26.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "luxon": "^3.7.2",
+    "mongodb": "^6.20.0",
+    "multer": "^2.2.0",
+    "node-cron": "^4.2.1",
+    "node-fetch": "^2.7.0",
+    "pdf-parse": "^2.4.5",
+    "resend": "^6.18.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "supertest": "^7.2.2"
+  }
+}

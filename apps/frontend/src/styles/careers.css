@@ -1,0 +1,205 @@
+/* FILE: src/styles/careers.css
+   Public careers page (/apply/:companySlug).
+
+   Every colour here is a token from theme-tokens.css, so light and dark both work
+   with no second ruleset. Layout lives in CSS rather than inline styles because the
+   roles list needs hover, focus-visible and a media query — none of which an inline
+   style can express. */
+
+/* ── Brand header ──────────────────────────────────────────────────────────
+   Left-aligned, not centred: a masthead reads as a real company page, a centred
+   stack reads as a marketing splash. */
+.careers-header {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.careers-header-text {
+  min-width: 0;
+  flex: 1 1 320px;
+}
+
+.careers-name {
+  font-size: clamp(1.9rem, 5vw, 2.6rem);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.15;
+  margin: 0;
+}
+
+.careers-tagline {
+  margin: 6px 0 0;
+  font-size: 1.05rem;
+  color: var(--ink-muted);
+  line-height: 1.45;
+}
+
+/* 68ch is a reading measure: past ~75 chars the eye loses the line start. */
+.careers-about {
+  margin: 12px 0 0;
+  font-size: 0.925rem;
+  line-height: 1.65;
+  color: var(--ink-2);
+  max-width: 68ch;
+}
+
+.careers-utility-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.careers-social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  color: var(--ink-muted);
+  border: 0.5px solid var(--border);
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.careers-social-link:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.careers-website {
+  font-size: 0.875rem;
+  color: var(--link);
+  text-decoration: none;
+}
+
+.careers-website:hover { text-decoration: underline; }
+
+/* ── Roles list ────────────────────────────────────────────────────────────
+   Hairline rows, not boxed cards: cards shift metadata position with title
+   length, so scanning ten roles means re-finding the location each time. A
+   shared left edge plus a fixed right rail makes the list one vertical read. */
+.careers-role-list {
+  border-top: 0.5px solid var(--border);
+}
+
+.careers-role {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 14px 12px;
+  border-bottom: 0.5px solid var(--border);
+  border-left: 2px solid transparent;
+  text-decoration: none;
+  /* Only the cheap, compositor-friendly properties animate. */
+  transition: background-color 120ms ease, border-left-color 120ms ease, padding-left 120ms ease;
+}
+
+/* The one flourish: the row shifts and grows an accent edge. */
+.careers-role:hover,
+.careers-role:focus-visible {
+  background: var(--surface-sunken);
+  border-left-color: var(--accent);
+  padding-left: 16px;
+}
+
+.careers-role:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.careers-role-main { min-width: 0; flex: 1 1 auto; }
+
+.careers-role-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.careers-role-meta {
+  margin: 3px 0 0;
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.careers-workplace-badge {
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 4px;
+  font-weight: 500;
+  background: var(--accent-soft);
+  color: var(--accent);
+  text-transform: capitalize;
+}
+
+/* The rail: fixed width + tabular figures, so recency lines up down the column. */
+.careers-role-rail {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.careers-posted {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.careers-posted[data-stale='true'] { opacity: 0.6; }
+
+/* ── Filters ────────────────────────────────────────────────────────────────*/
+.careers-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.careers-chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.careers-chip {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 0.5px solid var(--border);
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.careers-chip:hover { color: var(--ink); border-color: var(--ink-faint); }
+
+.careers-chip[aria-pressed='true'] {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
+  font-weight: 500;
+}
+
+@media (max-width: 560px) {
+  .careers-role { flex-wrap: wrap; gap: 6px; }
+  .careers-role-rail { width: 100%; justify-content: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .careers-role,
+  .careers-social-link,
+  .careers-chip { transition: none; }
+  .careers-role:hover,
+  .careers-role:focus-visible { padding-left: 12px; }
+}

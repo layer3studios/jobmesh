@@ -1,0 +1,143 @@
+/* Ported from frontend/src/index.css — component primitives + animations. */
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+@keyframes sheetFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sheetSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes sheetSlideDown { from { transform: translateY(0); } to { transform: translateY(100%); } }
+@keyframes toastIn { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulseDot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.8); } }
+.pulse-dot { animation: pulseDot 1.6s ease-in-out infinite; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.galaxy-ticker { display: inline-flex; white-space: nowrap; animation: marquee 38s linear infinite; }
+.galaxy-ticker:hover { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .galaxy-ticker { animation: none; } }
+
+.anim-up { animation: fadeUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-fade { animation: fadeIn 0.3s ease both; }
+.anim-scale { animation: scaleIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+.stagger > * { animation: fadeUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.stagger > *:nth-child(1) { animation-delay: 0.02s; }
+.stagger > *:nth-child(2) { animation-delay: 0.06s; }
+.stagger > *:nth-child(3) { animation-delay: 0.1s; }
+.stagger > *:nth-child(4) { animation-delay: 0.14s; }
+.stagger > *:nth-child(5) { animation-delay: 0.18s; }
+.stagger > *:nth-child(6) { animation-delay: 0.22s; }
+.stagger > *:nth-child(7) { animation-delay: 0.26s; }
+.stagger > *:nth-child(8) { animation-delay: 0.3s; }
+.stagger > *:nth-child(n+9) { animation-delay: 0.34s; }
+
+/* Entrance animations are decorative — honour a reduced-motion request by
+   showing the final state immediately. `both` fill-mode leaves these elements
+   at opacity 0 before they run, so the animation must be cancelled AND the
+   end state restored. Must stay below the .stagger rules above: equal
+   specificity, so the later declaration is the one that wins. */
+@media (prefers-reduced-motion: reduce) {
+  .anim-up, .anim-fade, .anim-scale, .stagger > * {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--paper-2) 0%, var(--paper-3) 40%, var(--paper-2) 80%);
+  background-size: 800px 100%;
+  animation: shimmer 1.6s infinite linear;
+  border-radius: 8px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  transition: border-color 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+              transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+              box-shadow 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.card.hover:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.sketch-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; }
+.sketch-ink { }
+
+.container-md { max-width: 768px; margin: 0 auto; padding: 0 16px; }
+.container-lg { max-width: 1024px; margin: 0 auto; padding: 0 16px; }
+.container-xl { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 640px) {
+  .container-md, .container-lg, .container-xl { padding: 0 24px; }
+}
+
+.companies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: 16px;
+  margin-top: 16px;
+  width: 100%;
+  max-width: 100%;
+}
+.companies-grid > * { min-width: 0; max-width: 100%; }
+@media (max-width: 639px) { .companies-grid { gap: 12px; } }
+
+.progress-grid { display: grid; grid-template-columns: 1fr; gap: 14px; align-items: start; }
+.progress-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+@media (min-width: 1024px) { .progress-grid { grid-template-columns: 1fr 1fr; } }
+
+.snap-carousel {
+  display: flex; gap: 12px; overflow-x: auto;
+  scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; padding-bottom: 8px;
+}
+.snap-carousel::-webkit-scrollbar { display: none; }
+.snap-carousel > * { scroll-snap-align: start; }
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border: 1px solid var(--glass-stroke);
+}
+
+.job-description-html { font-size: inherit; }
+.job-description-html p { margin: 0 0 12px; }
+.job-description-html ul, .job-description-html ol { padding-left: 22px; margin: 0 0 14px; }
+.job-description-html li { margin: 4px 0; }
+.job-description-html h1, .job-description-html h2, .job-description-html h3, .job-description-html h4 {
+  font-family: var(--font-serif);
+  font-weight: 600; margin-top: 22px; margin-bottom: 10px;
+  letter-spacing: -0.015em; color: var(--ink);
+}
+.job-description-html h3 { font-size: 1.02rem; }
+.job-description-html h4 { font-size: 0.95rem; }
+.job-description-html a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.job-description-html strong, .job-description-html b { color: var(--ink); font-weight: 600; }
+.job-description-html mark.skill-match {
+  background: var(--accent-soft); color: var(--accent);
+  padding: 1px 4px; border-radius: 4px; font-weight: 600;
+}
+.jd-boilerplate-toggle {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 12px;
+  color: var(--ink-muted); font-family: inherit; font-size: 0.82rem;
+  cursor: pointer; margin: 14px 0;
+}
+.jd-boilerplate-toggle:hover { background: var(--paper-2); color: var(--ink); }
+
+.has-bottom-nav { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
+
+.grid-bg {
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+}
+.orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5; pointer-events: none; }

@@ -1,0 +1,293 @@
+/* FILE: src/styles/home.css
+   Guest landing page (/) — everything inline styles cannot express: keyframes,
+   :hover / :focus-visible, breakpoints, prefers-reduced-motion. All classes are
+   `hm-` prefixed so they cannot collide with the rest of the app. Selectors are
+   deliberately kept flat (single class, no element qualifiers) so nothing in
+   here cancels anything else out.
+
+   Design contract:
+   - PROPORTION — the search console is a centred 620px object, never full-bleed.
+   - PLACEMENT  — the hero is centre-aligned; no dead zone on the right.
+   - WEIGHT     — headline heaviest, console second, everything else recedes.
+   - RHYTHM     — section padding VARIES (64/20/26/48/48/40/32) so the page has
+                  fast and slow moments instead of one uniform beat.
+   - BORDERS    — hairlines separate major sections; only interactive cards get
+                  an outline. Elevation otherwise comes from --paper/--surface.
+
+   TYPE SYSTEM — three faces, one rule. This product is an INDEX of scraped
+   listings, so the type says so:
+     mono  (--font-jetbrains-mono) → machine-derived data + structural labels:
+                                     ticker, live badge, eyebrows, metric
+                                     labels, role counts, step numerals, tags
+     serif (.font-display)         → statements: the h1 and the trust numbers
+     sans  (body default)          → prose: subtitle, step copy, company names
+   Nothing here is mono for decoration; if it is mono, it is data or a label. */
+
+.hm-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tight gutters: content sits near the edges and reads full-width, confident. */
+.hm-section { padding-left: 10px; padding-right: 10px; }
+@media (min-width: 640px) { .hm-section { padding-left: 12px; padding-right: 12px; } }
+
+/* Entrance stagger. `.anim-up` (primitives.css) uses the `animation` shorthand,
+   which resets delay to 0 — these must therefore load AFTER it in the cascade,
+   which they do: globals.css imports home.css last. Reduced motion is handled
+   at the .anim-up definition itself, so it cancels these too. */
+.hm-d1 { animation-delay: 0.08s; }
+.hm-d2 { animation-delay: 0.16s; }
+.hm-d3 { animation-delay: 0.24s; }
+.hm-d4 { animation-delay: 0.32s; }
+
+/* Quality floor: every interactive element keeps a visible keyboard ring. */
+.hm-tag:focus-visible,
+.hm-more:focus-visible,
+.hm-ghost:focus-visible,
+.hm-company:focus-visible,
+.hm-search__loc:focus-visible,
+.hm-search__btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── 1. Ticker — the live wire. Mono because it is a data feed. ─────── */
+@keyframes hm-ticker-scroll { from { transform: translateX(50%); } to { transform: translateX(-100%); } }
+
+.hm-ticker {
+  overflow: hidden; padding: 6px 0;
+  background: var(--accent-soft); color: var(--accent);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px; letter-spacing: 0.01em; line-height: 1.4;
+}
+.hm-ticker__text { display: inline-block; white-space: nowrap; animation: hm-ticker-scroll 24s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .hm-ticker { display: flex; justify-content: center; }
+  .hm-ticker__text { animation: none; }
+}
+
+/* ── 2. Hero — the focal point. Most breathing room on the page. ────── */
+@keyframes hm-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+/* position:relative + overflow:hidden CONTAIN the texture layer — without the
+   clip the orbs would bleed over the sticky TopNav and the section below. */
+.hm-hero {
+  position: relative; overflow: hidden; isolation: isolate;
+  padding-top: 64px; padding-bottom: 48px; text-align: center;
+}
+/* Texture sits behind content but inside the hero's own stacking context. */
+.hm-hero__texture { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.hm-hero > .hm-hero__badge,
+.hm-hero > .hm-hero__title,
+.hm-hero > .hm-hero__sub,
+.hm-hero > .hm-search,
+.hm-hero > .hm-tags { position: relative; z-index: 1; }
+
+/* Atmospheric depth, not decoration: two soft blooms just off the top corners.
+   Light mode needs them fainter than dark — same shape, different weight. */
+.hm-orb { opacity: 0.04; }
+:root[data-theme="dark"] .hm-orb { opacity: 0.08; }
+
+/* Stripped to a bare instrument readout: the ticker already announces
+   liveness, so this stays as quiet as the brief's "subtle" allows. */
+.hm-hero__badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  margin-bottom: 26px; padding: 4px 11px; border-radius: 999px;
+  background: var(--success-soft); color: var(--success);
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;
+}
+.hm-hero__dot {
+  width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+  background: var(--success); animation: hm-pulse 2.5s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) { .hm-hero__dot { animation: none; } }
+
+/* Heaviest element on the page: biggest, tightest, boldest. */
+.hm-hero__title {
+  max-width: 760px; margin: 0 auto 16px;
+  font-size: clamp(2rem, 5.5vw, 2.9rem); font-weight: 600;
+  letter-spacing: -0.04em; line-height: 1.08; color: var(--ink);
+}
+.hm-hero__title em { font-style: normal; color: var(--accent); }
+
+/* Light and receding — a calm explanation under the billboard. */
+.hm-hero__sub {
+  max-width: 500px; margin: 0 auto 32px;
+  font-size: 14.5px; line-height: 1.65; letter-spacing: 0.005em; color: var(--ink-muted);
+}
+
+/* ── 2b. SIGNATURE: the search console. ─────────────────────────────
+   One elevated object, not three fields — the shell owns the border, the
+   shadow and the focus state; the children are borderless passengers. */
+/* gap:0 + segment padding — the children butt against each other so the shell
+   reads as ONE control (the Google/Indeed/Airbnb pattern), not three fields. */
+.hm-search {
+  display: flex; align-items: center; gap: 0;
+  max-width: 620px; margin: 0 auto; padding: 4px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; box-shadow: var(--shadow-sm);
+  text-align: left;
+  transition: all 0.2s ease;
+}
+.hm-search:focus-within { border-color: var(--border-strong); box-shadow: var(--shadow-md); }
+
+/* Icon + input travel together as the first segment. */
+.hm-search__field {
+  display: flex; align-items: center; gap: 8px;
+  flex: 1; min-width: 0; height: 46px; padding: 0 12px;
+}
+.hm-search__input {
+  flex: 1; min-width: 0; height: 100%;
+  border: none; background: transparent;
+  font-size: 14px; color: var(--ink);
+}
+.hm-search__input::placeholder { color: var(--ink-faint); }
+
+.hm-search__divider { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
+
+/* Mono + uppercase: this is a scope readout, not a sentence. */
+.hm-search__loc {
+  display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
+  height: 46px; padding: 0 12px; border: none; border-radius: 8px;
+  background: transparent; cursor: pointer;
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--ink-muted); transition: all 0.2s ease;
+}
+.hm-search__loc:hover { color: var(--ink); }
+
+/* The single most prominent interactive element on the page. */
+.hm-search__btn {
+  display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
+  height: 42px; padding: 0 20px; border: none; border-radius: 10px;
+  background: var(--accent); color: var(--paper); /* --paper keeps contrast in dark mode */
+  font-size: 13px; font-weight: 500; letter-spacing: 0.01em; cursor: pointer;
+  transition: all 0.2s ease;
+}
+.hm-search__btn:hover { background: var(--accent-hover); }
+
+@media (max-width: 639px) {
+  .hm-search { flex-wrap: wrap; gap: 6px; }
+  .hm-search__field { flex: 1 1 100%; height: 44px; padding: 0 8px; }
+  .hm-search__divider { display: none; }
+  .hm-search__loc { flex: 1 1 auto; height: 42px; padding: 0 10px; }
+  .hm-search__btn { flex: 0 0 auto; }
+}
+
+/* ── 2c. Quick tags — the console's suggestion row. Secondary. ──────── */
+.hm-tags {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: 6px; margin-top: 18px;
+}
+.hm-tags__label {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--ink-faint); margin-right: 2px;
+}
+.hm-tag {
+  padding: 4px 11px; border: 1px solid var(--border); border-radius: 999px;
+  background: transparent; color: var(--ink-faint);
+  font-size: 11px; letter-spacing: 0.01em; text-decoration: none;
+  transition: all 0.2s ease;
+}
+.hm-tag:hover { border-color: var(--border-strong); color: var(--ink); background: var(--surface); }
+
+/* ── 3. Trust metrics — compact. Big serif number vs tiny mono label. ─ */
+.hm-metrics {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+}
+.hm-metric { padding: 20px 8px; text-align: center; }
+.hm-metric + .hm-metric { border-left: 1px solid var(--border); }
+.hm-metric__value { font-size: 25px; font-weight: 600; line-height: 1; letter-spacing: -0.03em; color: var(--ink); }
+.hm-metric__label {
+  margin-top: 7px; font-size: 9.5px; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--ink-faint);
+}
+
+/* ── 4. Logo strip — marks floating on a shade, no cards, no text. ──── */
+/* position:relative + z-index:1 keep the band in normal flow and stop it being
+   overlapped by the hero's texture layer or the sticky nav's stacking context. */
+.hm-logos {
+  position: relative; z-index: 1;
+  padding-top: 26px; padding-bottom: 26px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+}
+.hm-logos__row { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 24px; }
+
+/* ── Shared: eyebrow, heading, section header, "more" link ──────────── */
+.hm-eyebrow { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-faint); }
+.hm-heading { font-size: 19px; font-weight: 600; letter-spacing: -0.025em; color: var(--ink); }
+.hm-section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.hm-more {
+  display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
+  font-size: 12.5px; color: var(--accent); text-decoration: none; transition: color 0.2s ease;
+}
+.hm-more:hover { color: var(--accent-hover); }
+
+/* ── 5. How it works — cards on --paper pop off the --surface band. ─── */
+.hm-how { padding-top: 48px; padding-bottom: 48px; background: var(--surface); border-bottom: 1px solid var(--border); }
+.hm-how__grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 640px) { .hm-how__grid { grid-template-columns: repeat(3, 1fr); } }
+
+.hm-step {
+  padding: 24px; background: var(--paper); border: 1px solid var(--border);
+  border-radius: 12px; box-shadow: var(--highlight-edge);
+  transition: all 0.2s ease;
+}
+.hm-step:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+@media (prefers-reduced-motion: reduce) { .hm-step:hover { transform: none; } }
+/* Plain 1/2/3, not 01/02/03 — the zero-padding is decoration; the order is
+   real (browse → read → apply), so the numeral itself carries information. */
+.hm-step__n { margin-bottom: 14px; font-size: 28px; font-weight: 500; line-height: 1; letter-spacing: -0.04em; color: var(--accent); }
+.hm-step__title { margin-bottom: 7px; font-size: 15px; font-weight: 600; letter-spacing: -0.015em; color: var(--ink); }
+.hm-step__body { font-size: 13px; line-height: 1.6; letter-spacing: 0.005em; color: var(--ink-muted); }
+
+/* ── 6. Top companies — interactive, so these earn a border. ────────── */
+/* Back to --paper after the --surface band above: paper→surface→paper→surface
+   is what gives the page depth variation instead of one flat plane. */
+.hm-companies {
+  padding-top: 48px; padding-bottom: 48px;
+  background: var(--paper); border-bottom: 1px solid var(--border);
+}
+.hm-companies__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (min-width: 640px) { .hm-companies__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+.hm-company {
+  display: flex; align-items: center; gap: 10px; min-width: 0;
+  padding: 13px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; text-decoration: none;
+  box-shadow: var(--highlight-edge); /* 1px inset top glow — glass-like depth */
+  transition: all 0.2s ease;
+}
+.hm-company:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+@media (prefers-reduced-motion: reduce) { .hm-company:hover { transform: none; } }
+
+.hm-company__text { min-width: 0; }
+/* Deliberate weight split: the name is the object, the count is metadata. */
+.hm-company__name {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 13px; font-weight: 600; letter-spacing: -0.005em; color: var(--ink-2);
+}
+.hm-company__roles { margin-top: 3px; font-size: 10px; font-weight: 400; color: var(--ink-faint); }
+
+/* ── 7. Jobs feed — dense. This is the fast part of the rhythm. ─────── */
+.hm-jobs { padding-top: 40px; padding-bottom: 40px; background: var(--paper); }
+.hm-jobs__list { display: grid; gap: 6px; }
+.hm-jobs__more { margin-top: 24px; text-align: center; }
+.hm-ghost {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 18px; border: 1px solid var(--border); border-radius: 10px;
+  background: transparent; color: var(--ink-muted);
+  font-size: 12.5px; text-decoration: none;
+  transition: all 0.2s ease;
+}
+.hm-ghost:hover { border-color: var(--border-strong); color: var(--ink); background: var(--surface); }
+
+/* ── 8. Employer CTA — quiet cross-sell, last thing before the footer. ─ */
+.hm-employer {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding-top: 32px; padding-bottom: 32px;
+  border-top: 1px solid var(--border); background: var(--surface);
+}
+.hm-employer__title { font-size: 15px; font-weight: 600; letter-spacing: -0.015em; color: var(--ink); }
+.hm-employer__sub { margin-top: 4px; font-size: 12.5px; line-height: 1.55; color: var(--ink-muted); }
+@media (max-width: 639px) {
+  .hm-employer { flex-direction: column; align-items: flex-start; gap: 14px; }
+}
