@@ -7,6 +7,22 @@ import { HttpError } from '../../middleware/error-handler-middleware.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const URL_RE = /(https?:\/\/|www\.|\.[a-z]{2,}\/)/i;
+/** LeetCode's own username rule: alphanumerics, underscores and hyphens, ≤ 20. */
+const LEETCODE_USERNAME_RE = /^[A-Za-z0-9_-]{1,20}$/;
+
+/**
+ * The optional LeetCode handle. Returns null for absent OR malformed input —
+ * NEVER throws.
+ *
+ * This is the one field on the form that cannot cost someone their application.
+ * It is a bonus the candidate offers, the data behind it is public, and rejecting
+ * a submission over a typo in it would trade a real job application for a nicety.
+ * A bad value is simply dropped.
+ */
+export function normalizeLeetCodeUsername(value) {
+  const trimmed = typeof value === 'string' ? value.trim() : '';
+  return LEETCODE_USERNAME_RE.test(trimmed) ? trimmed : null;
+}
 
 function requireName(value, field, code) {
   const trimmed = String(value ?? '').trim();
@@ -48,7 +64,10 @@ export function validateApplicationForm(form = {}) {
   if (!dpdp) throw new HttpError(400, 'You must accept the privacy notice to apply.', 'CONSENT_REQUIRED');
   const futureOpportunities = form.consent_futureOpportunities === true || form.consent_futureOpportunities === 'true';
 
-  return { firstName, lastName, email, phone, yearsExperience, coverNote, futureOpportunities };
+  return {
+    firstName, lastName, email, phone, yearsExperience, coverNote, futureOpportunities,
+    leetcodeUsername: normalizeLeetCodeUsername(form.leetcodeUsername),
+  };
 }
 
 /** True when the honeypot field is filled — a bot signal (R4). */

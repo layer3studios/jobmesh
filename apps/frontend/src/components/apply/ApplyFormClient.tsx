@@ -41,7 +41,7 @@ import { trackEvent } from '@/lib/analytics-events';
 const EMPTY: ApplyFormData = {
   firstName: '', lastName: '', email: '', phone: '', coverNote: '',
   consent_dpdp: false, consent_futureOpportunities: false, resume: null,
-  source: '', honeypot: '',
+  source: '', leetcodeUsername: '', honeypot: '',
 };
 
 // Every major ATS (LinkedIn, Greenhouse, Lever, Ashby) puts the JD on the left and
@@ -447,6 +447,11 @@ export default function ApplyFormClient({
       form.append('email', data.email.trim());
       form.append('phone', data.phone.trim());
       form.append('coverNote', data.coverNote.trim());
+      // Sent only when non-empty: an empty string would be a value the server has
+      // to reason about, where an absent key is simply "not offered".
+      if (data.leetcodeUsername.trim()) {
+        form.append('leetcodeUsername', data.leetcodeUsername.trim());
+      }
       form.append('consent_dpdp', String(data.consent_dpdp));
       form.append('consent_futureOpportunities', String(data.consent_futureOpportunities));
       form.append('website_url', data.honeypot);

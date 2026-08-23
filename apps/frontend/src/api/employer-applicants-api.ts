@@ -13,6 +13,7 @@ export { EmployerApplicantsApiError, ROLE_FORBIDDEN_MESSAGE } from './employer-a
 import type {
   Applicant, ApplicantDetail, ApplicantNote, ResumeUrl, Stage, ArchiveReason, ApplicantSort, ApplicantFacets, AssignmentStats,
 } from '../types/employer-applicants';
+import type { LeetCodeProfile } from '../types/seeker-profile';
 
 export {
   listSavedViews, createSavedView, updateSavedView, deleteSavedView,
@@ -148,3 +149,26 @@ export async function createApplicantNote(
 
 // ─── Erasure + export (DPDP) ─────────────────────────────────────────
 
+// ── LeetCode ─────────────────────────────────────────────────────────────────
+
+/**
+ * Attach a LeetCode record to this application by username.
+ *
+ * Overwrites whatever was there — including the snapshot from the apply form.
+ * A 404 (LEETCODE_USER_NOT_FOUND) means the username is wrong, which is the one
+ * error on this control the recruiter can fix.
+ */
+export async function lookupApplicantLeetCode(
+  applicationId: string, username: string,
+): Promise<LeetCodeProfile> {
+  const body = await request<{ leetcode: LeetCodeProfile }>(
+    `${applicantPath(applicationId)}/leetcode`,
+    { method: 'PUT', body: JSON.stringify({ username }) },
+  );
+  return body.leetcode;
+}
+
+/** Remove it from THIS application. A connected seeker's own record is untouched. */
+export async function clearApplicantLeetCode(applicationId: string): Promise<void> {
+  await request<{ cleared: true }>(`${applicantPath(applicationId)}/leetcode`, { method: 'DELETE' });
+}

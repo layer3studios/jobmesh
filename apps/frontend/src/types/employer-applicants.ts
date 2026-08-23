@@ -85,6 +85,8 @@ export interface ApplicantDetail extends Applicant {
    * the UI renders no button at all for it.
    */
   leetcode?: LeetCodeProfile | null;
+  /** What was last looked up or typed. Seeds the employer's lookup box. */
+  leetcodeUsername?: string | null;
 }
 
 

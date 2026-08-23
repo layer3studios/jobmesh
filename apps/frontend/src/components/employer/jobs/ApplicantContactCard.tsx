@@ -10,7 +10,7 @@ import type { ReactNode } from 'react';
 import { Mail, Phone, Linkedin, Github, Globe, MapPin, Copy, Check } from 'lucide-react';
 import { Card, Stack } from '@/components/ui';
 import DoNotContactBanner from './parts/DoNotContactBanner';
-import LeetCodeButton from './parts/LeetCodeButton';
+import LeetCodeLookup from './parts/LeetCodeLookup';
 import type { DoNotContact } from '@/types/employer-applicants';
 import type { LeetCodeProfile } from '@/types/seeker-profile';
 
@@ -93,10 +93,16 @@ function ExternalLink({ href, children }: { href: string; children: ReactNode })
   return <a href={href} target="_blank" rel="noopener noreferrer" style={LINK_STYLE}>{children}</a>;
 }
 
-export default function ApplicantContactCard({ contact, leetcode }: {
+export default function ApplicantContactCard({
+  contact, applicationId, leetcode, leetcodeUsername,
+}: {
   contact: ApplicantContact;
-  /** Public LeetCode record, when the applicant connected one. */
+  /** Needed by the lookup, which writes to this application. */
+  applicationId: string;
+  /** The resolved record: apply-form snapshot, employer lookup, or seeker profile. */
   leetcode?: LeetCodeProfile | null;
+  /** Seeds the lookup box with whatever was last tried. */
+  leetcodeUsername?: string | null;
 }) {
   const email = str(contact.email);
   const phone = str(contact.phone);
@@ -149,8 +155,13 @@ export default function ApplicantContactCard({ contact, leetcode }: {
           </Row>
         )}
         {/* Last in the card: the rows above are how you REACH this person, and
-            this is how you read them. Renders nothing without a connected account. */}
-        <LeetCodeButton data={leetcode} />
+            this is how you read them. Always rendered — it either opens a record
+            or offers to find one. */}
+        <LeetCodeLookup
+          applicationId={applicationId}
+          initialData={leetcode}
+          initialUsername={leetcodeUsername}
+        />
       </Stack>
     </Card>
     </div>

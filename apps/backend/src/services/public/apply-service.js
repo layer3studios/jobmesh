@@ -23,6 +23,7 @@ import * as defaultStorage from './resume-storage-service.js';
 import { processAssignmentApplication } from './apply-assignment-path.js';
 import { validateApplicationForm, isHoneypotFilled } from './apply-validators.js';
 import { enqueueScoreJob } from './resume-score-queue-service.js';
+import { queueLeetCodeSnapshot } from './apply-leetcode-snapshot.js';
 
 // Re-exported: apply-service stays the seam the transaction tests drive, even
 // though the unit itself now lives next door.
@@ -114,6 +115,7 @@ export async function processApplication(companySlug, jobSlug, form, resume, met
       jobId: posting._id, contactId: contact._id, stageId: defaultStage._id,
       screeningAnswers,
       resumeFileId: resumeRecord._id, coverNote: clean.coverNote, yearsExperience: clean.yearsExperience,
+      leetcodeUsername: clean.leetcodeUsername,
       source: referral.source, sourceDetail: referral.sourceDetail,
       referralLinkId: referral.referralLinkId,
       applicantIp: meta.applicantIp ?? null, userAgent: meta.userAgent ?? null, referer: meta.referer ?? null,
@@ -136,6 +138,10 @@ export async function processApplication(companySlug, jobSlug, form, resume, met
       // failed insert would report referrals that do not exist. Fire-and-forget —
       // a missed increment costs one number on a dashboard, and taking the
       // application down to protect that number would be the wrong trade.
+      // Started, never awaited: the candidate already has their confirmation, and
+      // LeetCode being slow or down must not reach back into a committed apply.
+      queueLeetCodeSnapshot(application._id, clean.leetcodeUsername);
+
       if (referral.referralLinkId) {
         incrementReferralApplicationCount(referral.referralLinkId)
           .catch((err) => console.warn('[referral] application count failed:', err.message));

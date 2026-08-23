@@ -115,6 +115,12 @@ export interface ApplyFormData {
    * already reads into application.sourceDetail. Empty string means unanswered.
    */
   source: string;
+  /**
+   * Optional LeetCode handle. Best-effort on purpose: a malformed value is dropped
+   * server-side rather than blocking the application, so this field never carries
+   * a validation error.
+   */
+  leetcodeUsername: string;
   /** Honeypot — bots fill this hidden field; real users leave it empty (R4). */
   honeypot: string;
 }

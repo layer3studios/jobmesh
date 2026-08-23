@@ -25,6 +25,9 @@ import {
 import { buildCandidateTimeline } from '../../services/employer/candidate-timeline-service.js';
 import { getInterviewSummary } from '../../services/interview/interview-summary-service.js';
 import { bulkMoveStage } from '../../services/employer/bulk-stage-move-service.js';
+import {
+  setApplicantLeetCode, clearApplicantLeetCode,
+} from '../../services/employer/applicant-leetcode-service.js';
 
 const router = Router();
 
@@ -151,5 +154,30 @@ router.post('/:applicationId/anonymize', requireOwnerOrHigher, requireEmployerAp
   );
   res.json({ result });
 }));
+
+// PUT /:applicationId/leetcode — attach a LeetCode record by username. Member+.
+// Overwrites whatever was there: the employer named a specific account, and this
+// application is the thing being annotated.
+router.put(
+  '/:applicationId/leetcode',
+  requireMemberOrHigher,
+  requireEmployerApplicant,
+  asyncHandler(async (req, res) => {
+    const data = await setApplicantLeetCode(
+      req.employerCompanyId, req.params.applicationId, req.body?.username,
+    );
+    res.json({ leetcode: data });
+  }),
+);
+
+// DELETE /:applicationId/leetcode — remove it from THIS application only. Member+.
+router.delete(
+  '/:applicationId/leetcode',
+  requireMemberOrHigher,
+  requireEmployerApplicant,
+  asyncHandler(async (req, res) => {
+    res.json(await clearApplicantLeetCode(req.employerCompanyId, req.params.applicationId));
+  }),
+);
 
 export default router;

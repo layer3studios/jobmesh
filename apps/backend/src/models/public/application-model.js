@@ -66,6 +66,14 @@ export async function createApplicationForCompany(companyId, data, { session } =
     // TEXT is stored per answer, so editing the posting later never rewrites the
     // history of an application that was already submitted.
     screeningAnswers: Array.isArray(data.screeningAnswers) ? data.screeningAnswers : [],
+    // What the candidate typed on the apply form, or what an employer later looked
+    // up. Kept alongside the snapshot so a stale snapshot can be re-fetched.
+    leetcodeUsername: data.leetcodeUsername ?? null,
+    // A SNAPSHOT, deliberately. These are the numbers as they stood when the
+    // application arrived, and they never auto-refresh: an employer comparing two
+    // candidates should be reading the same moment for both, and a record that
+    // silently moved after they read it would be worse than a dated one.
+    leetcodeData: data.leetcodeData ?? null,
     resumeFileId: toOid(data.resumeFileId),
     assignmentSubmissionId: toOid(data.assignmentSubmissionId),
     coverNote: data.coverNote ?? null,

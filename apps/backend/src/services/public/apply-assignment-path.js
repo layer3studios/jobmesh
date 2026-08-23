@@ -29,6 +29,7 @@ import {
   validateSeekerNotes,
 } from './assignment-submission-validators.js';
 import { enqueueScoreJob } from './resume-score-queue-service.js';
+import { queueLeetCodeSnapshot } from './apply-leetcode-snapshot.js';
 import { queueApplicationReceivedEmail } from '../email/application-received-email-service.js';
 import { queueNewApplicationNotification } from '../employer/new-application-notification-service.js';
 import { incrementReferralApplicationCount } from '../../models/employer/referral-link-model.js';
@@ -148,6 +149,10 @@ export async function processAssignmentApplication(context, logDoNotContactAppli
       incrementReferralApplicationCount(referral.referralLinkId)
         .catch((err) => console.warn('[referral] application count failed:', err.message));
     }
+
+    // Post-commit, unawaited — same rule as the plain path, and additionally
+    // because the transaction callback may run more than once.
+    queueLeetCodeSnapshot(applicationId, clean.leetcodeUsername);
 
     enqueueScoreJob(applicationId, company._id, posting._id)
       .catch((err) => console.warn('[score-queue] enqueue failed:', err.message));

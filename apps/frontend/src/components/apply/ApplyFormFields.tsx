@@ -77,6 +77,25 @@ export default function ApplyFormFields({
             <Input label="Phone" type="text" inputMode="tel" autoComplete="tel" value={data.phone} error={errors.phone}
               onChange={(e) => set('phone', e.target.value)} onBlur={() => onBlur('phone')} />
           </div>
+
+          {/* Optional and never validated in the UI: a bad handle is dropped
+              server-side, so an inline error here would threaten a consequence
+              that does not exist. */}
+          <div onFocus={() => onFieldFocus('leetcodeUsername')}>
+            <Input
+              label="LeetCode username"
+              hint="Lets employers see your problem-solving record. Optional."
+              type="text"
+              inputMode="text"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              maxLength={20}
+              placeholder="e.g. neal_wu"
+              value={data.leetcodeUsername}
+              onChange={(e) => set('leetcodeUsername', e.target.value)}
+            />
+          </div>
         </div>
       </fieldset>
 

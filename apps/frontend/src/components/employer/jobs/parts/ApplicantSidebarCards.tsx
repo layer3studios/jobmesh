@@ -43,7 +43,12 @@ export default function ApplicantSidebarCards({
   return (
     <Stack gap={16}>
       {detail.contact && (
-        <ApplicantContactCard contact={detail.contact} leetcode={detail.leetcode} />
+        <ApplicantContactCard
+          contact={detail.contact}
+          applicationId={detail.application.id}
+          leetcode={detail.leetcode}
+          leetcodeUsername={detail.leetcodeUsername}
+        />
       )}
       {/* Renders nothing for anyone who applied exactly once — the backend omits
           the key entirely rather than sending an empty array. */}

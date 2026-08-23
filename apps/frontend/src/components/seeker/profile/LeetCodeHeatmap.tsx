@@ -27,12 +27,18 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
  * Four steps, because more would imply a precision the counts do not have.
  * Opacity on --accent rather than four literal greens: one hue, one token, and it
  * follows the theme into dark mode without a second palette.
+ *
+ * THE SCALE STARTS AT 0.32, NOT LOWER, because empty cells are now a visible muted
+ * surface rather than the card itself. At 0.15 the faintest active cell measured
+ * 1.02 contrast against that fill in light mode — a one-submission day would have
+ * looked emptier than an empty one, inverting the very thing the chart encodes.
+ * These four values keep each step at least 1.3 from its neighbour in both themes.
  */
 function intensityOf(count: number): number {
   if (count <= 0) return 0;
-  if (count <= 2) return 0.15;
-  if (count <= 5) return 0.35;
-  if (count <= 9) return 0.6;
+  if (count <= 2) return 0.32;
+  if (count <= 5) return 0.52;
+  if (count <= 9) return 0.74;
   return 1;
 }
 
@@ -139,9 +145,16 @@ export default function LeetCodeHeatmap({ data }: { data: LeetCodeProfile }) {
               width={CELL}
               height={CELL}
               rx={2}
-              // An empty day is the surface itself, not a faint accent: zero should
-              // read as absence rather than as a very small amount.
-              fill={intensity === 0 ? 'var(--surface)' : 'var(--accent)'}
+              // An empty day is a MUTED SURFACE, not a faint accent: the grid has to
+              // stay legible as a grid — 53 columns of seven is itself information,
+              // showing how far back the record runs and where the gaps fall — but a
+              // low-alpha green would make zero read as "a very small amount".
+              //
+              // --surface-muted rather than --border at low alpha: --border is 7%
+              // ink, which over a card of nearly the same value disappears exactly
+              // as the plain surface did. This is a solid token, so it composites
+              // predictably on any card and carries its own dark-mode value.
+              fill={intensity === 0 ? 'var(--surface-muted)' : 'var(--accent)'}
               fillOpacity={intensity === 0 ? 1 : intensity}
             >
               <title>{`${cell.count} submission${cell.count === 1 ? '' : 's'} on ${cell.date}`}</title>

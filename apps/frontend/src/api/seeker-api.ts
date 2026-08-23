@@ -39,7 +39,19 @@ export class SeekerApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(apiUrl(path), { credentials: 'include', ...init });
+  // Default the JSON content type whenever there is a body, because express.json()
+  // only parses when it sees it — without the header the body is silently dropped
+  // and the route reports the resulting `undefined` field as a validation error,
+  // which reads like the server rejecting a perfectly good value.
+  //
+  // FormData is excluded: the browser has to set that header itself so it can add
+  // the multipart boundary. `...init` still wins, so an explicit header overrides.
+  const isFormData = typeof FormData !== 'undefined' && init?.body instanceof FormData;
+  const response = await fetch(apiUrl(path), {
+    credentials: 'include',
+    headers: init?.body && !isFormData ? { 'Content-Type': 'application/json' } : undefined,
+    ...init,
+  });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
     throw new SeekerApiError(response.status, body?.code ?? null, body?.error || `Request failed (${response.status})`);

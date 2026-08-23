@@ -54,10 +54,17 @@ export async function getApplicantDetailForCompany(companyId, applicationId) {
     ? await listOtherApplicationsForContact(companyId, application.contactId, application._id)
     : [];
 
-  // Public proof-of-work, when this applicant is also a JobMesh seeker who
-  // connected LeetCode. Never blocks the page: the lookup swallows its own
-  // failures and yields null (see applicant-leetcode-lookup.js).
-  const leetcode = await resolveApplicantLeetCode(contact?.email ?? null);
+  // Public proof-of-work, resolved in priority order:
+  //   1. the snapshot ON THIS APPLICATION — typed on the apply form, or looked up
+  //      by an employer. It wins because it is specific to this application and
+  //      somebody chose it deliberately;
+  //   2. the live seeker connection, matched by email;
+  //   3. nothing.
+  //
+  // The snapshot short-circuits the lookup entirely, so an application that
+  // already carries data costs no cross-audience query at all.
+  const leetcode = application.leetcodeData
+    ?? await resolveApplicantLeetCode(contact?.email ?? null);
 
   const resumeMeta = resumeFile ? toResumeMeta(resumeFile) : null;
   const resumeDownloadUrl = resumeMeta
@@ -72,9 +79,12 @@ export async function getApplicantDetailForCompany(companyId, applicationId) {
     stageChanges: stageChanges.map(toEmployerStageChange),
     resumeMeta,
     resumeDownloadUrl,
-    // null for an external applicant, or for a seeker who never connected — the
-    // UI reads that one falsy case and renders no LeetCode button at all.
+    // null for an external applicant with no snapshot and no connected seeker —
+    // the UI reads that one falsy case and offers the manual lookup instead.
     leetcode,
+    // Echoed so the employer's lookup box can show what was tried, and so a
+    // cleared-then-retyped username is distinguishable from never having one.
+    leetcodeUsername: application.leetcodeUsername ?? null,
     ...(otherApplications.length > 0
       ? { otherApplications: otherApplications.map(toOtherApplication) }
       : {}),
