@@ -79,21 +79,22 @@ export interface ApplicantDetail extends Applicant {
   assignmentSubmission?: AssignmentSubmission | null;
   assignmentReview?: AssignmentReview | null;
   /**
-   * The candidate's public LeetCode record, when they are also a JobMesh seeker
-   * who connected one. Null for an external applicant, for a seeker who never
-   * connected, and whenever LeetCode could not be reached — one falsy case, and
-   * the UI renders no button at all for it.
+   * Public proof-of-work, from a connected account or an employer's lookup. Null
+   * for an external applicant, a seeker who never connected, or a provider that
+   * could not be reached — one falsy case each, and the UI offers its lookup box.
    */
   leetcode?: LeetCodeProfile | null;
-  /** What was last looked up or typed. Seeds the employer's lookup box. */
+  github?: GitHubProfile | null;
+  /** What was last looked up or typed. Seeds the employer's lookup boxes. */
   leetcodeUsername?: string | null;
+  githubUsername?: string | null;
 }
 
 
 
 
 
-import type { LeetCodeProfile } from './seeker-profile';
+import type { LeetCodeProfile, GitHubProfile } from './seeker-profile';
 
 export interface Applicant {
   application: {

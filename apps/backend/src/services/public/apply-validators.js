@@ -9,6 +9,12 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const URL_RE = /(https?:\/\/|www\.|\.[a-z]{2,}\/)/i;
 /** LeetCode's own username rule: alphanumerics, underscores and hyphens, ≤ 20. */
 const LEETCODE_USERNAME_RE = /^[A-Za-z0-9_-]{1,20}$/;
+/**
+ * GitHub's own rule: 1–39 of [A-Za-z0-9-], no leading or trailing hyphen and no
+ * two in a row. NOT the same as LeetCode's — GitHub allows no underscores and
+ * three times the length, so the two cannot share one pattern.
+ */
+const GITHUB_USERNAME_RE = /^[A-Za-z0-9](?:-?[A-Za-z0-9]){0,38}$/;
 
 /**
  * The optional LeetCode handle. Returns null for absent OR malformed input —
@@ -22,6 +28,15 @@ const LEETCODE_USERNAME_RE = /^[A-Za-z0-9_-]{1,20}$/;
 export function normalizeLeetCodeUsername(value) {
   const trimmed = typeof value === 'string' ? value.trim() : '';
   return LEETCODE_USERNAME_RE.test(trimmed) ? trimmed : null;
+}
+
+/**
+ * The optional GitHub handle. Same contract as the LeetCode one above: returns
+ * null for absent OR malformed input, and NEVER throws.
+ */
+export function normalizeGitHubUsername(value) {
+  const trimmed = typeof value === 'string' ? value.trim() : '';
+  return GITHUB_USERNAME_RE.test(trimmed) ? trimmed : null;
 }
 
 function requireName(value, field, code) {
@@ -67,6 +82,7 @@ export function validateApplicationForm(form = {}) {
   return {
     firstName, lastName, email, phone, yearsExperience, coverNote, futureOpportunities,
     leetcodeUsername: normalizeLeetCodeUsername(form.leetcodeUsername),
+    githubUsername: normalizeGitHubUsername(form.githubUsername),
   };
 }
 

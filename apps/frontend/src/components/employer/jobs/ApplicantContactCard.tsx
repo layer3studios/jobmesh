@@ -11,8 +11,9 @@ import { Mail, Phone, Linkedin, Github, Globe, MapPin, Copy, Check } from 'lucid
 import { Card, Stack } from '@/components/ui';
 import DoNotContactBanner from './parts/DoNotContactBanner';
 import LeetCodeLookup from './parts/LeetCodeLookup';
+import GitHubLookup from './parts/GitHubLookup';
 import type { DoNotContact } from '@/types/employer-applicants';
-import type { LeetCodeProfile } from '@/types/seeker-profile';
+import type { LeetCodeProfile, GitHubProfile } from '@/types/seeker-profile';
 
 export interface ApplicantContact {
   /** The "never reach out again" flag. Renders first, above everything. */
@@ -89,25 +90,37 @@ function Row({ icon, children, copyValue, copyLabel }: {
   );
 }
 
+/**
+ * "github.com/torvalds/repo" → "torvalds". Returns '' for anything that is not a
+ * github.com profile URL, so a portfolio link pasted into the wrong field never
+ * becomes a bogus lookup.
+ */
+function githubLoginFrom(url: string | null): string {
+  const match = /(?:^|\/\/)(?:www\.)?github\.com\/([A-Za-z0-9](?:-?[A-Za-z0-9]){0,38})/.exec(url ?? '');
+  return match ? match[1] : '';
+}
+
 function ExternalLink({ href, children }: { href: string; children: ReactNode }) {
   return <a href={href} target="_blank" rel="noopener noreferrer" style={LINK_STYLE}>{children}</a>;
 }
 
 export default function ApplicantContactCard({
-  contact, applicationId, leetcode, leetcodeUsername,
+  contact, applicationId, leetcode, leetcodeUsername, github, githubUsername,
 }: {
   contact: ApplicantContact;
-  /** Needed by the lookup, which writes to this application. */
+  /** Needed by the lookups, which write to this application. */
   applicationId: string;
-  /** The resolved record: apply-form snapshot, employer lookup, or seeker profile. */
+  /** The resolved records: apply-form snapshot, employer lookup, or seeker profile. */
   leetcode?: LeetCodeProfile | null;
-  /** Seeds the lookup box with whatever was last tried. */
+  github?: GitHubProfile | null;
+  /** Seed the lookup boxes with whatever was last tried. */
   leetcodeUsername?: string | null;
+  githubUsername?: string | null;
 }) {
   const email = str(contact.email);
   const phone = str(contact.phone);
   const linkedin = str(contact.linkedinUrl);
-  const github = str(contact.githubUrl);
+  const githubUrl = str(contact.githubUrl);
   const portfolio = str(contact.portfolioUrl);
   const location = str(contact.location);
 
@@ -115,7 +128,7 @@ export default function ApplicantContactCard({
 
   // A flagged candidate with no contact details still gets the card: the warning is
   // the most important thing on it, and dropping the card would drop the warning.
-  if (!email && !phone && !linkedin && !github && !portfolio && !location && !doNotContact?.flag) return null;
+  if (!email && !phone && !linkedin && !githubUrl && !portfolio && !location && !doNotContact?.flag) return null;
 
   return (
     // data-ph-mask: applicant contact PII masked in session replay (defence-in-depth).
@@ -139,9 +152,9 @@ export default function ApplicantContactCard({
             <ExternalLink href={withProtocol(linkedin)}>LinkedIn profile</ExternalLink>
           </Row>
         )}
-        {github && (
-          <Row icon={<Github size={15} aria-hidden="true" />} copyValue={withProtocol(github)} copyLabel="GitHub URL">
-            <ExternalLink href={withProtocol(github)}>GitHub profile</ExternalLink>
+        {githubUrl && (
+          <Row icon={<Github size={15} aria-hidden="true" />} copyValue={withProtocol(githubUrl)} copyLabel="GitHub URL">
+            <ExternalLink href={withProtocol(githubUrl)}>GitHub profile</ExternalLink>
           </Row>
         )}
         {portfolio && (
@@ -161,6 +174,13 @@ export default function ApplicantContactCard({
           applicationId={applicationId}
           initialData={leetcode}
           initialUsername={leetcodeUsername}
+        />
+        {/* Seeded from the profile URL the candidate typed on the form when no
+            handle was captured — the recruiter usually has to type nothing. */}
+        <GitHubLookup
+          applicationId={applicationId}
+          initialData={github}
+          initialUsername={githubUsername ?? githubLoginFrom(githubUrl)}
         />
       </Stack>
     </Card>

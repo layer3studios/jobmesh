@@ -13,7 +13,7 @@ export { EmployerApplicantsApiError, ROLE_FORBIDDEN_MESSAGE } from './employer-a
 import type {
   Applicant, ApplicantDetail, ApplicantNote, ResumeUrl, Stage, ArchiveReason, ApplicantSort, ApplicantFacets, AssignmentStats,
 } from '../types/employer-applicants';
-import type { LeetCodeProfile } from '../types/seeker-profile';
+import type { LeetCodeProfile, GitHubProfile } from '../types/seeker-profile';
 
 export {
   listSavedViews, createSavedView, updateSavedView, deleteSavedView,
@@ -171,4 +171,23 @@ export async function lookupApplicantLeetCode(
 /** Remove it from THIS application. A connected seeker's own record is untouched. */
 export async function clearApplicantLeetCode(applicationId: string): Promise<void> {
   await request<{ cleared: true }>(`${applicantPath(applicationId)}/leetcode`, { method: 'DELETE' });
+}
+
+/**
+ * Look up a GitHub username and attach it to THIS application. Overwrites any
+ * snapshot already there — the employer named a specific account.
+ */
+export async function lookupApplicantGitHub(
+  applicationId: string, username: string,
+): Promise<GitHubProfile> {
+  const body = await request<{ github: GitHubProfile }>(
+    `${applicantPath(applicationId)}/github`,
+    { method: 'PUT', body: JSON.stringify({ username }) },
+  );
+  return body.github;
+}
+
+/** Remove it from THIS application. A connected seeker's own record is untouched. */
+export async function clearApplicantGitHub(applicationId: string): Promise<void> {
+  await request<{ cleared: true }>(`${applicantPath(applicationId)}/github`, { method: 'DELETE' });
 }

@@ -10,6 +10,7 @@ import type {
   ParsedProfile, ResumeParseJob, ResumeUploadResult,
   ResumeReview, MatchCount, SalaryBenchmark,
   LeetCodeProfile, LeetCodeConnection,
+  GitHubProfile, GitHubConnection,
 } from '../types/seeker-profile';
 
 // Raw backend envelope for /upload + /text: either a queued job or the dedup
@@ -150,6 +151,39 @@ export async function disconnectLeetCode(): Promise<void> {
 /** Force a fresh read. Rate limited to once per 5 minutes; a 429 says so. */
 export async function refreshLeetCode(): Promise<LeetCodeProfile> {
   const body = await request<{ data: LeetCodeProfile }>('/seeker/me/leetcode/refresh', {
+    method: 'POST',
+  });
+  return body.data;
+}
+
+// ── GitHub ───────────────────────────────────────────────────────────────────
+
+/**
+ * Connect an account. The server verifies the username against GitHub before
+ * storing it, so a 404 here means the username is wrong — which is the one error
+ * on this form the candidate can actually fix. A 503 means the integration is off
+ * or GitHub is unreachable, neither of which is theirs to solve.
+ */
+export async function connectGitHub(username: string): Promise<GitHubProfile> {
+  const body = await request<{ connected: true; data: GitHubProfile }>('/seeker/me/github', {
+    method: 'PUT',
+    body: JSON.stringify({ username }),
+  });
+  return body.data;
+}
+
+/** The connected account and its last-read stats. `connected: false` when there is none. */
+export function getGitHubProfile(): Promise<GitHubConnection> {
+  return request<GitHubConnection>('/seeker/me/github');
+}
+
+export async function disconnectGitHub(): Promise<void> {
+  await request<{ connected: false }>('/seeker/me/github', { method: 'DELETE' });
+}
+
+/** Force a fresh read. Rate limited to once per 5 minutes; a 429 says so. */
+export async function refreshGitHub(): Promise<GitHubProfile> {
+  const body = await request<{ data: GitHubProfile }>('/seeker/me/github/refresh', {
     method: 'POST',
   });
   return body.data;

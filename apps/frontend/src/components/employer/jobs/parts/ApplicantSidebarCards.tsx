@@ -48,6 +48,8 @@ export default function ApplicantSidebarCards({
           applicationId={detail.application.id}
           leetcode={detail.leetcode}
           leetcodeUsername={detail.leetcodeUsername}
+          github={detail.github}
+          githubUsername={detail.githubUsername}
         />
       )}
       {/* Renders nothing for anyone who applied exactly once — the backend omits

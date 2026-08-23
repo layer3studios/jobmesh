@@ -74,6 +74,11 @@ export async function createApplicationForCompany(companyId, data, { session } =
     // candidates should be reading the same moment for both, and a record that
     // silently moved after they read it would be worse than a dated one.
     leetcodeData: data.leetcodeData ?? null,
+    // The same pair again for GitHub. Two providers, two independent snapshots:
+    // a candidate may offer one, the other, both or neither, and one being absent
+    // says nothing about the other.
+    githubUsername: data.githubUsername ?? null,
+    githubData: data.githubData ?? null,
     resumeFileId: toOid(data.resumeFileId),
     assignmentSubmissionId: toOid(data.assignmentSubmissionId),
     coverNote: data.coverNote ?? null,

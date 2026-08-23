@@ -156,3 +156,14 @@ export const EMAIL_ENABLED = process.env.EMAIL_ENABLED !== 'false';
 // 'false' disables it, so an unset var keeps reminders working.
 export const INTERVIEW_REMINDERS_ENABLED = process.env.INTERVIEW_REMINDERS_ENABLED !== 'false';
 
+
+// GitHub's GraphQL API needs a token even for entirely public data: unauthenticated
+// REST is capped at 60 requests/hour per IP, which one busy applicant list would
+// exhaust. A fine-grained PAT with NO scopes is enough — the token buys rate limit,
+// not access. Server-side only; it must never reach the frontend.
+//
+// Optional by design, and NOT via required(): a missing token disables the GitHub
+// panels and leaves the rest of the app running, which is the right failure for a
+// nice-to-have integration.
+export const GITHUB_API_TOKEN = process.env.GITHUB_API_TOKEN || '';
+export const GITHUB_ENABLED = GITHUB_API_TOKEN !== '';

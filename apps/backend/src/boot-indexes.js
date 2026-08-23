@@ -8,6 +8,7 @@
 import { connectToDb, closeDb } from './Db/connection.js';
 import {
   ensureUserIndexes, ensureLeetCodeUserIndexes, ensureLeetCodeCacheIndexes,
+  ensureGitHubUserIndexes, ensureGitHubCacheIndexes,
 } from './models/seeker/index.js';
 import { ensureJobIndexes } from './models/shared/job-model.js';
 import { ensureAdminUserIndexes } from './models/admin/index.js';
@@ -44,6 +45,8 @@ export async function runBootSequence() {
     await ensureUserIndexes();
   await ensureLeetCodeUserIndexes();
   await ensureLeetCodeCacheIndexes();
+  await ensureGitHubUserIndexes();
+  await ensureGitHubCacheIndexes();
     await ensureJobIndexes();
     await ensureEmployerUserIndexes();
     await ensureAdminUserIndexes();

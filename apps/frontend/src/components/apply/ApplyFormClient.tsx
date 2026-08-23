@@ -41,7 +41,7 @@ import { trackEvent } from '@/lib/analytics-events';
 const EMPTY: ApplyFormData = {
   firstName: '', lastName: '', email: '', phone: '', coverNote: '',
   consent_dpdp: false, consent_futureOpportunities: false, resume: null,
-  source: '', leetcodeUsername: '', honeypot: '',
+  source: '', leetcodeUsername: '', githubUsername: '', honeypot: '',
 };
 
 // Every major ATS (LinkedIn, Greenhouse, Lever, Ashby) puts the JD on the left and
@@ -451,6 +451,9 @@ export default function ApplyFormClient({
       // to reason about, where an absent key is simply "not offered".
       if (data.leetcodeUsername.trim()) {
         form.append('leetcodeUsername', data.leetcodeUsername.trim());
+      }
+      if (data.githubUsername.trim()) {
+        form.append('githubUsername', data.githubUsername.trim());
       }
       form.append('consent_dpdp', String(data.consent_dpdp));
       form.append('consent_futureOpportunities', String(data.consent_futureOpportunities));

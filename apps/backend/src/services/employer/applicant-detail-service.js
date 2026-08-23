@@ -24,6 +24,7 @@ import {
 import { toEmployerApplication, toEmployerStageChange, toResumeMeta } from './applicant-mappers.js';
 import { signResumeToken } from './signed-url-service.js';
 import { resolveApplicantLeetCode } from './applicant-leetcode-lookup.js';
+import { resolveApplicantGitHub } from './applicant-github-lookup.js';
 
 /** Assemble every section of one applicant's detail page for the owning company. */
 export async function getApplicantDetailForCompany(companyId, applicationId) {
@@ -63,8 +64,13 @@ export async function getApplicantDetailForCompany(companyId, applicationId) {
   //
   // The snapshot short-circuits the lookup entirely, so an application that
   // already carries data costs no cross-audience query at all.
-  const leetcode = application.leetcodeData
-    ?? await resolveApplicantLeetCode(contact?.email ?? null);
+  // Both providers resolve the same way and are independent of each other, so
+  // they race rather than queue — two 5s ceilings in sequence would be a 10s
+  // ceiling on a page that must not wait on anyone.
+  const [leetcode, github] = await Promise.all([
+    application.leetcodeData ?? resolveApplicantLeetCode(contact?.email ?? null),
+    application.githubData ?? resolveApplicantGitHub(contact?.email ?? null),
+  ]);
 
   const resumeMeta = resumeFile ? toResumeMeta(resumeFile) : null;
   const resumeDownloadUrl = resumeMeta
@@ -85,6 +91,8 @@ export async function getApplicantDetailForCompany(companyId, applicationId) {
     // Echoed so the employer's lookup box can show what was tried, and so a
     // cleared-then-retyped username is distinguishable from never having one.
     leetcodeUsername: application.leetcodeUsername ?? null,
+    github,
+    githubUsername: application.githubUsername ?? null,
     ...(otherApplications.length > 0
       ? { otherApplications: otherApplications.map(toOtherApplication) }
       : {}),

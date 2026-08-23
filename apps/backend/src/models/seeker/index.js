@@ -8,3 +8,5 @@ export * from './comeback-jobs-model.js';
 export * from './dismissed-jobs-model.js';
 export * from './seeker-leetcode-model.js';
 export * from './leetcode-cache-model.js';
+export * from './seeker-github-model.js';
+export * from './github-cache-model.js';

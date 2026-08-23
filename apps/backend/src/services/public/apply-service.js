@@ -24,6 +24,7 @@ import { processAssignmentApplication } from './apply-assignment-path.js';
 import { validateApplicationForm, isHoneypotFilled } from './apply-validators.js';
 import { enqueueScoreJob } from './resume-score-queue-service.js';
 import { queueLeetCodeSnapshot } from './apply-leetcode-snapshot.js';
+import { queueGitHubSnapshot } from './apply-github-snapshot.js';
 
 // Re-exported: apply-service stays the seam the transaction tests drive, even
 // though the unit itself now lives next door.
@@ -116,6 +117,7 @@ export async function processApplication(companySlug, jobSlug, form, resume, met
       screeningAnswers,
       resumeFileId: resumeRecord._id, coverNote: clean.coverNote, yearsExperience: clean.yearsExperience,
       leetcodeUsername: clean.leetcodeUsername,
+      githubUsername: clean.githubUsername,
       source: referral.source, sourceDetail: referral.sourceDetail,
       referralLinkId: referral.referralLinkId,
       applicantIp: meta.applicantIp ?? null, userAgent: meta.userAgent ?? null, referer: meta.referer ?? null,
@@ -141,6 +143,7 @@ export async function processApplication(companySlug, jobSlug, form, resume, met
       // Started, never awaited: the candidate already has their confirmation, and
       // LeetCode being slow or down must not reach back into a committed apply.
       queueLeetCodeSnapshot(application._id, clean.leetcodeUsername);
+      queueGitHubSnapshot(application._id, clean.githubUsername);
 
       if (referral.referralLinkId) {
         incrementReferralApplicationCount(referral.referralLinkId)

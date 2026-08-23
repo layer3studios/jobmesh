@@ -121,6 +121,7 @@ export interface ApplyFormData {
    * a validation error.
    */
   leetcodeUsername: string;
+  githubUsername: string;
   /** Honeypot — bots fill this hidden field; real users leave it empty (R4). */
   honeypot: string;
 }

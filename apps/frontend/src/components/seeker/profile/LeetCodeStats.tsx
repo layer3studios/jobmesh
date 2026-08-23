@@ -14,7 +14,7 @@
 
 import { useEffect, useState } from 'react';
 import type { LeetCodeProfile } from '@/types/seeker-profile';
-import LeetCodeHeatmap from './LeetCodeHeatmap';
+import ContributionHeatmap from './ContributionHeatmap';
 import LeetCodeContestChart from './LeetCodeContestChart';
 
 /** Semantic, not literal: these follow the theme instead of being three fixed hues. */
@@ -142,7 +142,11 @@ export default function LeetCodeStats({ data }: { data: LeetCodeProfile }) {
         </section>
       )}
 
-      <LeetCodeHeatmap data={data} />
+      <ContributionHeatmap
+        calendar={data.submissionCalendar}
+        heading="Activity · past year"
+        unit="submission"
+      />
       <LeetCodeContestChart data={data} />
     </div>
   );

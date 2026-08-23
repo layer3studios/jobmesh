@@ -13,6 +13,7 @@ import type { ParsedProfile } from '../../../types/seeker-profile';
 import ProfileContact from './ProfileContact';
 import ProfileSkills from './ProfileSkills';
 import LeetCodeConnect from './LeetCodeConnect';
+import GitHubConnect from './GitHubConnect';
 import ProfilePreferences from './ProfilePreferences';
 import { ProfileExperience, ProfileEducation } from './ProfileReadonly';
 import ProfileReviewCard from '../ProfileReviewCard';
@@ -95,6 +96,7 @@ export default function Profile() {
         {/* Directly after skills, because it answers the same question with
             evidence: skills are claimed, this is a record. */}
         <LeetCodeConnect />
+        <GitHubConnect />
         <ProfilePreferences profile={profile} onSaved={setProfile} />
         <ProfileExperience profile={profile} />
         <ProfileEducation profile={profile} />

@@ -163,3 +163,8 @@ export interface LeetCodeConnection {
   username?: string;
   data?: LeetCodeProfile | null;
 }
+
+// The GitHub types live in their own file (section 2 size limit) and are
+// re-exported here so `@/types/seeker-profile` remains the one import site for
+// everything on a seeker's profile.
+export type { GitHubRepo, GitHubProfile, GitHubConnection } from './github-profile';

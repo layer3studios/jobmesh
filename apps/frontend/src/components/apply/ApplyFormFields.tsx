@@ -96,6 +96,16 @@ export default function ApplyFormFields({
               onChange={(e) => set('leetcodeUsername', e.target.value)}
             />
           </div>
+          <div onFocus={() => onFieldFocus('githubUsername')}>
+            <Input
+              label="GitHub username"
+              hint="Shows your projects and contributions. Optional."
+              type="text" inputMode="text" autoCapitalize="none" autoCorrect="off"
+              spellCheck={false} maxLength={39} placeholder="e.g. torvalds"
+              value={data.githubUsername}
+              onChange={(e) => set('githubUsername', e.target.value)}
+            />
+          </div>
         </div>
       </fieldset>
 
