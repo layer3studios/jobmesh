@@ -38,7 +38,19 @@ function readViewport(): { w: number; h: number } {
 }
 
 export function useViewport(): Viewport {
-  const [vp, setVp] = useState(readViewport);
+  // SEEDED WITH THE SERVER VALUES, NOT readViewport(). The first client render is
+  // the HYDRATION render: React compares it against the server's HTML, and any
+  // component whose markup depends on width would mismatch the moment the real
+  // window is narrower than SERVER_WIDTH. Measuring here instead of in the effect
+  // is what caused exactly that — nav labels rendered `display: inline` on the
+  // server and `display: none` on hydration, and React discards the whole
+  // mismatched subtree rather than patching it.
+  //
+  // The effect below measures on mount, one frame later, which is also what the
+  // header comment always described: render the full layout, then narrow.
+  // Annotated: SERVER_WIDTH is a literal-typed const, so without this the state
+  // narrows to `w: 1280` and the effect's real measurement will not assign.
+  const [vp, setVp] = useState<{ w: number; h: number }>({ w: SERVER_WIDTH, h: SERVER_HEIGHT });
 
   useEffect(() => {
     const onResize = () => setVp(readViewport());
