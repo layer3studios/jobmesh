@@ -23,6 +23,7 @@ import {
 } from '../../models/public/contact-application-model.js';
 import { toEmployerApplication, toEmployerStageChange, toResumeMeta } from './applicant-mappers.js';
 import { signResumeToken } from './signed-url-service.js';
+import { resolveApplicantLeetCode } from './applicant-leetcode-lookup.js';
 
 /** Assemble every section of one applicant's detail page for the owning company. */
 export async function getApplicantDetailForCompany(companyId, applicationId) {
@@ -53,6 +54,11 @@ export async function getApplicantDetailForCompany(companyId, applicationId) {
     ? await listOtherApplicationsForContact(companyId, application.contactId, application._id)
     : [];
 
+  // Public proof-of-work, when this applicant is also a JobMesh seeker who
+  // connected LeetCode. Never blocks the page: the lookup swallows its own
+  // failures and yields null (see applicant-leetcode-lookup.js).
+  const leetcode = await resolveApplicantLeetCode(contact?.email ?? null);
+
   const resumeMeta = resumeFile ? toResumeMeta(resumeFile) : null;
   const resumeDownloadUrl = resumeMeta
     ? `/api/public/resume-download?token=${signResumeToken(application._id)}`
@@ -66,6 +72,9 @@ export async function getApplicantDetailForCompany(companyId, applicationId) {
     stageChanges: stageChanges.map(toEmployerStageChange),
     resumeMeta,
     resumeDownloadUrl,
+    // null for an external applicant, or for a seeker who never connected — the
+    // UI reads that one falsy case and renders no LeetCode button at all.
+    leetcode,
     ...(otherApplications.length > 0
       ? { otherApplications: otherApplications.map(toOtherApplication) }
       : {}),

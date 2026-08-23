@@ -42,7 +42,9 @@ export default function ApplicantSidebarCards({
 
   return (
     <Stack gap={16}>
-      {detail.contact && <ApplicantContactCard contact={detail.contact} />}
+      {detail.contact && (
+        <ApplicantContactCard contact={detail.contact} leetcode={detail.leetcode} />
+      )}
       {/* Renders nothing for anyone who applied exactly once — the backend omits
           the key entirely rather than sending an empty array. */}
       <ApplicantOtherApplications otherApplications={detail.otherApplications ?? []} />

@@ -9,6 +9,7 @@ import { apiUrl } from '../lib/api-base';
 import type {
   ParsedProfile, ResumeParseJob, ResumeUploadResult,
   ResumeReview, MatchCount, SalaryBenchmark,
+  LeetCodeProfile, LeetCodeConnection,
 } from '../types/seeker-profile';
 
 // Raw backend envelope for /upload + /text: either a queued job or the dedup
@@ -108,4 +109,36 @@ export async function fetchMatchCount(signal?: AbortSignal): Promise<MatchCount>
 /** Salary benchmark band for the caller's seniority slice (direct shape). */
 export async function fetchSalaryBenchmark(signal?: AbortSignal): Promise<SalaryBenchmark> {
   return request<SalaryBenchmark>('/seeker/market/salary-benchmark', { signal });
+}
+
+// ── LeetCode ─────────────────────────────────────────────────────────────────
+
+/**
+ * Connect an account. The server verifies the username against LeetCode before
+ * storing it, so a 404 here means the username is wrong — which is the one error
+ * on this form the candidate can actually fix.
+ */
+export async function connectLeetCode(username: string): Promise<LeetCodeProfile> {
+  const body = await request<{ connected: true; data: LeetCodeProfile }>('/seeker/me/leetcode', {
+    method: 'PUT',
+    body: JSON.stringify({ username }),
+  });
+  return body.data;
+}
+
+/** The connected account and its last-read stats. `connected: false` when there is none. */
+export function getLeetCodeProfile(): Promise<LeetCodeConnection> {
+  return request<LeetCodeConnection>('/seeker/me/leetcode');
+}
+
+export async function disconnectLeetCode(): Promise<void> {
+  await request<{ connected: false }>('/seeker/me/leetcode', { method: 'DELETE' });
+}
+
+/** Force a fresh read. Rate limited to once per 5 minutes; a 429 says so. */
+export async function refreshLeetCode(): Promise<LeetCodeProfile> {
+  const body = await request<{ data: LeetCodeProfile }>('/seeker/me/leetcode/refresh', {
+    method: 'POST',
+  });
+  return body.data;
 }

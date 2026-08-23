@@ -12,6 +12,7 @@ import { fetchProfile, SeekerApiError } from '../../../api/seeker-api';
 import type { ParsedProfile } from '../../../types/seeker-profile';
 import ProfileContact from './ProfileContact';
 import ProfileSkills from './ProfileSkills';
+import LeetCodeConnect from './LeetCodeConnect';
 import ProfilePreferences from './ProfilePreferences';
 import { ProfileExperience, ProfileEducation } from './ProfileReadonly';
 import ProfileReviewCard from '../ProfileReviewCard';
@@ -91,6 +92,9 @@ export default function Profile() {
         <ProfileMarketCard />
         <ProfileContact profile={profile} onSaved={setProfile} />
         <ProfileSkills profile={profile} onSaved={setProfile} />
+        {/* Directly after skills, because it answers the same question with
+            evidence: skills are claimed, this is a record. */}
+        <LeetCodeConnect />
         <ProfilePreferences profile={profile} onSaved={setProfile} />
         <ProfileExperience profile={profile} />
         <ProfileEducation profile={profile} />

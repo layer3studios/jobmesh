@@ -122,3 +122,44 @@ export interface SalaryBenchmark {
   filters: { seniority: string | null; roleCategory: string | null; location: string | null };
   asOf: string;
 }
+
+/**
+ * A candidate's public LeetCode record, as shaped by the backend.
+ *
+ * Nullable fields mean "never happened", not "zero": contestRating is null for
+ * someone who has never entered a contest, which is a different statement from a
+ * rating of 0 and is rendered differently.
+ */
+export interface LeetCodeProfile {
+  username: string;
+  ranking: number | null;
+  totalSolved: number;
+  easySolved: number;
+  mediumSolved: number;
+  hardSolved: number;
+  contestRating: number | null;
+  contestsAttended: number;
+  contestGlobalRanking: number | null;
+  contestTopPercentage: number | null;
+  contestHistory: Array<{
+    contestTitle: string;
+    rating: number;
+    ranking: number;
+    date: string;
+  }>;
+  topSkills: Array<{ name: string; count: number }>;
+  languages: Array<{ name: string; count: number }>;
+  /** JSON string of unix-second → submission count. '{}' when LeetCode returns none. */
+  submissionCalendar: string;
+  badges: Array<{ name: string; icon: string }>;
+  fetchedAt: string;
+  /** Set when served from an expired cache because LeetCode could not be reached. */
+  isStale?: boolean;
+}
+
+/** The GET response: connected is about the ACCOUNT, data about the last read. */
+export interface LeetCodeConnection {
+  connected: boolean;
+  username?: string;
+  data?: LeetCodeProfile | null;
+}

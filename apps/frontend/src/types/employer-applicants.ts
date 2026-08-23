@@ -78,11 +78,20 @@ export interface ApplicantDetail extends Applicant {
   /** Null for a plain posting or a legacy application — guard on it, never assume. */
   assignmentSubmission?: AssignmentSubmission | null;
   assignmentReview?: AssignmentReview | null;
+  /**
+   * The candidate's public LeetCode record, when they are also a JobMesh seeker
+   * who connected one. Null for an external applicant, for a seeker who never
+   * connected, and whenever LeetCode could not be reached — one falsy case, and
+   * the UI renders no button at all for it.
+   */
+  leetcode?: LeetCodeProfile | null;
 }
 
 
 
 
+
+import type { LeetCodeProfile } from './seeker-profile';
 
 export interface Applicant {
   application: {

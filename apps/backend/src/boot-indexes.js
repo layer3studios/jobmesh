@@ -6,7 +6,9 @@
 // rather than in a migration. The order is preserved exactly as it was.
 
 import { connectToDb, closeDb } from './Db/connection.js';
-import { ensureUserIndexes } from './models/seeker/index.js';
+import {
+  ensureUserIndexes, ensureLeetCodeUserIndexes, ensureLeetCodeCacheIndexes,
+} from './models/seeker/index.js';
 import { ensureJobIndexes } from './models/shared/job-model.js';
 import { ensureAdminUserIndexes } from './models/admin/index.js';
 import { ensureInterviewIndexes, ensureInterviewReminderJobIndexes, ensureInterviewTimeIndexes } from './models/interview/index.js';
@@ -40,6 +42,8 @@ import {
 export async function runBootSequence() {
     await connectToDb();
     await ensureUserIndexes();
+  await ensureLeetCodeUserIndexes();
+  await ensureLeetCodeCacheIndexes();
     await ensureJobIndexes();
     await ensureEmployerUserIndexes();
     await ensureAdminUserIndexes();

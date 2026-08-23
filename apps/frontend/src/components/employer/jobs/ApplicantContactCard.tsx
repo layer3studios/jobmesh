@@ -10,7 +10,9 @@ import type { ReactNode } from 'react';
 import { Mail, Phone, Linkedin, Github, Globe, MapPin, Copy, Check } from 'lucide-react';
 import { Card, Stack } from '@/components/ui';
 import DoNotContactBanner from './parts/DoNotContactBanner';
+import LeetCodeButton from './parts/LeetCodeButton';
 import type { DoNotContact } from '@/types/employer-applicants';
+import type { LeetCodeProfile } from '@/types/seeker-profile';
 
 export interface ApplicantContact {
   /** The "never reach out again" flag. Renders first, above everything. */
@@ -91,7 +93,11 @@ function ExternalLink({ href, children }: { href: string; children: ReactNode })
   return <a href={href} target="_blank" rel="noopener noreferrer" style={LINK_STYLE}>{children}</a>;
 }
 
-export default function ApplicantContactCard({ contact }: { contact: ApplicantContact }) {
+export default function ApplicantContactCard({ contact, leetcode }: {
+  contact: ApplicantContact;
+  /** Public LeetCode record, when the applicant connected one. */
+  leetcode?: LeetCodeProfile | null;
+}) {
   const email = str(contact.email);
   const phone = str(contact.phone);
   const linkedin = str(contact.linkedinUrl);
@@ -142,6 +148,9 @@ export default function ApplicantContactCard({ contact }: { contact: ApplicantCo
             {location}
           </Row>
         )}
+        {/* Last in the card: the rows above are how you REACH this person, and
+            this is how you read them. Renders nothing without a connected account. */}
+        <LeetCodeButton data={leetcode} />
       </Stack>
     </Card>
     </div>

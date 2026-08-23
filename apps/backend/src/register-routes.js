@@ -13,6 +13,7 @@ import cookieParser from 'cookie-parser';
 import employerInterviewTimesRouter from './api/employer/employer-interview-times-routes.js';
 import authRouter from './api/seeker/seeker-auth-routes.js';
 import meRouter from './api/seeker/seeker-me-routes.js';
+import seekerLeetCodeRouter from './api/seeker/seeker-leetcode-routes.js';
 import { jobsApiRouter } from './api/seeker/seeker-jobs-routes.js';
 import usersRouter from './api/seeker/seeker-users-routes.js';
 import adminRouter from './api/admin/admin-routes.js';
@@ -84,6 +85,7 @@ export function registerRoutes(app) {
 
   // ─── Routes ───────────────────────────────────────────────────────
   app.use('/api/seeker/auth', authRouter);
+  app.use('/api/seeker/me', requireSeeker, seekerLeetCodeRouter);
   app.use('/api/seeker/me', requireSeeker, meRouter);
   app.use('/api/seeker/jobs', jobsApiRouter);
   app.use('/api/seeker/users', usersRouter); // legacy 410 wildcard

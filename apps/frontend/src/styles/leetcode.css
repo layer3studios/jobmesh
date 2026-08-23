@@ -1,0 +1,159 @@
+/* FILE: src/styles/leetcode.css
+   The LeetCode proof-of-work panel: difficulty bars, skill pills, the language
+   split, the activity heatmap and the contest chart.
+
+   Layout and motion live here rather than inline because two things this panel
+   needs cannot be expressed in a style attribute: a reduced-motion query, and the
+   responsive rules that let the heatmap survive a phone.
+
+   Every colour is a token. The difficulty scale uses the SEMANTIC trio
+   (--success / --warning / --danger) rather than literal greens and reds, so it
+   stays legible when the theme flips. */
+
+/* ── Headline stats ─────────────────────────────────────────────────────────
+   A four-up row that wraps to two-up on narrow screens rather than scrolling. */
+.lc-stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.lc-stat {
+  background: var(--surface-sunken);
+  border-radius: 10px;
+  padding: 12px 10px;
+  text-align: center;
+  min-width: 0;
+}
+
+/* Tabular figures so the four numbers align on their digits instead of drifting
+   with the width of a 1 versus an 8. */
+.lc-stat-value {
+  font-size: clamp(1.05rem, 3.6vw, 1.4rem);
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The contest rating is the one number a recruiter reads first. */
+.lc-stat-value--accent { color: var(--accent); }
+
+.lc-stat-label {
+  margin: 4px 0 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* ── Difficulty bars ────────────────────────────────────────────────────────
+   A track per difficulty with the count parked at the end. The fill animates
+   from zero on mount, staggered, so the three read as one gesture. */
+.lc-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lc-bar-name {
+  width: 58px;
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+.lc-bar-track {
+  flex: 1;
+  min-width: 0;
+  height: 24px;
+  border-radius: 6px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.lc-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  width: 0;
+  transition: width 0.6s ease-out;
+  transition-delay: var(--lc-bar-delay, 0ms);
+}
+
+.lc-bar-count {
+  width: 46px;
+  flex-shrink: 0;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Language split ─────────────────────────────────────────────────────────
+   One bar, segments proportional to problems solved. Reading the mix is the
+   point, so the segments touch rather than sitting in separate tracks. */
+.lc-lang-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.lc-lang-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 10px;
+}
+
+.lc-lang-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+.lc-lang-swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ── Activity heatmap ───────────────────────────────────────────────────────
+   The SVG carries a viewBox and no width, so it scales to its container and
+   compresses on a phone instead of forcing the card to scroll sideways. */
+.lc-heatmap-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
+/* ── Section headings ───────────────────────────────────────────────────────
+   Shared by skills, languages, activity and contests so the panel reads as one
+   list of sections rather than four separately styled blocks. */
+.lc-section-heading {
+  margin: 0 0 8px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+@media (max-width: 520px) {
+  .lc-stat-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lc-bar-name { width: 48px; font-size: 0.74rem; }
+}
+
+/* Motion is decoration here — the bar's WIDTH is the information, and it is
+   correct at rest. Anyone who asked for less motion gets the final state. */
+@media (prefers-reduced-motion: reduce) {
+  .lc-bar-fill { transition: none; }
+}
