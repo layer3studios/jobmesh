@@ -5,7 +5,7 @@
 // mutation waits for the API row and replaces it in local state. The invite modal
 // stays open after success so the copy-link URL is never lost (D3).
 import { useState } from 'react';
-import { Button } from '@/components/ui';
+import { Button, PageShell } from '@/components/ui';
 import { useAdmin } from '@/context/admin/AdminContext';
 import {
   deactivateAdmin, reactivateAdmin, updateAdminRole,
@@ -110,7 +110,7 @@ export default function TeamManagementClient({ initialAdmins }: { initialAdmins:
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1536px]" style={{ padding: '24px clamp(16px, 3vw, 32px) 60px' }}>
+    <PageShell width="wide" style={{ paddingBottom: 60 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--ink)', margin: 0 }}>Team</h1>
@@ -143,6 +143,6 @@ export default function TeamManagementClient({ initialAdmins }: { initialAdmins:
           lastResult={lastInviteResult}
         />
       )}
-    </div>
+    </PageShell>
   );
 }

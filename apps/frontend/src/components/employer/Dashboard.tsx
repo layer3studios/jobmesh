@@ -9,7 +9,7 @@
 import type { CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button, PageShell } from '@/components/ui';
 import { useIsNarrowViewport } from '@/components/employer/jobs/useIsNarrowViewport';
 import { useEmployer } from '@/context/employer/EmployerContext';
 import { useDashboard } from '@/hooks/employer/useDashboard';
@@ -20,7 +20,8 @@ import TopCandidatesCard from './dashboard/TopCandidatesCard';
 import { UpcomingInterviewsCard, ActivityCard } from './dashboard/ActivityCard';
 import CompanyActivityCard from './dashboard/CompanyActivityCard';
 
-const PAGE_STYLE = { padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: 20 } as const;
+// Padding now comes from PageShell; this only owns the column rhythm.
+const PAGE_STYLE = { display: 'flex', flexDirection: 'column', gap: 20 } as const;
 // Desktop pins the page to the viewport minus the top nav and clips it, so the
 // DOCUMENT never scrolls — the columns own their height and scroll internally.
 // Mobile keeps natural flow (stacked columns are meant to scroll the page).
@@ -29,6 +30,8 @@ const LOCKED_PAGE_STYLE: CSSProperties = {
   ...PAGE_STYLE,
   height: `calc(100dvh - ${NAV_HEIGHT_PIXELS}px)`,
   overflow: 'hidden',
+  // The shell supplies the page padding, and box-sizing keeps it INSIDE the
+  // 100dvh lock rather than adding to it — without this the last row clips.
   boxSizing: 'border-box',
 };
 const SKELETON_STYLE = { borderRadius: 10, animation: 'jm-dash-pulse 1.2s ease-in-out infinite' } as const;
@@ -39,7 +42,7 @@ function Skeleton({ height }: { height: number }) {
 
 function LoadingState() {
   return (
-    <div style={PAGE_STYLE}>
+    <PageShell width="wide" style={PAGE_STYLE}>
       <style>{`@keyframes jm-dash-pulse { 0%, 100% { background: var(--surface); } 50% { background: var(--surface-raised); } }`}</style>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
         {Array.from({ length: 5 }, (_, i) => <Skeleton key={i} height={64} />)}
@@ -52,7 +55,7 @@ function LoadingState() {
           <Skeleton height={120} /><Skeleton height={220} />
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }
 
@@ -66,12 +69,12 @@ export default function EmployerDashboard() {
 
   if (error || !summary) {
     return (
-      <div style={{ ...PAGE_STYLE, alignItems: 'center', paddingTop: 80 }}>
+      <PageShell width="wide" style={{ ...PAGE_STYLE, alignItems: 'center', paddingTop: 80 }}>
         <p style={{ margin: 0, fontSize: 13, color: 'var(--ink-2)' }}>
           Couldn&apos;t load the dashboard. Check your connection and try again.
         </p>
         <Button variant="secondary" onClick={() => void refetch()}>Retry</Button>
-      </div>
+      </PageShell>
     );
   }
 
@@ -79,7 +82,7 @@ export default function EmployerDashboard() {
   const { kpis } = summary;
 
   return (
-    <div style={narrow ? PAGE_STYLE : LOCKED_PAGE_STYLE}>
+    <PageShell width="wide" style={narrow ? PAGE_STYLE : LOCKED_PAGE_STYLE}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexShrink: 0 }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 18, fontWeight: 500, color: 'var(--ink)' }}>
@@ -132,6 +135,6 @@ export default function EmployerDashboard() {
           <ActivityCard events={activity} fill={!narrow} />
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }

@@ -1,9 +1,10 @@
 'use client';
 // FILE: src/components/seeker/JobCard.tsx
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { MapPin, Clock, ArrowUpRight } from 'lucide-react';
 import type { IJob } from '../../types';
 import CompanyLogo from './CompanyLogo';
+import { useViewport } from '@/hooks/shared/useViewport';
 
 interface Props {
   job: IJob;
@@ -47,14 +48,9 @@ function workplaceLabel(job: IJob): string | null {
 }
 
 export default function JobCard({ job, domain }: Props) {
+  const { isMobile } = useViewport();
   const [hovered, setHovered] = useState(false);
-  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 640 : false);
 
-  useEffect(() => {
-    const fn = () => setIsMobile(window.innerWidth < 640);
-    window.addEventListener('resize', fn);
-    return () => window.removeEventListener('resize', fn);
-  }, []);
 
   const effectiveDate = job.PostedDate || job.createdAt || job.scrapedAt || null;
   const rt = relTime(effectiveDate);

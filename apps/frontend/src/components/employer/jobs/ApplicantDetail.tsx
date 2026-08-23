@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { Container, Button, PageHeader } from '@/components/ui';
+import { Button, PageHeader, PageShell } from '@/components/ui';
 import { useEmployer } from '@/context/employer/EmployerContext';
 import { trackEvent } from '@/lib/analytics-events';
 import { scoreToDecile } from '@/lib/score-decile';
@@ -188,10 +188,10 @@ export default function ApplicantDetail() {
     );
   }
   return (
-    <Container size="full" style={{ padding: '24px 16px' }}>
+    <PageShell width="wide">
       {crumbs}
       {header}
       {body}
-    </Container>
+    </PageShell>
   );
 }

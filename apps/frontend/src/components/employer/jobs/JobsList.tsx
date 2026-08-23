@@ -7,9 +7,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Briefcase, RefreshCw } from 'lucide-react';
-import {
-  Container, Button, Alert, PageHeader, Stack, Tabs, EmptyState, SkeletonCard, useToast,
-} from '@/components/ui';
+import { Alert, Button, EmptyState, PageHeader, PageShell, SkeletonCard, Stack, Tabs, useToast } from '@/components/ui';
 import type { TabItem } from '@/components/ui';
 import JobsTable from '@/components/employer/jobs/JobsTable';
 import PostingFillDialog from '@/components/employer/jobs/parts/PostingFillDialog';
@@ -122,7 +120,7 @@ export default function JobsList() {
   }
 
   return (
-    <Container size="full" style={{ padding: '32px 16px 60px' }}>
+    <PageShell width="wide" style={{ paddingBottom: 60 }}>
       <PageHeader
         label={COPY.employer.jobs.pageLabel}
         title={COPY.employer.jobs.pageTitle}
@@ -161,6 +159,6 @@ export default function JobsList() {
         onCancel={() => setFillTarget(null)}
         onConfirm={() => { void handleFill(); }}
       />
-    </Container>
+    </PageShell>
   );
 }

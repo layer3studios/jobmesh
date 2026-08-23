@@ -4,6 +4,8 @@
 
 // Layout primitives
 export { Container, Stack, Divider } from './layout';
+export { PageShell } from './PageShell';
+export type { PageShellWidth } from './PageShell';
 
 // Actions & display
 export { Button } from './Button';

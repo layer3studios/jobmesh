@@ -1,9 +1,10 @@
 // FILE: /employer (dashboard) loading — stats skeleton.
 import { SkeletonLine } from '@/components/ui/Skeleton';
+import { PageShell } from '@/components/ui';
 
 export default function EmployerDashboardLoading() {
   return (
-    <div className="container-xl" style={{ padding: '24px 16px' }}>
+    <PageShell width="wide">
       <SkeletonLine width="35%" height={30} style={{ marginBottom: 24 }} />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 28 }}>
         {Array.from({ length: 4 }).map((_, i) => (
@@ -15,6 +16,6 @@ export default function EmployerDashboardLoading() {
           <SkeletonLine key={i} height={64} style={{ borderRadius: 10 }} />
         ))}
       </div>
-    </div>
+    </PageShell>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { STAGES, STAGE_ORDER } from './PipelineCard';
 import type { StageName } from './PipelineCard';
+import { useViewport } from '@/hooks/shared/useViewport';
 
 interface Props {
   stageCounts: Record<string, number>;
@@ -11,13 +12,12 @@ interface Props {
 
 export default function FunnelChart({ stageCounts, totalApplied }: Props) {
   const [visible, setVisible] = useState(false);
-  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 480 : false);
-
-  useEffect(() => {
-    const fn = () => setIsMobile(window.innerWidth < 480);
-    window.addEventListener('resize', fn);
-    return () => window.removeEventListener('resize', fn);
-  }, []);
+  // 480 is narrower than any token breakpoint — this chart's bars stop fitting
+  // before a phone stops being a phone. The threshold stays its own; only the
+  // width now comes from the shared hook instead of a second resize listener.
+  const NARROW_CHART_WIDTH = 480;
+  const { width } = useViewport();
+  const isMobile = width < NARROW_CHART_WIDTH;
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 60);

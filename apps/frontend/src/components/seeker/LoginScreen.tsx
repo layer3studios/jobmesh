@@ -12,21 +12,17 @@ import { LOGIN_BENEFITS } from './login-benefits';
 import { trackEvent } from '../../lib/analytics-events';
 import { getFromRoute } from '../../lib/from-route';
 import { Z } from '@/theme/tokens';
+import { useViewport } from '@/hooks/shared/useViewport';
 
 export default function LoginScreen() {
   const { login } = useSeeker();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [vw, setVw] = useState(() => typeof window !== 'undefined' ? window.innerWidth : 1280);
-
-  useEffect(() => {
-    const fn = () => setVw(window.innerWidth);
-    window.addEventListener('resize', fn);
-    return () => window.removeEventListener('resize', fn);
-  }, []);
+  // Both are needed: isMobile picks the layout, and the raw width sizes the
+  // Google button below, which has to be given a pixel value.
+  const { width: vw, isMobile } = useViewport();
   useEffect(() => { trackEvent('seeker_signup_started', { fromRoute: getFromRoute() }); }, []); // signup entry point
-  const isMobile = vw < 640;
 
   return (
     <div style={{

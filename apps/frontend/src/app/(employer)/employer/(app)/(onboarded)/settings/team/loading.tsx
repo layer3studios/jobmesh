@@ -1,5 +1,6 @@
 // FILE: settings/team loading — skeleton matching the members + invites layout.
 import { SkeletonLine } from '@/components/ui/Skeleton';
+import { PageShell } from '@/components/ui';
 
 function TableSkeleton({ rows }: { rows: number }) {
   return (
@@ -14,7 +15,7 @@ function TableSkeleton({ rows }: { rows: number }) {
 
 export default function TeamSettingsLoading() {
   return (
-    <div className="container-xl" style={{ padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: 28 }}>
+    <PageShell style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 12 }}>
         <SkeletonLine width="30%" height={34} />
         <SkeletonLine width="150px" height={38} style={{ borderRadius: 8, opacity: 0.6 }} />
@@ -27,6 +28,6 @@ export default function TeamSettingsLoading() {
         <SkeletonLine width="130px" height={20} />
         <TableSkeleton rows={2} />
       </div>
-    </div>
+    </PageShell>
   );
 }

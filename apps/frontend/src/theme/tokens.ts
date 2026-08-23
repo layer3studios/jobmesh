@@ -69,3 +69,20 @@ export const SHADOW = {
   lg: 'var(--shadow-lg)',
   focus: 'var(--focus-ring)',
 } as const;
+
+// Viewport breakpoints, in pixels. The ONE place these numbers are written down —
+// every component reads them through useViewport (hooks/shared/useViewport.ts)
+// rather than comparing window.innerWidth itself.
+//
+// Each value is the LOWER bound of the range it names, so the comparisons read the
+// same way everywhere: `width < BREAKPOINTS.mobile` is "narrower than a tablet".
+export const BREAKPOINTS = {
+  /** Below this is a phone. */
+  mobile: 640,
+  /** Below this is a tablet; at or above it, layouts may assume two columns. */
+  tablet: 768,
+  /** Below this is a small laptop. */
+  desktop: 1024,
+  /** At or above this there is room for a third column or a persistent sidebar. */
+  wide: 1280,
+} as const;

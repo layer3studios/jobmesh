@@ -1,9 +1,10 @@
 // FILE: /employer/jobs loading — table row skeletons.
 import { SkeletonLine } from '@/components/ui/Skeleton';
+import { PageShell } from '@/components/ui';
 
 export default function EmployerJobsLoading() {
   return (
-    <div className="container-xl" style={{ padding: '24px 16px' }}>
+    <PageShell width="wide">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <SkeletonLine width="30%" height={30} />
         <SkeletonLine width="120px" height={40} style={{ borderRadius: 10 }} />
@@ -14,6 +15,6 @@ export default function EmployerJobsLoading() {
           <SkeletonLine key={i} height={52} style={{ borderRadius: 6 }} />
         ))}
       </div>
-    </div>
+    </PageShell>
   );
 }

@@ -1,9 +1,10 @@
 // FILE: /employer/onboarding loading — onboarding form skeleton.
 import { SkeletonLine } from '../../../../../components/ui/Skeleton';
+import { PageShell } from '@/components/ui';
 
 export default function OnboardingLoading() {
   return (
-    <div className="container-md" style={{ padding: '40px 16px' }}>
+    <PageShell>
       <SkeletonLine width="50%" height={30} style={{ marginBottom: 10 }} />
       <SkeletonLine width="70%" height={14} style={{ marginBottom: 28 }} />
       <div style={{ display: 'grid', gap: 16 }}>
@@ -15,6 +16,6 @@ export default function OnboardingLoading() {
         ))}
         <SkeletonLine width="160px" height={44} style={{ borderRadius: 10 }} />
       </div>
-    </div>
+    </PageShell>
   );
 }

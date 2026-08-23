@@ -1,9 +1,10 @@
 'use client';
 // FILE: src/components/seeker/PipelineCard.tsx
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ExternalLink, Clock, MoreHorizontal } from 'lucide-react';
 import { STAGES, STAGE_ORDER, type StageName } from './pipeline-stages';
 import { Z } from '@/theme/tokens';
+import { useViewport } from '@/hooks/shared/useViewport';
 
 // Re-export for back-compat (other files import these from PipelineCard)
 export { STAGES, STAGE_ORDER };
@@ -39,16 +40,11 @@ export default function PipelineCard({
   jobId, jobTitle, company, location, department,
   applicationURL, stage, stageUpdatedAt, appliedAt, isListingActive, onStageChange,
 }: PipelineCardProps) {
+  const { isMobile } = useViewport();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 640 : false);
   const stageKey = (STAGES[stage as StageName] ? stage : 'applied') as StageName;
   const cfg = STAGES[stageKey];
 
-  useEffect(() => {
-    const fn = () => setIsMobile(window.innerWidth < 640);
-    window.addEventListener('resize', fn);
-    return () => window.removeEventListener('resize', fn);
-  }, []);
 
   return (
     <div style={{

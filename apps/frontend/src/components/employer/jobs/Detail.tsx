@@ -9,9 +9,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import {
-  Container, Card, Button, Alert, Stack, Tabs, SkeletonCard,
-} from '@/components/ui';
+import { Alert, Button, Card, PageShell, SkeletonCard, Stack, Tabs } from '@/components/ui';
 import type { TabItem } from '@/components/ui';
 import Breadcrumbs from '@/components/employer/Breadcrumbs';
 import DetailSettings from '@/components/employer/jobs/DetailSettings';
@@ -132,12 +130,12 @@ export function PostingDetail({ postingId }: { postingId: string }) {
   }
 
   return (
-    <Container size="full" style={{ padding: '24px 16px' }}>
+    <PageShell width="wide">
       {/* The breadcrumb carries the posting title — no separate page title (it
           would duplicate both the crumb and the form's title field on edit). */}
       <Breadcrumbs items={[{ label: 'Jobs', href: '/employer/jobs' }, { label: posting?.title ?? 'Posting' }]} />
       {renderBody()}
-    </Container>
+    </PageShell>
   );
 }
 

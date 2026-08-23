@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Container, Card, PageHeader, Alert, SkeletonCard, useToast } from '@/components/ui';
+import { Alert, Card, PageHeader, PageShell, SkeletonCard, useToast } from '@/components/ui';
 import Breadcrumbs from '@/components/employer/Breadcrumbs';
 import PostingForm from '@/components/employer/jobs/PostingForm';
 import PostingLivePreview from '@/components/employer/jobs/PostingLivePreview';
@@ -54,7 +54,7 @@ export default function EmployerJobsNew() {
 
   return (
     <div style={{ background: 'var(--surface-sunken)', padding: '16px 0' }}>
-      <Container size="wide">
+      <PageShell width="wide">
         <Breadcrumbs items={[{ label: 'Jobs', href: '/employer/jobs' }, { label: 'New posting' }]} />
         <PageHeader title="New posting" compact />
         {duplicate.sourceTitle && (
@@ -95,7 +95,7 @@ export default function EmployerJobsNew() {
             <PostingLivePreview values={previewValues} />
           </div>
         </div>
-      </Container>
+      </PageShell>
     </div>
   );
 }

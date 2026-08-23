@@ -1,9 +1,10 @@
 // FILE: /employer/jobs/new loading — posting form skeleton.
 import { SkeletonLine } from '@/components/ui/Skeleton';
+import { PageShell } from '@/components/ui';
 
 export default function EmployerJobNewLoading() {
   return (
-    <div className="container-md" style={{ padding: '32px 16px' }}>
+    <PageShell width="wide">
       <SkeletonLine width="45%" height={30} style={{ marginBottom: 24 }} />
       <div style={{ display: 'grid', gap: 16 }}>
         {Array.from({ length: 6 }).map((_, i) => (
@@ -14,6 +15,6 @@ export default function EmployerJobNewLoading() {
         ))}
         <SkeletonLine width="150px" height={44} style={{ borderRadius: 10 }} />
       </div>
-    </div>
+    </PageShell>
   );
 }

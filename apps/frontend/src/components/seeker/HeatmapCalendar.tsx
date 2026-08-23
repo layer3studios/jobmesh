@@ -1,8 +1,9 @@
 'use client';
 // FILE: src/components/seeker/HeatmapCalendar.tsx
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { AppliedJobEntry } from '../../types';
 import { Z } from '@/theme/tokens';
+import { useViewport } from '@/hooks/shared/useViewport';
 
 interface Props {
   appliedJobs: AppliedJobEntry[];
@@ -14,14 +15,9 @@ function dateKey(d: Date) {
 }
 
 export default function HeatmapCalendar({ appliedJobs, dailyGoal }: Props) {
+  const { isMobile } = useViewport();
   const [hovered, setHovered] = useState<{ x: number; y: number; date: string; count: number } | null>(null);
-  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 640 : false);
 
-  useEffect(() => {
-    const fn = () => setIsMobile(window.innerWidth < 640);
-    window.addEventListener('resize', fn);
-    return () => window.removeEventListener('resize', fn);
-  }, []);
 
   const { weeks, monthLabels } = useMemo(() => {
     const counts = new Map<string, number>();

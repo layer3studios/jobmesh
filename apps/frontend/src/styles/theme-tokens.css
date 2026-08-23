@@ -216,3 +216,31 @@
   --overlay: rgba(0, 0, 0, 0.6);
   --text-on-accent: #FFFFFF;
 }
+
+/* ── Page shell ────────────────────────────────────────────────────────────
+   ONE set of page-level spacing values for the employer and admin apps. Before
+   this, comparable pages ran at 20px, 24px, 32px, 40px and 48px, so moving
+   between Jobs and Settings shifted the content sideways for no reason.
+
+   These are theme-independent (a gap is a gap in both modes), but they live here
+   with the rest of the design tokens so there is one file to read when asking
+   "what are the numbers?".
+
+   The seeker and apply pages deliberately do NOT use these: a job feed reads
+   better edge-to-edge on a phone, and the apply page is a single narrow column
+   with its own measure. */
+:root {
+  --page-padding-x: 16px;
+  --page-padding-y: 20px;
+  /* The default working width. Data-dense surfaces opt into --page-max-width-wide
+     instead — see PageShell's `width` prop. */
+  --page-max-width: 1280px;
+  --page-max-width-wide: 1536px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --page-padding-x: 24px;
+    --page-padding-y: 24px;
+  }
+}

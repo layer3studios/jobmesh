@@ -22,6 +22,7 @@ import {
   ensureSavedViewIndexes,
   ensureCandidateTagIndexes,
   ensureReferralLinkIndexes,
+  ensureInterviewerAvailabilityIndexes,
 } from './models/employer/index.js';
 
 import {
@@ -59,6 +60,7 @@ import employerPostingsRouter from './api/employer/employer-postings-routes.js';
 import employerAssignmentsRouter from './api/employer/employer-assignments-routes.js';
 import employerAssignmentReviewsRouter from './api/employer/employer-assignment-reviews-routes.js';
 import employerMeRouter from './api/employer/employer-me-routes.js';
+import employerAvailabilityRouter from './api/employer/employer-availability-routes.js';
 import employerContactRouter from './api/employer/employer-contact-routes.js';
 import employerApplicantRouter from './api/employer/employer-applicant-routes.js';
 import employerCandidateExportRouter from './api/employer/employer-candidate-export-routes.js';
@@ -169,6 +171,7 @@ app.use('/api/employer/assignment-reviews', requireEmployer, requireEmployerComp
 // static path it could shadow).
 // Personal settings. requireEmployer ONLY: these are the user's own fields, and a
 // teammate who has not finished onboarding still has a timezone.
+app.use('/api/employer/me', requireEmployer, employerAvailabilityRouter);
 app.use('/api/employer/me', requireEmployer, employerMeRouter);
 app.use('/api/employer/contacts', requireEmployer, requireEmployerCompany, employerContactRouter);
 app.use('/api/employer/applicants', requireEmployer, requireEmployerCompany, employerCandidateExportRouter);
@@ -224,6 +227,7 @@ const server = app.listen(PORT, async () => {
     await ensureSavedViewIndexes();
     await ensureCandidateTagIndexes();
     await ensureReferralLinkIndexes();
+    await ensureInterviewerAvailabilityIndexes();
     await ensureConsentIndexes();
     await ensureAuditLogIndexes();
     await ensureRightsRequestIndexes();

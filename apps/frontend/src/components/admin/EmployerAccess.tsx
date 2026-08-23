@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { ShieldX } from 'lucide-react';
-import { PageHeader, Stack, Card, SkeletonCard, EmptyState, Alert, Button, Modal, useToast } from '@/components/ui';
+import { Alert, Button, Card, EmptyState, Modal, PageHeader, PageShell, SkeletonCard, Stack, useToast } from '@/components/ui';
 import { SignupToggleCard, WhitelistSection } from '@/components/admin/EmployerAccessParts';
 import {
   fetchEmployerAccess, setEmployerSignupOpen, addWhitelistEntry, removeWhitelistEntry,
@@ -90,7 +90,7 @@ export default function AdminEmployerAccess() {
 
   return (
     // Width matches the admin analytics container + AdminTopNav (max-w-[1536px]).
-    <div className="mx-auto w-full max-w-[1536px]" style={{ padding: '24px clamp(16px, 3vw, 32px) 60px' }}>
+    <PageShell width="wide" style={{ paddingBottom: 60 }}>
       <PageHeader label="ADMIN" title="Employer Access" />
 
       {(loadState === 'idle' || loadState === 'loading') && (
@@ -168,6 +168,6 @@ export default function AdminEmployerAccess() {
         <span><strong>{pendingRemove}</strong> will no longer be able to sign up while the global toggle is
         closed. This does not delete any existing employer account they already have.</span>
       </Modal>
-    </div>
+    </PageShell>
   );
 }

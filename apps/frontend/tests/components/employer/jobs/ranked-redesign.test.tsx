@@ -47,7 +47,15 @@ function applicant(id: string, name: string, score: number | null, stageId = 's1
   } as unknown as Applicant;
 }
 
-let matchMediaMatches = false;
+/** Viewport width for this render. useIsNarrowViewport now reads the shared
+ *  useViewport hook (window.innerWidth + resize) rather than matchMedia, so the
+ *  test sets the width the hook actually observes. */
+const WIDE_VIEWPORT = 1280;
+const NARROW_VIEWPORT = 500;
+function setViewportWidth(width: number) {
+  Object.defineProperty(window, 'innerWidth', { value: width, configurable: true, writable: true });
+  window.dispatchEvent(new Event('resize'));
+}
 beforeEach(() => {
   routerPush.mockReset(); listApplicantsWithStats.mockReset(); fetchApplicantFacets.mockReset();
   // No `stats` key: these fixtures are plain postings, so the tab renders the
@@ -59,11 +67,7 @@ beforeEach(() => {
     skills: Array.from({ length: 10 }, (_, i) => ({ skill: `Skill${i + 1}`, count: 10 - i })),
     cities: [],
   });
-  matchMediaMatches = false;
-  vi.stubGlobal('matchMedia', (query: string) => ({
-    matches: matchMediaMatches, media: query,
-    addEventListener: () => {}, removeEventListener: () => {},
-  }));
+  setViewportWidth(WIDE_VIEWPORT);
   cleanup();
 });
 
@@ -157,7 +161,7 @@ describe('RankedTab sidebar redesign', () => {
   });
 
   it('below 768px the sidebar hides and a Filters button with badge count appears', async () => {
-    matchMediaMatches = true;
+    setViewportWidth(NARROW_VIEWPORT);
     await renderRanked();
     const filtersButton = screen.getByText('Filters').closest('button') as HTMLButtonElement;
     expect(filtersButton).toBeTruthy();

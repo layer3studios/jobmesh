@@ -14,3 +14,4 @@ export * from './assignment-model.js';
 export * from './saved-view-model.js';
 export * from './candidate-tag-model.js';
 export * from './referral-link-model.js';
+export * from './interviewer-availability-model.js';

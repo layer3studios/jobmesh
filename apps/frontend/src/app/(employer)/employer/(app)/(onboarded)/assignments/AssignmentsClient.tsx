@@ -33,6 +33,7 @@ import AssignmentsTable from './parts/AssignmentsTable';
 import AssignmentFormModal from './parts/AssignmentFormModal';
 import type { FormMode } from './parts/AssignmentFormModal';
 import AssignmentDetailView from './parts/AssignmentDetailView';
+import { PageShell } from '@/components/ui';
 
 type ActiveModal =
   | { kind: 'form'; mode: FormMode; source: EmployerAssignment | null }
@@ -194,7 +195,7 @@ export default function AssignmentsClient({
   );
 
   return (
-    <div className="container-xl" style={{ padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <PageShell width="wide" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* No eyebrow. It read "SETTINGS" while this lived under settings/, which is
           now simply false — Assignments is its own top-level nav section. The other
           top-level employer pages (Jobs, Dashboard) pass no label either: the nav
@@ -283,6 +284,6 @@ export default function AssignmentsClient({
           <AssignmentDetailView assignment={modal.assignment} usedBy={usageFor(modal.assignment.id)} />
         </Modal>
       )}
-    </div>
+    </PageShell>
   );
 }

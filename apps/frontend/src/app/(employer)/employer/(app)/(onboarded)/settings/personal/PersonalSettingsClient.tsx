@@ -22,6 +22,7 @@ import { COPY } from '@/theme/brand';
 import AvatarSection from './AvatarSection';
 import ProfileFields from './ProfileFields';
 import NotificationSettings from './NotificationSettings';
+import AvailabilitySection from './AvailabilitySection';
 
 const C = COPY.employer.personal;
 const DEFAULT_TIMEZONE = 'Asia/Kolkata';
@@ -97,6 +98,11 @@ export default function PersonalSettingsClient() {
             {COPY.employer.common.save}
           </Button>
         </div>
+
+        {/* Directly below the timezone it depends on: the hours mean nothing until
+            you know which zone they are in, and the warning inside points back up. */}
+        <div style={{ borderTop: '0.5px solid var(--border)' }} />
+        <AvailabilitySection />
 
         <div style={{ borderTop: '0.5px solid var(--border)' }} />
         <NotificationSettings

@@ -1,10 +1,11 @@
 // FILE: assignments loading — skeleton matching the header + library table.
 // Mirrors settings/team/loading.tsx; one table instead of two.
 import { SkeletonLine } from '@/components/ui/Skeleton';
+import { PageShell } from '@/components/ui';
 
 export default function AssignmentsLoading() {
   return (
-    <div className="container-xl" style={{ padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: 28 }}>
+    <PageShell width="wide" style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 12 }}>
         <SkeletonLine width="30%" height={34} />
         <SkeletonLine width="150px" height={38} style={{ borderRadius: 8, opacity: 0.6 }} />
@@ -18,6 +19,6 @@ export default function AssignmentsLoading() {
           ))}
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }

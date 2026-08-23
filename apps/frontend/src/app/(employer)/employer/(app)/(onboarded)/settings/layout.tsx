@@ -6,6 +6,7 @@
 
 import type { ReactNode } from 'react';
 import SettingsSidebar from './SettingsSidebar';
+import { PageShell } from '@/components/ui';
 import { useIsNarrowViewport } from '@/components/employer/jobs/useIsNarrowViewport';
 
 export default function SettingsLayout({ children }: { children: ReactNode }) {
@@ -13,16 +14,19 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
 
   if (isNarrow) {
     return (
-      <div style={{ padding: '20px 16px' }}>
+      <PageShell>
         <SettingsSidebar horizontal />
         <div>{children}</div>
-      </div>
+      </PageShell>
     );
   }
+  // The sidebar and the content BOTH sit inside the shell, so the page's
+  // max-width applies to the combined layout rather than to the content alone —
+  // otherwise the sidebar would push the content off-centre on a wide monitor.
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', padding: '24px 16px', width: '100%' }}>
+    <PageShell style={{ display: 'flex', alignItems: 'flex-start' }}>
       <SettingsSidebar />
       <div style={{ flex: 1, minWidth: 0, paddingLeft: 24 }}>{children}</div>
-    </div>
+    </PageShell>
   );
 }

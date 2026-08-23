@@ -1,9 +1,10 @@
 'use client';
 // FILE: src/components/seeker/JobListItem.tsx
-import { useEffect, useState, memo } from 'react';
+import { useState, memo } from 'react';
 import { Clock, CheckCircle2, X } from 'lucide-react';
 import type { IJob } from '../../types';
 import CompanyLogo from './CompanyLogo';
+import { useViewport } from '@/hooks/shared/useViewport';
 
 export type CompactBadge = { key: string; label: string; bg: string; color: string };
 
@@ -31,13 +32,9 @@ const JobListItem = memo(function JobListItem({
   skillMatchText, skillMatchBg, skillMatchColor, onSelect, onDismiss,
 }: JobListItemProps) {
   const [hovered, setHovered] = useState(false);
-  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false);
-
-  useEffect(() => {
-    const fn = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', fn);
-    return () => window.removeEventListener('resize', fn);
-  }, []);
+  // 768 is the tablet boundary, so "not desktop" is exactly the old `< 768`.
+  const { isDesktop } = useViewport();
+  const isMobile = !isDesktop;
 
   return (
     <div

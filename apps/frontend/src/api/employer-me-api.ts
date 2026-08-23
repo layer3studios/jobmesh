@@ -78,3 +78,75 @@ export async function uploadAvatar(file: File): Promise<EmployerUser> {
 export function removeAvatar(): Promise<EmployerUser> {
   return request('/employer/me/avatar', { method: 'DELETE' });
 }
+
+// ── Interview availability ───────────────────────────────────────────────────
+// These endpoints answer with the availability itself rather than the whole user,
+// so they do NOT go through request() — that helper unwraps { employerUser }.
+
+/** One weekly window. Absent days mean "not available then". */
+export interface AvailabilityEntry {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  timezone?: string;
+  isActive?: boolean;
+}
+
+export interface AvailabilityResponse {
+  availability: AvailabilityEntry[];
+  /** The user's profile timezone; every time above is expressed in it. */
+  timezone: string;
+  /** False when the timezone is only our fallback, so the UI can prompt for a real one. */
+  hasExplicitTimezone: boolean;
+}
+
+async function availabilityRequest(path: string, init?: RequestInit): Promise<AvailabilityResponse> {
+  const response = await fetch(apiUrl(path), {
+    credentials: 'include',
+    headers: init?.body ? { 'Content-Type': 'application/json' } : undefined,
+    ...init,
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new EmployerApiError(
+      response.status, body?.code ?? null, body?.error || `Request failed (${response.status})`,
+    );
+  }
+  return body as AvailabilityResponse;
+}
+
+export function fetchAvailability(): Promise<AvailabilityResponse> {
+  return availabilityRequest('/employer/me/availability');
+}
+
+/** Replaces the WHOLE week — a day left out is cleared, not left alone. */
+export function saveAvailability(availability: AvailabilityEntry[]): Promise<AvailabilityResponse> {
+  return availabilityRequest('/employer/me/availability', {
+    method: 'PUT', body: JSON.stringify({ availability }),
+  });
+}
+
+export interface SuggestedSlots {
+  /** ISO UTC instants. */
+  slots: string[];
+  /** How many fell away to interviews the person is already on. */
+  skippedCount: number;
+  timezone: string;
+}
+
+/** Concrete slots derived from the caller's weekly windows. Read-only — suggests, never writes. */
+export async function fetchSuggestedSlots(
+  from: string, to: string, durationMinutes: number,
+): Promise<SuggestedSlots> {
+  const query = new URLSearchParams({ from, to, durationMinutes: String(durationMinutes) });
+  const response = await fetch(apiUrl(`/employer/me/availability/suggestions?${query.toString()}`), {
+    credentials: 'include',
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new EmployerApiError(
+      response.status, body?.code ?? null, body?.error || `Request failed (${response.status})`,
+    );
+  }
+  return body as SuggestedSlots;
+}

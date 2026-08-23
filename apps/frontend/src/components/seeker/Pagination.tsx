@@ -1,7 +1,7 @@
 'use client';
 // FILE: src/components/seeker/Pagination.tsx
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useViewport } from '@/hooks/shared/useViewport';
 
 interface Props {
   page: number;
@@ -15,12 +15,7 @@ function range(start: number, end: number) {
 }
 
 export default function Pagination({ page, totalPages, onPageChange, siblingCount = 1 }: Props) {
-  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 640 : false);
-  useEffect(() => {
-    const fn = () => setIsMobile(window.innerWidth < 640);
-    window.addEventListener('resize', fn);
-    return () => window.removeEventListener('resize', fn);
-  }, []);
+  const { isMobile } = useViewport();
 
   if (totalPages <= 1) return null;
 

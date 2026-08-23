@@ -51,12 +51,13 @@ describe('PostingDetail tabs', () => {
     const labels = screen.getAllByRole('tab').map((tab) => tab.textContent);
     expect(labels).toEqual(['Overview', 'Pipeline', 'Ranked', 'Settings']);
     expect(screen.getByText('overview-body')).toBeTruthy();
-    // Full-width fix: NO max-width on the employer content area (was 1024px,
-    // then 1536px) and only 16px side padding — nothing narrower than 1400px.
+    // The page shell owns width and padding now (sprint 7 item 2): this is a
+    // data-dense working surface, so it takes the WIDE width rather than the
+    // reading width, and its padding comes from the shared page tokens instead
+    // of a hand-written '24px 16px' that had drifted across comparable pages.
     const pageContainer = container.firstElementChild as HTMLElement;
-    expect(pageContainer.style.maxWidth).toBe('none');
-    // Tighter vertical rhythm (breadcrumb redesign): no oversized bottom padding.
-    expect(pageContainer.style.padding).toBe('24px 16px');
+    expect(pageContainer.style.maxWidth).toBe('var(--page-max-width-wide)');
+    expect(pageContainer.style.padding).toBe('var(--page-padding-y) var(--page-padding-x)');
   });
 
   it('?tab=ranked still lands on the Ranked tab (deep links stay stable)', async () => {

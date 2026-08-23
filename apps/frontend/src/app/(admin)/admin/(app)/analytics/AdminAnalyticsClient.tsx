@@ -17,6 +17,7 @@ import AnalyticsSections from './parts/AnalyticsSections';
 import AssignmentAnalyticsSection from './parts/AssignmentAnalyticsSection';
 import TimeRangeSelector from './parts/TimeRangeSelector';
 import EmptyStateNotice from './parts/EmptyStateNotice';
+import { PageShell } from '@/components/ui';
 
 // Map a bundle-level error to a user-facing message + whether a Retry makes sense.
 function describeError(error: AdminAnalyticsApiError): { title: string; body: string; canRetry: boolean } {
@@ -96,7 +97,7 @@ export default function AdminAnalyticsClient({
   const isChanging = loadingRanges.has(currentSince);
 
   return (
-    <div className="mx-auto w-full max-w-[1536px]" style={{ padding: '24px clamp(16px, 3vw, 32px) 60px' }}>
+    <PageShell width="wide" style={{ paddingBottom: 60 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--ink)', margin: 0 }}>Analytics</h1>
         <TimeRangeSelector value={currentSince} onSelect={onSelect} isChanging={isChanging} />
@@ -131,6 +132,6 @@ export default function AdminAnalyticsClient({
       {/* Outside the bundle branch on purpose: its Mongo half has no PostHog
           dependency, so it must render even when the bundle above 503s. */}
       <AssignmentAnalyticsSection since={currentSince} />
-    </div>
+    </PageShell>
   );
 }

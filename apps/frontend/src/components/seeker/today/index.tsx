@@ -11,18 +11,18 @@ import { BRAND } from '../../../theme/brand';
 import Hero from './Hero';
 import PicksSection from './PicksSection';
 import NewsSection from './NewsSection';
+import { useViewport } from '@/hooks/shared/useViewport';
 
 export default function Today() {
   const { currentUser, userSkills, todayCount, dailyGoal, openSkillsEditor, saveDailyGoal } = useSeeker();
   const [jobs, setJobs] = useState<IJob[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDesktop, setIsDesktop] = useState(() => typeof window !== 'undefined' ? window.innerWidth >= 900 : true);
-
-  useEffect(() => {
-    const onResize = () => setIsDesktop(window.innerWidth >= 900);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
+  // 900 sits between the tablet and desktop tokens: this page's two-column
+  // reading layout needs more room than 768 but does not wait for 1024. The
+  // threshold stays local; only the width comes from the shared hook now.
+  const TWO_COLUMN_WIDTH = 900;
+  const { width } = useViewport();
+  const isDesktop = width >= TWO_COLUMN_WIDTH;
 
   useEffect(() => { document.title = `Today · ${BRAND.appName}`; }, []);
 

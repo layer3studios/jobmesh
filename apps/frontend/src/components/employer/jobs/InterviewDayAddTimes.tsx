@@ -16,6 +16,7 @@ import { istLocalToUtcIso } from '@/utils/ist-datetime';
 import { buildTimeChips, type ExistingPoolTime } from './time-chip-helpers';
 import TimeChipGrid from './TimeChipGrid';
 import AddTimesTypeFields from './AddTimesTypeFields';
+import SuggestedTimesPanel from './SuggestedTimesPanel';
 import { requiredFieldFilled, type AddTimesForm } from './useAddTimesForm';
 
 const INPUT_STYLE = {
@@ -97,6 +98,14 @@ export default function InterviewDayAddTimes({
       </p>
       <AddTimesTypeFields form={form} onChange={onFormChange} />
       <TimeChipGrid chips={chips} selectedIstLocals={selected} onToggle={toggle} />
+      {/* Below the manual grid, ticking into the SAME selection: suggestions are a
+          faster way to reach the identical outcome, not a separate flow. */}
+      <SuggestedTimesPanel
+        dateIso={dateIso}
+        durationMinutes={durationMinutes}
+        selectedIstLocals={selected}
+        onToggle={toggle}
+      />
       {customOpen && (
         <Stack dir="row" gap={8} align="center">
           <input type="datetime-local" aria-label="Custom time" value={customValue} style={INPUT_STYLE} onChange={(event) => setCustomValue(event.target.value)} />
