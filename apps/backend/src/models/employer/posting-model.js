@@ -6,6 +6,19 @@
 
 import { ObjectId } from 'mongodb';
 import { col } from '../../Db/connection.js';
+import { getPostingForCompany } from './posting-queries.js';
+export { toPublicPosting } from './posting-projection.js';
+import {
+  generateUniquePostingSlugForCompany, DUPLICATE_KEY_CODE,
+  describeDuplicateKey, isPostingSlugCollision,
+} from './posting-slug-queries.js';
+
+// Re-exported so existing imports of this module keep resolving unchanged.
+export { generateUniquePostingSlugForCompany } from './posting-slug-queries.js';
+export {
+  listPostingsForCompany, getPostingForCompany, getActivePostingBySlugForCompany,
+  getPostingBySlugForCompany, listActivePostingsForCompany,
+} from './posting-queries.js';
 import {
   slugifyPostingTitle, buildPostingSlugCandidate, randomPostingSlugSuffix,
 } from './posting-slug-helpers.js';
@@ -42,41 +55,10 @@ export async function ensurePostingIndexes() {
   );
 }
 
-/** True when a native posting already owns this slug within the company. */
-async function isPostingSlugTaken(companyOid, slug) {
-  const collection = await postingsCol();
-  const existing = await collection.findOne({ source: NATIVE, companyId: companyOid, slug });
-  return existing != null;
-}
 
-/** Pick a slug not yet taken within this company: base → base-2 … → base-{random}. */
-export async function generateUniquePostingSlugForCompany(companyId, title) {
-  const companyOid = toOid(companyId);
-  const base = slugifyPostingTitle(title);
-  if (companyOid && !(await isPostingSlugTaken(companyOid, base))) return base;
-  for (let suffixNumber = 2; suffixNumber <= 100; suffixNumber += 1) {
-    const candidate = buildPostingSlugCandidate(base, String(suffixNumber));
-    if (companyOid && !(await isPostingSlugTaken(companyOid, candidate))) return candidate;
-  }
-  return buildPostingSlugCandidate(base, randomPostingSlugSuffix());
-}
 
-const DUPLICATE_KEY_CODE = 11000;
 
-/** Render an E11000's colliding index + values for internal diagnostics. */
-function describeDuplicateKey(err) {
-  return `keyPattern=${JSON.stringify(err?.keyPattern ?? null)} keyValue=${JSON.stringify(err?.keyValue ?? null)}`;
-}
 
-/**
- * True only for an E11000 from a slug-bearing unique index — the sole collision
- * a fresh slug can resolve. Any other index (e.g. the scraped-jobs JobID index)
- * must surface, not be retried into a misleading slug error.
- */
-function isPostingSlugCollision(err) {
-  const keyPattern = err?.keyPattern;
-  return keyPattern != null && Object.prototype.hasOwnProperty.call(keyPattern, 'slug');
-}
 
 /** Insert a native posting; retries up to 3 times on a slug race (E11000). */
 export async function createPostingForCompany(companyId, input, createdByEmployerUserId) {
@@ -134,53 +116,10 @@ export async function createPostingForCompany(companyId, input, createdByEmploye
   throw new Error(`Could not generate a unique posting slug after retries (last ${describeDuplicateKey(lastSlugCollision)})`);
 }
 
-/** List a company's native postings, newest first; optional status filter. */
-export async function listPostingsForCompany(companyId, { status } = {}) {
-  const companyOid = toOid(companyId);
-  if (!companyOid) return [];
-  const collection = await postingsCol();
-  const query = { source: NATIVE, companyId: companyOid };
-  if (status) query.status = status;
-  return collection.find(query).sort({ createdAt: -1 }).toArray();
-}
 
-/** Fetch one native posting scoped to the company — cross-tenant returns null. */
-export async function getPostingForCompany(companyId, postingId) {
-  const companyOid = toOid(companyId);
-  const postingOid = toOid(postingId);
-  if (!companyOid || !postingOid) return null;
-  const collection = await postingsCol();
-  return collection.findOne({ _id: postingOid, source: NATIVE, companyId: companyOid });
-}
 
-/** Fetch an ACTIVE native posting by slug within a company (public apply, R7). */
-export async function getActivePostingBySlugForCompany(companyId, slug) {
-  const companyOid = toOid(companyId);
-  if (!companyOid || typeof slug !== 'string' || !slug) return null;
-  const collection = await postingsCol();
-  return collection.findOne({ companyId: companyOid, slug, source: NATIVE, status: 'active' });
-}
 
-/**
- * Fetch a native posting by slug within a company at ANY status. Exists so the
- * apply path can tell "this role closed while you were working on it" apart from
- * "this slug never existed" — the active-only lookup collapses both into a 404.
- */
-export async function getPostingBySlugForCompany(companyId, slug) {
-  const companyOid = toOid(companyId);
-  if (!companyOid || typeof slug !== 'string' || !slug) return null;
-  const collection = await postingsCol();
-  return collection.findOne({ companyId: companyOid, slug, source: NATIVE });
-}
 
-/** List a company's ACTIVE native postings for the public company page. */
-export async function listActivePostingsForCompany(companyId) {
-  const companyOid = toOid(companyId);
-  if (!companyOid) return [];
-  const collection = await postingsCol();
-  return collection.find({ companyId: companyOid, source: NATIVE, status: 'active' })
-    .sort({ postedAt: -1 }).toArray();
-}
 
 /**
  * $set only the explicit patch keys. When status transitions to 'active' and
@@ -255,33 +194,3 @@ export function reopenPostingForCompany(companyId, postingId) {
   return updatePostingForCompany(companyId, postingId, { status: 'active' });
 }
 
-/** Client-safe projection — id as string, no internal owner/source fields. */
-export function toPublicPosting(doc) {
-  return {
-    id: doc._id.toString(),
-    slug: doc.slug,
-    title: doc.title,
-    description: doc.description,
-    descriptionPlain: doc.descriptionPlain,
-    location: doc.location,
-    workplaceType: doc.workplaceType,
-    employmentType: doc.employmentType,
-    salaryMin: doc.salaryMin ?? null,
-    salaryMax: doc.salaryMax ?? null,
-    salaryCurrency: doc.salaryCurrency,
-    status: doc.status,
-    assignmentId: doc.assignmentId?.toString() ?? null,
-    // Employer-side projection: carries knockoutAnswer. The candidate's view is
-    // built by toPublicScreeningQuestion, which strips it.
-    screeningQuestions: doc.screeningQuestions ?? [],
-    applicationDeadline: doc.applicationDeadline ?? null,
-    autoCloseOnDeadline: doc.autoCloseOnDeadline === true,
-    // Postings created before view counting default to 0 rather than null, so the
-    // UI renders "0 views" instead of an empty tile.
-    viewCount: doc.viewCount ?? 0,
-    postedAt: doc.postedAt ?? null,
-    closedAt: doc.closedAt ?? null,
-    createdAt: doc.createdAt,
-    updatedAt: doc.updatedAt,
-  };
-}

@@ -4,53 +4,28 @@
 // Cookie handling (client): credentials:'include' → the browser attaches jm_employer_token.
 // Paths route through API_BASE (C10); real URL is unchanged from the Vite app.
 
-import { apiUrl } from '../lib/api-base';
+import {
+  request, applicantPath,
+} from './employer-applicants-request';
+
+// Re-exported so every existing import of these from this module keeps resolving.
+export { EmployerApplicantsApiError, ROLE_FORBIDDEN_MESSAGE } from './employer-applicants-request';
 import type {
-  Applicant, ApplicantDetail, ApplicantNote, ResumeUrl, Stage, ArchiveReason,
-  ApplicantSort, BulkArchiveResult, RescoreResult, ApplicantFacets, SavedView,
-  AssignmentStats, AnonymizePreview, AnonymizeResult, InterviewFeedbackSummary,
+  Applicant, ApplicantDetail, ApplicantNote, ResumeUrl, Stage, ArchiveReason, ApplicantSort, ApplicantFacets, AssignmentStats,
 } from '../types/employer-applicants';
 
-export class EmployerApplicantsApiError extends Error {
-  status: number;
-  code: string | null;
+export {
+  listSavedViews, createSavedView, updateSavedView, deleteSavedView,
+} from './employer-saved-views-api';
 
-  constructor(status: number, code: string | null, message: string) {
-    super(message);
-    this.name = 'EmployerApplicantsApiError';
-    this.status = status;
-    this.code = code;
-  }
-}
+export {
+  rescoreApplicant, fetchAnonymizePreview, anonymizeCandidate, candidateExportUrl, bulkArchiveApplicants, fetchFeedbackSummary, setDoNotContact,
+} from './employer-applicant-actions-api-extra';
 
 // Friendly copy for role-permission 403s the UI didn't pre-gate (Chunk 5, item 17).
 // Normalised here in the shared wrapper — no separate interceptor — so every surface
 // that surfaces error.message shows the same explanation instead of a raw backend code.
-export const ROLE_FORBIDDEN_MESSAGE = "You don't have permission to do that.";
 
-function isRolePermissionError(status: number, code: string | null): boolean {
-  if (status !== 403) return false;
-  return Boolean(code && (code.startsWith('ROLE_') || code.includes('FORBIDDEN')));
-}
-
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(apiUrl(path), {
-    credentials: 'include',
-    headers: init?.body ? { 'Content-Type': 'application/json' } : undefined,
-    ...init,
-  });
-  const body = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const code = body?.code ?? null;
-    const message = isRolePermissionError(response.status, code)
-      ? ROLE_FORBIDDEN_MESSAGE
-      : body?.error || `Request failed (${response.status})`;
-    throw new EmployerApplicantsApiError(response.status, code, message);
-  }
-  return body as T;
-}
-
-const applicantPath = (applicationId: string) => `/employer/applicants/${encodeURIComponent(applicationId)}`;
 
 /**
  * The list endpoint's full envelope.
@@ -104,57 +79,6 @@ export async function fetchApplicantFacets(postingId: string): Promise<Applicant
 // Listed once per page load and cached in-memory; mutations write through the
 // cache so chips update without a refetch.
 
-const savedViewsPath = (postingId: string) =>
-  `/employer/jobs/${encodeURIComponent(postingId)}/saved-views`;
-
-const savedViewsCache = new Map<string, SavedView[]>();
-
-export async function listSavedViews(postingId: string, { fresh = false } = {}): Promise<SavedView[]> {
-  if (!fresh && savedViewsCache.has(postingId)) return savedViewsCache.get(postingId)!;
-  const body = await request<{ views: SavedView[] }>(savedViewsPath(postingId));
-  savedViewsCache.set(postingId, body.views);
-  return body.views;
-}
-
-/** Throws EmployerApplicantsApiError with status 409 when the 10-view cap is hit. */
-export async function createSavedView(
-  postingId: string,
-  input: { name: string; filters: Record<string, unknown> },
-): Promise<SavedView> {
-  const body = await request<{ view: SavedView }>(savedViewsPath(postingId), {
-    method: 'POST',
-    body: JSON.stringify(input),
-  });
-  savedViewsCache.set(postingId, [body.view, ...(savedViewsCache.get(postingId) ?? [])]);
-  return body.view;
-}
-
-export async function updateSavedView(
-  postingId: string,
-  viewId: string,
-  input: { name?: string; filters?: Record<string, unknown> },
-): Promise<SavedView> {
-  const body = await request<{ view: SavedView }>(
-    `${savedViewsPath(postingId)}/${encodeURIComponent(viewId)}`,
-    { method: 'PATCH', body: JSON.stringify(input) },
-  );
-  savedViewsCache.set(
-    postingId,
-    (savedViewsCache.get(postingId) ?? []).map((view) => (view.id === viewId ? body.view : view)),
-  );
-  return body.view;
-}
-
-export async function deleteSavedView(postingId: string, viewId: string): Promise<void> {
-  await request<{ message: string }>(
-    `${savedViewsPath(postingId)}/${encodeURIComponent(viewId)}`,
-    { method: 'DELETE' },
-  );
-  savedViewsCache.set(
-    postingId,
-    (savedViewsCache.get(postingId) ?? []).filter((view) => view.id !== viewId),
-  );
-}
 
 export async function fetchApplicantDetail(applicationId: string): Promise<ApplicantDetail> {
   const body = await request<{ applicant: ApplicantDetail }>(applicantPath(applicationId));
@@ -222,86 +146,5 @@ export async function createApplicantNote(
   return body.note;
 }
 
-/**
- * Requeue AI scoring for one applicant. Resolves on both 202 (a job was reset or
- * inserted) and 200 (one was already in flight — `rescored: false`); the caller
- * distinguishes them via the returned flag rather than the status code.
- */
-export async function rescoreApplicant(applicationId: string): Promise<RescoreResult> {
-  return request<RescoreResult>(`${applicantPath(applicationId)}/rescore`, { method: 'POST' });
-}
-
 // ─── Erasure + export (DPDP) ─────────────────────────────────────────
 
-/** What anonymizing this candidate would touch. Owner+; 403 for everyone else. */
-export async function fetchAnonymizePreview(applicationId: string): Promise<AnonymizePreview> {
-  const body = await request<{ preview: AnonymizePreview }>(`${applicantPath(applicationId)}/anonymize-preview`);
-  return body.preview;
-}
-
-/**
- * Irreversibly anonymize this candidate across every application they made at this
- * company. Idempotent — a repeat call resolves with alreadyAnonymized: true.
- */
-export async function anonymizeCandidate(applicationId: string): Promise<AnonymizeResult> {
-  const body = await request<{ result: AnonymizeResult }>(`${applicantPath(applicationId)}/anonymize`, {
-    method: 'POST',
-  });
-  return body.result;
-}
-
-/**
- * The browser navigates to this URL to download the export. Deliberately NOT a
- * fetch + blob: the endpoint sets Content-Disposition, and letting the browser
- * handle the download keeps the server-chosen filename instead of inventing one
- * client-side that would drift from it.
- */
-export function candidateExportUrl(applicationId: string, format: 'json' | 'csv' = 'json'): string {
-  return apiUrl(`${applicantPath(applicationId)}/export${format === 'csv' ? '?format=csv' : ''}`);
-}
-
-/**
- * Bulk-archive many applications (PP1/PP3). Resolves with the per-item outcome body on
- * 200 (including partial success); throws EmployerApplicantsApiError with .code on a
- * whole-request failure (BULK_EMPTY / BULK_LIMIT_EXCEEDED / REASON_NOT_FOUND / 401 / 403).
- */
-export async function bulkArchiveApplicants(
-  input: { applicationIds: string[]; reasonId: string; note?: string; skipEmail?: boolean },
-): Promise<BulkArchiveResult> {
-  return request<BulkArchiveResult>('/employer/applicants/bulk/archive', {
-    method: 'POST',
-    body: JSON.stringify(input),
-  });
-}
-
-/**
- * The panel's aggregated verdicts. Null when this candidate has no interviews —
- * the caller's signal to render nothing rather than an empty card.
- *
- * The anti-bias hold is applied SERVER-SIDE: when the viewer still owes their own
- * feedback the per-interviewer detail is absent from the payload entirely, not
- * merely hidden here.
- */
-export async function fetchFeedbackSummary(
-  applicationId: string,
-): Promise<InterviewFeedbackSummary | null> {
-  const body = await request<{ summary: InterviewFeedbackSummary | null }>(
-    `${applicantPath(applicationId)}/feedback-summary`,
-  );
-  return body.summary;
-}
-
-/**
- * Set or clear a candidate's "do not contact" flag. Member+; the flag lives on the
- * contact, so this affects every posting this person appears on at the company.
- */
-export async function setDoNotContact(
-  contactId: string,
-  input: { flag: boolean; reason?: string | null },
-): Promise<Applicant['contact']> {
-  const body = await request<{ contact: NonNullable<Applicant['contact']> }>(
-    `/employer/contacts/${encodeURIComponent(contactId)}/do-not-contact`,
-    { method: 'PATCH', body: JSON.stringify(input) },
-  );
-  return body.contact;
-}

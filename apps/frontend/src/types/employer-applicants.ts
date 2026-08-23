@@ -3,45 +3,37 @@
 // 7A/Step-6 backend responses: getApplicantDetail / listApplicants / listStages /
 // listArchiveReasons. Kept minimal — only the fields the pipeline UI consumes.
 
-export type ScoreTier = 'strong' | 'good' | 'partial' | 'weak' | 'poor';
+export type {
+  OtherApplication, ScreeningAnswer, ApplicantSort,
+} from './employer-applicant-detail-extras';
+import type { OtherApplication, ScreeningAnswer } from './employer-applicant-detail-extras';
 
-/**
- * The "never contact this person again" flag. Lives on the CONTACT, so it follows
- * the candidate across every posting they appear on at this company.
- */
-export interface DoNotContact {
-  flag: boolean;
-  setAt: string | null;
-  setBy: string | null;
-  /** Snapshot of who set it — still correct after that person leaves. */
-  setByName: string | null;
-  reason: string | null;
-}
+export type {
+  ScoreTier, ApplicantScore, ResumeMeta, DoNotContact, ApplicantNote,
+} from './employer-applicant-profile';
 
-export interface ApplicantScore {
-  id: string;
-  score: number;
-  tier: ScoreTier;
-  matchedSkills: string[];
-  missingSkills: string[];
-  /** Detail-view fields (7C); optional so the leaner pipeline payloads still type-check. */
-  bonusSkills?: string[];
-  experienceFit?: string | null;
-  locationFit?: string | null;
-  noticePeriodFit?: string | null;
-  explanation: string | null;
-  processedAt: string | null;
-  processingError: string | null;
-}
+import type {
+  ApplicantScore, ResumeMeta, DoNotContact,
+} from './employer-applicant-profile';
+import type {
+  AssignmentReview, AssignmentSubmission, ApplicantAssignmentSummary,
+} from './employer-assignment-review';
+import type { ScoreJobStatus } from './employer-applicant-actions';
 
-/** One resume file's metadata (7A). Null when the candidate never uploaded one. */
-export interface ResumeMeta {
-  id: string;
-  originalFilename: string | null;
-  mimeType: string | null;
-  sizeBytes: number | null;
-  uploadedAt: string | null;
-}
+// Re-exported so every existing `from '@/types/employer-applicants'` import of an
+// assignment type keeps resolving — this split must not move anyone's import path.
+export type {
+  AssignmentReview, AssignmentSnapshot, AssignmentSubmissionFile, AssignmentSubmission,
+  ApplicantAssignmentSummary, AssignmentStats, AssignmentReviewFilter,
+} from './employer-assignment-review';
+
+export type {
+  ScoreJobStatus, RescoreResult, ResumeUrl, BulkArchiveResult, AnonymizePreview, AnonymizeResult,
+} from './employer-applicant-actions';
+
+export type {
+  ArchiveReason, ApplicantFacets, CandidateTag, SavedView,
+} from './employer-applicant-library';
 
 /** One stage-history entry. Archive/unarchive rows carry a note beginning "Archived:"/"Unarchived". */
 export interface StageChange {
@@ -53,25 +45,11 @@ export interface StageChange {
   movedAt: string | null;
 }
 
-/**
- * One employer-written note on an application (C3). Append-only: there is no edit or
- * delete endpoint, and updatedAt always equals createdAt today. The author fields are
- * a snapshot taken at write time (R2) — they are NOT a live join onto the employer
- * user, so a later rename leaves historical notes reading as they did when written.
- */
-export interface ApplicantNote {
-  id: string;
-  applicationId: string;
-  authorEmployerUserId: string | null;
-  authorName: string | null;
-  authorEmail: string;
-  body: string;
-  /** Teammates named with @ in the body, validated server-side against the roster.
-   *  Empty on notes written before mentions existed. */
-  mentionedUserIds: string[];
-  createdAt: string;
-  updatedAt: string;
-}
+
+
+
+
+
 
 // ─── Take-home assignment review (Chunk 5 backend / 8c UI) ──────────────────
 // TWO SEPARATE SCORING AXES, deliberately never merged. `score` above is the AI
@@ -80,90 +58,13 @@ export interface ApplicantNote {
 // them in separate response keys, and nothing in this app may average, blend or
 // co-sort them.
 
-/** One employer's verdict on one submission. 1–5, plus a hard pass/fail. */
-export interface AssignmentReview {
-  id: string;
-  assignmentSubmissionId: string | null;
-  reviewedByEmployerUserId: string | null;
-  /** Doubles as the optimistic-lock version echoed back as expectedReviewedAt. */
-  reviewedAt: string | null;
-  overallScore: number | null;
-  passesBar: boolean;
-  reviewNotesMarkdown: string | null;
-}
 
-/** The task exactly as the candidate saw it, frozen at apply time. */
-export interface AssignmentSnapshot {
-  title: string | null;
-  publicSummary: string | null;
-  descriptionMarkdown: string | null;
-  submissionInstructionsMarkdown: string | null;
-  estimatedHours: number | null;
-  allowedFileTypes: string[];
-  sourceAssignmentId: string | null;
-  snapshottedAt: string | null;
-}
 
-export interface AssignmentSubmissionFile {
-  fileId: string | null;
-  originalName: string | null;
-  sizeBytes: number | null;
-  mimeType: string | null;
-  uploadedAt: string | null;
-}
 
-/** The full submission, returned by the applicant DETAIL endpoint only. */
-export interface AssignmentSubmission {
-  id: string;
-  applicationId: string | null;
-  jobId: string | null;
-  assignmentSnapshot: AssignmentSnapshot | null;
-  profileLinks: { githubUrl: string | null; linkedinUrl: string | null } | null;
-  submittedAt: string | null;
-  links: Array<{ url: string | null; addedAt: string | null }>;
-  files: AssignmentSubmissionFile[];
-  seekerNotesMarkdown: string | null;
-  /** Set once retention deleted the bytes. The rows stay; the files are gone. */
-  filesDeletedAt: string | null;
-}
 
-/** The row-level summary on the LIST endpoint — counts only, never the content. */
-export interface ApplicantAssignmentSummary {
-  submissionId: string;
-  submittedAt: string | null;
-  linkCount: number;
-  fileCount: number;
-  review: { overallScore: number; passesBar: boolean; reviewedAt: string | null } | null;
-}
 
-/**
- * Assignment stats for the posting. PRE-FILTER by design: the backend computes them
- * across every application and deliberately ignores the assignmentReview filter, so
- * a filtered response can return total 47 next to a single row. Render what arrives;
- * never recompute from the visible rows.
- */
-export interface AssignmentStats {
-  total: number;
-  submitted: number;
-  reviewed: number;
-  passing: number;
-}
 
-export type AssignmentReviewFilter = 'reviewed' | 'not_reviewed' | 'passed' | 'failed';
 
-/**
- * One OTHER application by the same person at the same company. Contacts are deduped
- * by email per company, so these rows are the same human, not a fuzzy match.
- */
-export interface OtherApplication {
-  applicationId: string;
-  postingId: string | null;
-  postingTitle: string | null;
-  stageId: string | null;
-  stage: string | null;
-  appliedAt: string | null;
-  isArchived: boolean;
-}
 
 /** Full applicant detail payload (7A endpoint) consumed by the ApplicantDetail page. */
 export interface ApplicantDetail extends Applicant {
@@ -179,45 +80,9 @@ export interface ApplicantDetail extends Applicant {
   assignmentReview?: AssignmentReview | null;
 }
 
-/**
- * Queue lifecycle of the AI scoring job — a separate axis from score.processingError.
- * 'queued' | 'processing' mean a rescore is in flight; the old score stays visible.
- */
-export interface ScoreJobStatus {
-  jobId: string;
-  status: 'queued' | 'processing' | 'done' | 'failed';
-  attemptCount: number;
-  errorCode: string | null;
-  nextTryAt: string | null;
-  completedAt: string | null;
-}
 
-/** Response of POST /api/employer/applicants/:id/rescore. */
-export interface RescoreResult {
-  rescored: boolean;
-  jobStatus: ScoreJobStatus['status'];
-  jobId: string;
-  attemptCount: number;
-}
 
-/** Refreshed signed resume URL (7A resume-url endpoint). */
-export interface ResumeUrl {
-  url: string;
-  expiresAt: string;
-}
 
-/**
- * One screening answer as stored on the application. `questionText` is a SNAPSHOT
- * taken at apply time — the posting's current wording may differ, and this is
- * deliberately what the candidate actually saw.
- */
-export interface ScreeningAnswer {
-  questionId: string;
-  questionText: string;
-  answer: string;
-  /** True when the answer matched the one the employer chose to flag. */
-  isKnockout: boolean;
-}
 
 export interface Applicant {
   application: {
@@ -280,70 +145,13 @@ export interface Stage {
   terminalType: 'hired' | null;
 }
 
-export interface ArchiveReason {
-  id: string;
-  text: string;
-  type: 'hired' | 'non-hired';
-  status: string;
-}
 
-export type ApplicantSort = 'score' | 'date' | 'assignment';
 
-/** Per-item outcome of the PP1 bulk-archive endpoint (partial success is first-class). */
-export interface BulkArchiveResult {
-  succeeded: Array<{ id: string }>;
-  failed: Array<{ id: string; code: string; message: string }>;
-  total: number;
-  successCount: number;
-  failureCount: number;
-}
 
-/**
- * What anonymizing a candidate would touch. A contact is shared across postings, so
- * applicationCount is nearly always more than the one application being viewed —
- * which is exactly why the confirmation dialog reads it out.
- */
-export interface AnonymizePreview {
-  applicationId: string;
-  candidateName: string | null;
-  applicationCount: number;
-  alreadyAnonymized: boolean;
-  /** Scheduled interviews. Anonymizing does NOT cancel them — the dialog says so. */
-  upcomingInterviews: Array<{ id: string; startAtUtc: string; timezoneId: string | null }>;
-}
 
-export interface AnonymizeResult {
-  contactAnonymized: boolean;
-  alreadyAnonymized: boolean;
-  applicationsProcessed: number;
-  filesDeleted: number;
-  notesRedacted: number;
-}
 
-/** Filter facets scoped to one posting's applicant pool (Chunk 1). */
-export interface ApplicantFacets {
-  skills: Array<{ skill: string; count: number }>;
-  cities: Array<{ city: string; count: number }>;
-}
 
-/**
- * One tag in the company's shared library. Names are canonical — lowercase and
- * trimmed by the backend — so "Referral" and "referral" are the same tag.
- */
-export interface CandidateTag {
-  id: string;
-  name: string;
-  createdAt: string;
-}
 
-/** A recruiter's saved filter combination for one posting (per-user, not shared). */
-export interface SavedView {
-  id: string;
-  name: string;
-  filters: Record<string, unknown>;
-  createdAt: string;
-  updatedAt: string;
-}
 
 // ─── Interview feedback summary (Sprint 5) ──────────────────────────────────
 // The panel's verdicts on one candidate, aggregated. Recommendations use the

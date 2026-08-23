@@ -13,21 +13,27 @@
 
 import { ObjectId } from 'mongodb';
 import { col } from '../../Db/connection.js';
+import {
+  ALLOWED_FILE_TYPES, MIN_ESTIMATED_HOURS, MAX_ESTIMATED_HOURS,
+} from './assignment-constants.js';
+
+// Re-exported so existing imports of this module keep resolving unchanged.
+export { ALLOWED_FILE_TYPES, MIN_ESTIMATED_HOURS, MAX_ESTIMATED_HOURS } from './assignment-constants.js';
+import {
+  normalizeAllowedFileTypes, requireEstimatedHours,
+} from './assignment-validators-internal.js';
+// Re-exported so existing imports of this module keep resolving unchanged.
+export {
+  countJobsUsingAssignment, listJobTitlesUsingAssignment,
+} from './assignment-usage-queries.js';
 
 const NATIVE = 'native';
 
 const assignmentsCol = () => col('assignments');
 const jobsCol = () => col('jobs');
 
-/** The file kinds a submission may carry. An empty allowedFileTypes means link-only. */
-export const ALLOWED_FILE_TYPES = Object.freeze(['pdf', 'zip', 'md']);
 
-export const MIN_ESTIMATED_HOURS = 1;
-export const MAX_ESTIMATED_HOURS = 8;
 
-// listJobTitlesUsingAssignment exists to NAME the blocking postings in a Chunk 2
-// error message, not to paginate. A hard cap keeps that read bounded.
-const MAX_USAGE_TITLES = 20;
 
 /** Accept a string or ObjectId; return an ObjectId or null. */
 function toOid(id) {
@@ -46,32 +52,7 @@ export async function ensureAssignmentIndexes() {
   );
 }
 
-/**
- * Normalize allowedFileTypes: a non-array becomes [] (link-only), duplicates are
- * dropped, and an unknown type throws rather than being silently discarded — a
- * typo'd type must not quietly become a stricter upload rule than the author meant.
- */
-function normalizeAllowedFileTypes(value) {
-  if (!Array.isArray(value)) return [];
-  const seen = [];
-  for (const entry of value) {
-    if (!ALLOWED_FILE_TYPES.includes(entry)) {
-      throw new Error(`assignment: invalid allowedFileTypes entry "${entry}"`);
-    }
-    if (!seen.includes(entry)) seen.push(entry);
-  }
-  return seen;
-}
 
-/** Integer within [1,8] or throw. Rejects 2.5 and '2' — no coercion. */
-function requireEstimatedHours(value) {
-  if (!Number.isInteger(value) || value < MIN_ESTIMATED_HOURS || value > MAX_ESTIMATED_HOURS) {
-    throw new Error(
-      `assignment: estimatedHours must be an integer between ${MIN_ESTIMATED_HOURS} and ${MAX_ESTIMATED_HOURS}`,
-    );
-  }
-  return value;
-}
 
 /**
  * Insert an assignment for a company. Stamps timestamps and an explicit
@@ -197,31 +178,7 @@ export async function unarchiveAssignmentForCompany(companyId, assignmentId, { s
   );
 }
 
-/** How many native postings currently reference this assignment. Read-only. */
-export async function countJobsUsingAssignment(companyId, assignmentId) {
-  const companyOid = toOid(companyId);
-  const assignmentOid = toOid(assignmentId);
-  if (!companyOid || !assignmentOid) return 0;
-  const collection = await jobsCol();
-  return collection.countDocuments({ source: NATIVE, companyId: companyOid, assignmentId: assignmentOid });
-}
 
-/**
- * The referencing postings, capped at 20, so Chunk 2's archive-blocked / edit-blocked
- * errors can name them. Read-only — this never mutates a job.
- */
-export async function listJobTitlesUsingAssignment(companyId, assignmentId) {
-  const companyOid = toOid(companyId);
-  const assignmentOid = toOid(assignmentId);
-  if (!companyOid || !assignmentOid) return [];
-  const collection = await jobsCol();
-  const docs = await collection
-    .find({ source: NATIVE, companyId: companyOid, assignmentId: assignmentOid })
-    .project({ title: 1, status: 1 })
-    .limit(MAX_USAGE_TITLES)
-    .toArray();
-  return docs.map((doc) => ({ id: doc._id.toString(), title: doc.title ?? null, status: doc.status ?? null }));
-}
 
 /** Client-safe projection — ids as strings. */
 export function toPublicAssignment(doc) {

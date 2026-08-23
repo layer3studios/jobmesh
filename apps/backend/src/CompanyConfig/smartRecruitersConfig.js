@@ -1,4 +1,6 @@
 import fetch from 'node-fetch';
+import { companyIdentifiers } from './smartrecruiters-companies.js';
+import { smartRecruitersExtractors } from './smartrecruiters-extractors.js';
 import { StripHtml, SanitizeHtml } from '../utils.js';
 import { isIndiaString, normalizeEmploymentType } from '../core/Locationprefilters.js';
 import { normalizeArray } from '../core/jobExtractor.js';
@@ -62,100 +64,7 @@ export const smartRecruitersConfig = {
     // Polite delay between requests (ms)
     requestDelayMs: 250,
 
-    // ─── Company identifiers ──────────────────────────────────────────────
-    // Feed URL: https://api.smartrecruiters.com/v1/companies/{id}/postings
-    // To verify: hit
-    //   https://api.smartrecruiters.com/v1/companies/{ID}/postings?country=in&limit=1
-    // If totalFound > 0 and HTTP 200, add it.
-    //
-    // To find new ones: visit careers.smartrecruiters.com/{id} in a browser.
-    companyIdentifiers: [
-        // ─── BIG ENTERPRISE (known India offices, high volume) ──────────
-        'BoschGroup',          // Bosch India (Bangalore, Pune, Coimbatore)
-        'ServiceNow',          // Hyderabad office
-        'Visa',                // Bangalore office
-        'LinkedIn3',           // LinkedIn India
-        'SIXT',                // India tech center
-        'Endava',              // DACH + India delivery
-
-        // ─── INDIAN COMPANIES on SmartRecruiters ────────────────────────
-        'TechMahindraLtd1',    // Tech Mahindra
-        'WNSGlobalServices144', // WNS (Mumbai, Pune, Bangalore)
-        'T-SystemsICTIndiaPvtLtd1', // T-Systems India
-
-        // ─── MID-SIZE (10-50 India jobs each) ──────────────────────────
-        'StepStoneGroup',      // Some India roles
-        'ifs1',                // Enterprise software, India engineering
-        'Flink3',              // Some India remote roles
-        'ecovadis',            // India office
-
-        // ─── ADDITIONAL (low-volume but worth keeping) ─────────────────
-        'aboutyougmbh',        // Remote roles open to India
-        'ScalableGmbH',        // Scalable Capital, some India roles
-        'smartrecruiters',     // SR's own India engineering
-        'Meta1',               // Meta India roles
-        'alten',               // Alten India engineering
-        'Bosch-HomeComfort',   // Bosch subsidiary India
-
-        // ─── Add more here as you find them ─────────────────────────────
-        'AtlassianCareers',
-'canva',
-'ubisoft',
-'Zurich5',
-'PublicisGroupe',
-'Publicis-Sapient',
-'PublicisSapient1',
-'Sanofi5',
-'DeutscheBank2',
-'CommerzbankAG',
-'AllianzGroup',
-'AXA',
-'ING',
-'Zurich',
-'JLL2',
-'HSBC',
-'StandardChartered',
-'BarclaysBank',
-'DeutscheTelekomAG',
-'Ericsson2',
-'NokiaSolutions',
-'Nokia',
-'Ubisoft',
-'ubi',
-'Bosch-HomeAppliances',
-'Bosch-Automotive',
-'BoschRexroth',
-'JobsatBAT',
-'BritishAmericanTobacco',
-'GetYourGuide',
-'Delivery-Hero1',
-'MediaSaturn',
-'MediaMarktSaturn',
-'Zalando1',
-'HelloFresh',
-'AboutYou',
-'AboutYouGmbH',
-'Personio1',
-'HotelBeds',
-'Trivago',
-'Booking',
-'BookingHoldings',
-'BasfSE',
-'BASF',
-'Continental6',
-'Heidelberg',
-'HeidelbergCement',
-'HenkelAG',
-'Beiersdorf',
-'Adidas1',
-'Adidas',
-'PumaSE',
-'Puma',
-'Puma1',
-'HugoBoss',
-'Zara',
-'Inditex',
-    ],
+    companyIdentifiers,
 
     // Internal state
     _allJobsQueue: [],
@@ -274,47 +183,9 @@ export const smartRecruitersConfig = {
     getJobs(data) { return data.jobs || []; },
     getTotal(data) { return data.total || 0; },
 
-    // ─── Field extractors ─────────────────────────────────────────────────
-    extractJobID(job) {
-        return `sr_${job._companyId}_${job.id}`;
-    },
-
-    extractJobTitle(job) {
-        return job.name || '';
-    },
-
-    extractCompany(job) {
-        const companyObj = job.company || job._detail?.company;
-        if (companyObj?.name) return companyObj.name;
-        return String(job._companyId || '')
-            .replace(/([a-z])([A-Z])/g, '$1 $2')
-            .split(/[-_]/)
-            .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-            .join(' ');
-    },
-
-    extractLocation(job) {
-        const loc = job.location || {};
-        return loc.fullLocation || [loc.city, loc.region, loc.country?.toUpperCase()].filter(Boolean).join(', ') || 'India';
-    },
-
-    extractDescription(job) {
-        const sections = job._detail?.jobAd?.sections;
-        return assembleDescription(sections, false);
-    },
-
-    extractDescriptionHtml(job) {
-        const sections = job._detail?.jobAd?.sections;
-        return SanitizeHtml(assembleDescription(sections, true));
-    },
-
-    extractURL(job) {
-        return job._detail?.postingUrl || job._detail?.applyUrl || null;
-    },
-
-    extractPostedDate(job) {
-        return job.releasedDate || job._detail?.releasedDate || null;
-    },
+    // Field readers live in smartrecruiters-extractors.js; spread here so the exported
+    // config keeps the exact shape scraperEngine already reads.
+    ...smartRecruitersExtractors,
 };
 
 export default smartRecruitersConfig;

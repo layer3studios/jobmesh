@@ -1,12 +1,14 @@
 'use client';
 // FILE: src/components/seeker/DashboardFilterBar.tsx
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { trackEvent } from '../../lib/analytics-events';
-import { MAX_LOCATIONS, SALARY_MAX_LPA } from './dashboard/constants';
+import { SALARY_MAX_LPA } from './dashboard/constants';
 import type { JobFacets } from './dashboard/useJobFacets';
-import { Z } from '@/theme/tokens';
 
 interface Option { value: string; label: string; }
+
+import { MultiSelectDropdown } from './DashboardMultiSelect';
+import { LocationPicker } from './DashboardLocationPicker';
 
 // A select value of 'all' clears that dimension (removed); anything else adds it.
 type DiscoveryFilter = 'role' | 'exp' | 'wp' | 'date';
@@ -41,85 +43,6 @@ interface Props {
   setSalaryFilter: (min: string, max: string) => void;
 }
 
-/** Dense LinkedIn-style multi-select: trigger button + checkbox popover. */
-function MultiSelectDropdown({ label, options, selected, onChange, baseStyle }: {
-  label: string;
-  options: Option[];
-  selected: string[];
-  onChange: (v: string[]) => void;
-  baseStyle: CSSProperties;
-}) {
-  const [open, setOpen] = useState(false);
-  const wrapRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onDocClick = (e: MouseEvent) => {
-      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener('mousedown', onDocClick);
-    return () => document.removeEventListener('mousedown', onDocClick);
-  }, [open]);
-
-  const toggle = (value: string) =>
-    onChange(selected.includes(value) ? selected.filter(v => v !== value) : [...selected, value]);
-  const active = selected.length > 0;
-
-  return (
-    <div ref={wrapRef} style={{ position: 'relative' }}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        aria-expanded={open}
-        style={{
-          ...baseStyle,
-          fontWeight: active ? 600 : 400,
-          borderColor: active ? 'var(--accent)' : 'var(--border-strong)',
-          color: active ? 'var(--accent)' : 'var(--ink)',
-        }}
-      >
-        {label}{active ? ` · ${selected.length}` : ''}
-      </button>
-      {open && (
-        <div style={{
-          position: 'absolute', top: 'calc(100% + 4px)', left: 0, zIndex: Z.dropdown,
-          minWidth: 190, background: 'var(--surface)',
-          border: '1px solid var(--border-strong)', borderRadius: 10,
-          boxShadow: 'var(--shadow-md)', padding: 6,
-        }}>
-          {options.map(o => (
-            <label
-              key={o.value}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                padding: '6px 8px', borderRadius: 7, cursor: 'pointer',
-                fontSize: '0.82rem', color: 'var(--ink)',
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={selected.includes(o.value)}
-                onChange={() => toggle(o.value)}
-                style={{ accentColor: 'var(--accent)', cursor: 'pointer' }}
-              />
-              {o.label}
-            </label>
-          ))}
-          {active && (
-            <button
-              onClick={() => onChange([])}
-              style={{
-                width: '100%', marginTop: 4, padding: '6px 8px',
-                background: 'transparent', border: 'none', borderTop: '1px solid var(--border)',
-                color: 'var(--ink-muted)', fontSize: '0.78rem', cursor: 'pointer',
-                fontFamily: 'inherit', textAlign: 'left',
-              }}
-            >Clear</button>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
 
 const numberInputStyle = (base: CSSProperties): CSSProperties => ({
   ...base,
@@ -129,83 +52,6 @@ const numberInputStyle = (base: CSSProperties): CSSProperties => ({
   cursor: 'text',
 });
 
-/** Searchable city picker fed by the facets endpoint; up to MAX_LOCATIONS cities. */
-function LocationPicker({ cities, selected, onChange, baseStyle }: {
-  cities: { city: string; count: number }[];
-  selected: string[];
-  onChange: (v: string[]) => void;
-  baseStyle: CSSProperties;
-}) {
-  const [query, setQuery] = useState('');
-  const [open, setOpen] = useState(false);
-  const wrapRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const onDocClick = (e: MouseEvent) => {
-      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener('mousedown', onDocClick);
-    return () => document.removeEventListener('mousedown', onDocClick);
-  }, []);
-
-  const q = query.trim().toLowerCase();
-  const suggestions = cities
-    .filter(c => !selected.some(s => s.toLowerCase() === c.city.toLowerCase()))
-    .filter(c => !q || c.city.toLowerCase().includes(q))
-    .slice(0, 8);
-  const atLimit = selected.length >= MAX_LOCATIONS;
-
-  const add = (city: string) => {
-    if (atLimit) return;
-    onChange([...selected, city]);
-    setQuery('');
-    setOpen(false);
-  };
-
-  return (
-    <div ref={wrapRef} style={{ position: 'relative' }}>
-      <input
-        type="text"
-        value={query}
-        placeholder={atLimit ? `Max ${MAX_LOCATIONS} cities` : (selected.length ? `Location · ${selected.length}` : 'Location')}
-        disabled={atLimit}
-        onChange={e => { setQuery(e.target.value); setOpen(true); }}
-        onFocus={() => setOpen(true)}
-        onKeyDown={e => {
-          if (e.key === 'Enter' && suggestions.length > 0) { e.preventDefault(); add(suggestions[0].city); }
-          if (e.key === 'Escape') setOpen(false);
-        }}
-        style={{ ...baseStyle, width: 132, backgroundImage: 'none', cursor: atLimit ? 'not-allowed' : 'text' }}
-      />
-      {open && suggestions.length > 0 && !atLimit && (
-        <div style={{
-          position: 'absolute', top: 'calc(100% + 4px)', left: 0, zIndex: Z.dropdown,
-          minWidth: 180, maxHeight: 260, overflowY: 'auto',
-          background: 'var(--surface)', border: '1px solid var(--border-strong)',
-          borderRadius: 10, boxShadow: 'var(--shadow-md)', padding: 4,
-        }}>
-          {suggestions.map(c => (
-            <button
-              key={c.city}
-              onClick={() => add(c.city)}
-              style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
-                width: '100%', padding: '7px 10px', borderRadius: 7,
-                background: 'transparent', border: 'none', cursor: 'pointer',
-                fontFamily: 'inherit', fontSize: '0.82rem', color: 'var(--ink)', textAlign: 'left',
-              }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--paper-2)'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
-            >
-              <span>{c.city}</span>
-              <span style={{ fontSize: '0.72rem', color: 'var(--ink-muted)' }}>{c.count}</span>
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export default function DashboardFilterBar({
   roleCategoryFilter, experienceBandFilter, workplaceFilter, dateFilter,

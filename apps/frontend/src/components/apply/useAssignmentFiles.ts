@@ -19,20 +19,13 @@ import { PublicApiError } from '@/api/public-api';
 import { MAX_FILE_BYTES, MAX_SUBMISSION_FILES } from './assignment-validation';
 import { trackEvent } from '@/lib/analytics-events';
 import type { DraftFileEntry } from './assignment-draft';
+import type { AssignmentFileRow, UseAssignmentFiles } from './assignment-file-types';
 
-export type UploadStatus = 'uploading' | 'done' | 'error';
+// Re-exported so existing imports of these from this module keep resolving.
+export type { UploadStatus, AssignmentFileRow, UseAssignmentFiles } from './assignment-file-types';
+import { nextLocalId, extensionOf, formatMegabytes } from './assignment-file-helpers';
 
-export interface AssignmentFileRow {
-  /** Stable client-side key. Not the server fileId — a row exists before one does. */
-  localId: string;
-  file: File | null;
-  /** The signed staging token. Present only once the upload succeeded. */
-  fileId: string | null;
-  originalName: string;
-  sizeBytes: number | null;
-  status: UploadStatus;
-  error: string | null;
-}
+
 
 interface Options {
   postingId: string;
@@ -44,33 +37,9 @@ interface Options {
   enabled: boolean;
 }
 
-let localIdCounter = 0;
-function nextLocalId(): string {
-  localIdCounter += 1;
-  return `af-${localIdCounter}`;
-}
 
-function extensionOf(name: string): string {
-  const parts = String(name || '').split('.');
-  return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : '';
-}
 
-function formatMegabytes(bytes: number): string {
-  return `${Math.round(bytes / (1024 * 1024))}MB`;
-}
 
-export interface UseAssignmentFiles {
-  files: AssignmentFileRow[];
-  /** Rows the submit gate may count — uploaded and still valid. */
-  doneFiles: AssignmentFileRow[];
-  /** True while any row is still uploading; the submit gate must not count those. */
-  uploading: boolean;
-  addFiles: (list: FileList | File[]) => void;
-  retry: (localId: string) => void;
-  remove: (localId: string) => void;
-  restoreFromDraft: (entries: DraftFileEntry[]) => void;
-  markExpired: (fileIds: string[]) => void;
-}
 
 export function useAssignmentFiles({ postingId, allowedFileTypes, enabled }: Options): UseAssignmentFiles {
   const [files, setFiles] = useState<AssignmentFileRow[]>([]);
