@@ -96,6 +96,9 @@ export async function createCompany(input, claimedByEmployerUserId) {
       autoArchiveStaleDays: input.autoArchiveStaleDays ?? null,
       privacyPolicyUrl: input.privacyPolicyUrl ?? null,
       dpoEmail: input.dpoEmail ?? null,
+      // Careers-page employer branding: headline, description, benefits, photos.
+      // null means "never configured", which is what the public page renders around.
+      cultureSection: input.cultureSection ?? null,
       createdAt: now,
       updatedAt: now,
     };
@@ -139,6 +142,7 @@ export function toPublicCompany(company) {
     autoArchiveStaleDays: company.autoArchiveStaleDays ?? null,
     privacyPolicyUrl: company.privacyPolicyUrl ?? null,
     dpoEmail: company.dpoEmail ?? null,
+    cultureSection: company.cultureSection ?? null,
     createdAt: company.createdAt,
   };
 }

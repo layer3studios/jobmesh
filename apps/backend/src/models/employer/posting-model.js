@@ -104,6 +104,9 @@ export async function createPostingForCompany(companyId, input, createdByEmploye
       salaryCurrency: 'INR',
       status,
       assignmentId: null,
+      // Employer-authored questions shown on the apply form. [] means "ask nothing",
+      // which is the default and the common case.
+      screeningQuestions: Array.isArray(input.screeningQuestions) ? input.screeningQuestions : [],
       // Deadline after which the apply endpoint refuses new applications, and
       // whether the nightly task should close the posting when it passes.
       applicationDeadline: input.applicationDeadline ?? null,
@@ -268,6 +271,9 @@ export function toPublicPosting(doc) {
     salaryCurrency: doc.salaryCurrency,
     status: doc.status,
     assignmentId: doc.assignmentId?.toString() ?? null,
+    // Employer-side projection: carries knockoutAnswer. The candidate's view is
+    // built by toPublicScreeningQuestion, which strips it.
+    screeningQuestions: doc.screeningQuestions ?? [],
     applicationDeadline: doc.applicationDeadline ?? null,
     autoCloseOnDeadline: doc.autoCloseOnDeadline === true,
     // Postings created before view counting default to 0 rather than null, so the

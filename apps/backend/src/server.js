@@ -21,6 +21,7 @@ import {
   ensureAssignmentIndexes,
   ensureSavedViewIndexes,
   ensureCandidateTagIndexes,
+  ensureReferralLinkIndexes,
 } from './models/employer/index.js';
 
 import {
@@ -53,6 +54,7 @@ import { ensureUsageStatsIndexes } from './gemma/usage-stats.js';
 import newsRouter from './api/seeker/news-routes.js';
 import { createEmployerAuthRouter } from './api/employer/employer-auth-routes.js';
 import employerCompanyRouter from './api/employer/employer-company-routes.js';
+import employerCulturePhotoRouter from './api/employer/employer-culture-photo-routes.js';
 import employerPostingsRouter from './api/employer/employer-postings-routes.js';
 import employerAssignmentsRouter from './api/employer/employer-assignments-routes.js';
 import employerAssignmentReviewsRouter from './api/employer/employer-assignment-reviews-routes.js';
@@ -68,6 +70,7 @@ import employerInterviewRouter from './api/employer/employer-interview-routes.js
 import employerDashboardRouter from './api/employer/employer-dashboard-routes.js';
 import employerTagRouter from './api/employer/employer-tag-routes.js';
 import employerActivityRouter from './api/employer/employer-activity-routes.js';
+import employerReferralRouter from './api/employer/employer-referral-routes.js';
 import employerExportRouter from './api/employer/employer-export-routes.js';
 import employerImportRouter from './api/employer/employer-import-routes.js';
 import publicInterviewRouter from './api/public/public-interview-routes.js';
@@ -76,6 +79,7 @@ import publicDpdpExportRouter from './api/public/public-dpdp-export-routes.js';
 import employerAvatarRouter from './api/public/employer-avatar-route.js';
 import resumeDownloadRouter from './api/public/resume-download-route.js';
 import companyLogoRouter from './api/public/company-logo-route.js';
+import culturePhotoRouter from './api/public/culture-photo-route.js';
 import assignmentStagingRouter from './api/public/assignment-staging-routes.js';
 import assignmentDownloadRouter from './api/public/assignment-download-route.js';
 import {
@@ -100,6 +104,7 @@ import {
 import { ensureResumeDirectory } from './services/public/resume-storage-service.js';
 import { ensureLogoDirectory } from './services/employer/logo-storage-service.js';
 import { ensureAvatarDirectory } from './services/employer/avatar-storage-service.js';
+import { ensureCulturePhotoDirectory } from './services/employer/culture-photo-storage-service.js';
 import { ensureResumeParseJobIndexes } from './models/seeker/resume-parse-job-model.js';
 import { ensureTmpDirectory } from './services/seeker/resume-tmp-storage.js';
 import { startResumeParseWorker } from './services/seeker/resume-parse-worker.js';
@@ -151,6 +156,7 @@ app.use('/api/seeker/resume', requireSeeker, requireConsentForPurpose('resume_pa
 app.use('/api/seeker/profile', requireSeeker, seekerProfileRouter);
 app.use('/api/seeker/market', requireSeeker, seekerMarketRouter);
 app.use('/api/employer/auth', createEmployerAuthRouter());
+app.use('/api/employer/company', requireEmployer, employerCulturePhotoRouter);
 app.use('/api/employer/company', requireEmployer, employerCompanyRouter);
 app.use('/api/employer/jobs', requireEmployer, requireEmployerCompany, employerPostingsRouter);
 app.use('/api/employer/jobs', requireEmployer, requireEmployerCompany, employerSavedViewsRouter);
@@ -178,11 +184,13 @@ app.use('/api/employer/dashboard', requireEmployer, requireEmployerCompany, empl
 // mount on the bare /api/employer prefix like the interview router below.
 app.use('/api/employer', requireEmployer, requireEmployerCompany, employerTagRouter);
 app.use('/api/employer', requireEmployer, requireEmployerCompany, employerActivityRouter);
+app.use('/api/employer', requireEmployer, requireEmployerCompany, employerReferralRouter);
 app.use('/api/employer', requireEmployer, requireEmployerCompany, employerInterviewRouter);
 app.use('/api/employer/jobs', requireEmployer, requireEmployerCompany, employerInterviewTimesRouter);
 app.use('/api/dpdp', dpdpRouter); // per-route guards (D9) — /notice-version is public
 app.use('/api/public/resume-download', resumeDownloadRouter); // signed-token PDF stream (before the apply catch-all)
 app.use('/api/public/company-logo', companyLogoRouter); // unauthenticated careers-page logo (before the apply catch-all)
+app.use('/api/public/culture-photo', culturePhotoRouter); // unauthenticated careers-page photos (before the apply catch-all)
 app.use('/api/public/avatar', employerAvatarRouter); // unauthenticated interviewer photo (before the apply catch-all)
 app.use('/api/public/invites', publicInviteRouter); // unauthenticated invite preview (before the apply catch-all)
 // DPDP right of access. Unauthenticated by necessity — the emailed one-time token
@@ -215,6 +223,7 @@ const server = app.listen(PORT, async () => {
     await ensureCompanyInviteIndexes();
     await ensureSavedViewIndexes();
     await ensureCandidateTagIndexes();
+    await ensureReferralLinkIndexes();
     await ensureConsentIndexes();
     await ensureAuditLogIndexes();
     await ensureRightsRequestIndexes();
@@ -234,6 +243,7 @@ const server = app.listen(PORT, async () => {
     ensureResumeDirectory();
     ensureLogoDirectory();
     ensureAvatarDirectory();
+    ensureCulturePhotoDirectory();
     ensureTmpDirectory();
     ensureAssignmentDirectories();
     // Recover files whose submission committed but whose rename never ran (crash

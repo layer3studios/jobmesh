@@ -9,6 +9,7 @@
 import { Container, Stack } from '@/components/ui';
 import CompanyBrandHeader from './CompanyBrandHeader';
 import CareersJobList from './CareersJobList';
+import CultureSection from './CultureSection';
 import RequestMyDataForm from '@/components/seeker/legal/RequestMyDataForm';
 import type { PublicCompany, PublicJobSummary } from '@/types/public-apply';
 
@@ -22,6 +23,10 @@ export default function CompanyView({ company, jobs }: Props) {
     <Container size="md" style={{ paddingTop: 40, paddingBottom: 72 }}>
       <Stack gap={28}>
         <CompanyBrandHeader company={company} />
+        {/* Between the masthead and the roles: a candidate decides whether they
+            want to work here before they decide which role to read. Renders
+            nothing when the employer configured no culture content. */}
+        <CultureSection section={company.cultureSection} companyName={company.name} />
         <CareersJobList
           jobs={jobs}
           companySlug={company.slug}

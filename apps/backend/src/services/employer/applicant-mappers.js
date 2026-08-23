@@ -12,9 +12,17 @@ export function toEmployerApplication(doc) {
     contactId: doc.contactId?.toString() ?? null,
     stageId: doc.stageId?.toString() ?? null,
     source: doc.source ?? null,
+    // Who referred them, when source === 'referral'. Projected because the ranked
+    // row and the detail header both name the referrer rather than showing a bare
+    // "Referral" label — "referred by whom" is the part a recruiter acts on.
+    sourceDetail: doc.sourceDetail ?? null,
     coverNote: doc.coverNote ?? null,
     yearsExperience: doc.yearsExperience ?? null,
     tags: doc.tags ?? [],
+    // The full Q&A snapshot for the detail sidebar, plus the roll-up the review
+    // banner reads so the UI never has to recompute it.
+    screeningAnswers: doc.screeningAnswers ?? [],
+    hasKnockoutAnswers: (doc.screeningAnswers ?? []).some((answer) => answer.isKnockout === true),
     appliedAt: doc.appliedAt ?? null,
     lastStageMovedAt: doc.lastStageMovedAt ?? null,
     assignmentSubmissionId: doc.assignmentSubmissionId?.toString() ?? null,

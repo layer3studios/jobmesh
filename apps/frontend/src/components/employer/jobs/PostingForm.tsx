@@ -19,6 +19,7 @@ import {
   isoToDeadlineInput, minimumDeadlineDate, deadlineError,
 } from '@/components/employer/jobs/posting-form-helpers';
 import type { PostingFormValues, PostingFormErrors } from '@/components/employer/jobs/posting-form-helpers';
+import ScreeningQuestionsEditor from '@/components/employer/jobs/parts/ScreeningQuestionsEditor';
 import AssignmentSection from '@/components/employer/jobs/parts/AssignmentSection';
 import type { AssignmentSectionState } from '@/components/employer/jobs/parts/AssignmentSection';
 import AssignmentSwapDialog from '@/components/employer/jobs/parts/AssignmentSwapDialog';
@@ -84,6 +85,7 @@ export default function PostingForm({
     salaryMaxStr: initialValues?.salaryMax != null ? String(initialValues.salaryMax) : '',
     applicationDeadline: isoToDeadlineInput(initialValues?.applicationDeadline),
     autoCloseOnDeadline: initialValues?.autoCloseOnDeadline === true,
+    screeningQuestions: initialValues?.screeningQuestions ?? [],
   }));
   // Computed once per mount: "tomorrow" only has to be right when the form opens.
   const minimumDeadline = useMemo(() => minimumDeadlineDate(), []);
@@ -295,6 +297,14 @@ export default function PostingForm({
         minRows={5} maxRows={8}
         onFocus={() => setIsDescriptionFocused(true)} onBlur={() => setIsDescriptionFocused(false)}
         onChange={(event) => setField('description', event.target.value)}
+      />
+
+      {/* After the JD, before the deadline: these are part of what the candidate
+          fills in, so they belong beside the description rather than among the
+          posting's scheduling settings. */}
+      <ScreeningQuestionsEditor
+        questions={values.screeningQuestions}
+        onChange={(next) => setField('screeningQuestions', next)}
       />
 
       {/* Optional. Candidates see the date on the apply page, and the apply

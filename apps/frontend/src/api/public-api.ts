@@ -80,3 +80,21 @@ export async function submitApplication(
     { method: 'POST', body: formData },
   );
 }
+
+/**
+ * Resolve a `?ref=` token to the referrer's display name.
+ *
+ * Called from the BROWSER, never from the ISR-cached server render: the apply page
+ * is revalidated hourly and shared between visitors, so a referrer baked into that
+ * cache would be shown to the wrong candidate. This request is also what counts
+ * the click, so it must happen once per visit rather than once per revalidation.
+ *
+ * Never throws for an unknown or deactivated token — the backend answers 200 with
+ * a null name and the page simply renders without a banner.
+ */
+export async function fetchReferrerName(token: string): Promise<string | null> {
+  const body = await request<{ referrerName: string | null }>(
+    `/public/referrals/${encodeURIComponent(token)}`,
+  );
+  return body.referrerName ?? null;
+}

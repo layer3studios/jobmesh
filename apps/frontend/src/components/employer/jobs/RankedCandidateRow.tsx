@@ -14,8 +14,9 @@ import { formatRelativeTime } from './applicant-view-helpers';
 import AssignmentColumn from './parts/AssignmentColumn';
 import TimeInStage from './parts/TimeInStage';
 import TagPill from './TagPill';
+import SourceBadge from './parts/SourceBadge';
 import { COPY } from '@/theme/brand';
-import { Ban } from 'lucide-react';
+import { Ban, AlertTriangle } from 'lucide-react';
 
 /** Two pills, then a count. A row is scanned, not read — three pills already crowd
  *  the name they sit beside, and the detail page holds the full list. */
@@ -46,6 +47,21 @@ function CrossApplicationPill({ count }: { count: number }) {
       }}
     >
       {COPY.employer.applicants.rolesPill.replace('{count}', String(count))}
+    </span>
+  );
+}
+
+/** An amber triangle beside the name when a screening answer tripped the employer's
+ *  own flag. Amber, not red: this is "read this before you decide", not a verdict —
+ *  nothing here rejects anyone. Icon plus an sr-only label, never colour alone. */
+function KnockoutMark() {
+  return (
+    <span
+      title={COPY.employer.screening.rowFlagLabel}
+      style={{ display: 'inline-flex', color: 'var(--warning)', flexShrink: 0 }}
+    >
+      <AlertTriangle size={13} aria-hidden="true" />
+      <span className="sr-only">{COPY.employer.screening.rowFlagLabel}</span>
     </span>
   );
 }
@@ -133,6 +149,11 @@ export default function RankedCandidateRow({
             {applicant.contact?.fullName ?? '—'}
           </span>
           {applicant.contact?.doNotContact?.flag && <DoNotContactMark />}
+          {applicant.application.hasKnockoutAnswers && <KnockoutMark />}
+          <SourceBadge
+            source={applicant.application.source}
+            sourceDetail={applicant.application.sourceDetail}
+          />
           {applicant.applicationCount != null && applicant.applicationCount > 1 && (
             <CrossApplicationPill count={applicant.applicationCount} />
           )}

@@ -10,15 +10,12 @@ import { HttpError } from '../../middleware/error-handler-middleware.js';
 import { getEmployerUserById } from '../../models/employer/employer-user-model.js';
 import { getCompanyById, updateCompanyForOwner, toPublicCompany } from '../../models/employer/company-model.js';
 import { onboardEmployerCompany } from '../../services/employer/onboarding-service.js';
-import {
-  validateName, validateOptionalUrl, validateRetentionDays, validateDpoEmail, validateTagline,
-  validateAbout, validateSocialLinks, validateRejectionTemplates,
-  validateAutoArchiveStaleDays,
-} from '../../services/employer/company-validators.js';
+import { buildCompanyPatch } from './company-patch-builder.js';
 import {
   storeLogoFile, deleteLogoFile, publicLogoUrlFor,
   MAXIMUM_LOGO_BYTES, ALLOWED_LOGO_MIME_TYPES,
 } from '../../services/employer/logo-storage-service.js';
+import { deleteCulturePhotoFile, fileNameFromPublicUrl } from '../../services/employer/culture-photo-storage-service.js';
 import {
   requireInterviewerOrHigher, requireOwnerOrHigher,
 } from '../../middleware/require-company-role-middleware.js';
@@ -26,11 +23,21 @@ import {
 const router = Router();
 // logoUrl is patchable so the UI can CLEAR a logo (null); it is never set to a
 // caller-supplied string — the upload route below owns writing a real value.
-const PATCHABLE_FIELDS = [
-  'name', 'tagline', 'about', 'socialLinks', 'website', 'retentionDays',
-  'privacyPolicyUrl', 'dpoEmail', 'logoUrl', 'rejectionEmailTemplates',
-  'autoArchiveStaleDays',
-];
+// This router mounts on requireEmployer only (POST onboarding must work before a
+// company exists), so the role middleware — which needs req.employerCompanyId — gets
+// it here. Preserves the existing 404 NO_COMPANY for a caller who hasn't onboarded.
+async function attachCompanyForRole(req, _res, next) {
+  try {
+    const user = await getEmployerUserById(req.employerUser.employerUserId);
+    if (!user?.companyId) return next(new HttpError(404, 'No company', 'NO_COMPANY'));
+    req.employerCompanyId = user.companyId;
+    next();
+  } catch (err) {
+    next(err);
+  }
+}
+
+/** Validate a PATCH body: reject unknown keys, normalize each supplied field. */
 
 // Memory storage, never disk: the buffer is validated (type + size) before
 // logo-storage-service writes anything, so a rejected upload leaves no bytes.
@@ -54,60 +61,6 @@ function runLogoUpload(req, res) {
       return reject(new HttpError(400, 'Could not read the uploaded file.', 'UPLOAD_FAILED'));
     });
   });
-}
-
-// This router mounts on requireEmployer only (POST onboarding must work before a
-// company exists), so the role middleware — which needs req.employerCompanyId — gets
-// it here. Preserves the existing 404 NO_COMPANY for a caller who hasn't onboarded.
-async function attachCompanyForRole(req, _res, next) {
-  try {
-    const user = await getEmployerUserById(req.employerUser.employerUserId);
-    if (!user?.companyId) return next(new HttpError(404, 'No company', 'NO_COMPANY'));
-    req.employerCompanyId = user.companyId;
-    next();
-  } catch (err) {
-    next(err);
-  }
-}
-
-/** Validate a PATCH body: reject unknown keys, normalize each supplied field. */
-function buildCompanyPatch(body) {
-  for (const key of Object.keys(body)) {
-    if (!PATCHABLE_FIELDS.includes(key)) {
-      throw new HttpError(400, `Unknown field: ${key}`, 'UNKNOWN_FIELD');
-    }
-  }
-  const patch = {};
-  if ('name' in body) patch.name = validateName(body.name);
-  if ('tagline' in body) patch.tagline = validateTagline(body.tagline);
-  if ('about' in body) patch.about = validateAbout(body.about);
-  if ('socialLinks' in body) patch.socialLinks = validateSocialLinks(body.socialLinks);
-  if ('rejectionEmailTemplates' in body) {
-    patch.rejectionEmailTemplates = validateRejectionTemplates(body.rejectionEmailTemplates);
-  }
-  // Clear-only. Accepting an arbitrary string here would let any Owner point the
-  // careers-page <img> at a URL of their choosing; a real logo can only be set by
-  // uploading bytes to POST /logo below.
-  if ('logoUrl' in body) {
-    if (body.logoUrl != null) {
-      throw new HttpError(400, 'logoUrl can only be cleared. Upload a file to set it.', 'INVALID_LOGO_URL');
-    }
-    patch.logoUrl = null;
-    patch.logoStoragePath = null;
-  }
-  if ('website' in body) patch.website = validateOptionalUrl(body.website, 'INVALID_WEBSITE');
-  if ('retentionDays' in body) patch.retentionDays = validateRetentionDays(body.retentionDays);
-  if ('privacyPolicyUrl' in body) {
-    patch.privacyPolicyUrl = validateOptionalUrl(body.privacyPolicyUrl, 'INVALID_PRIVACY_POLICY_URL');
-  }
-  if ('dpoEmail' in body) patch.dpoEmail = validateDpoEmail(body.dpoEmail);
-  if ('autoArchiveStaleDays' in body) {
-    patch.autoArchiveStaleDays = validateAutoArchiveStaleDays(body.autoArchiveStaleDays);
-  }
-  if (Object.keys(patch).length === 0) {
-    throw new HttpError(400, 'No valid fields to update', 'EMPTY_PATCH');
-  }
-  return patch;
 }
 
 // POST /api/employer/company — create + onboard.
@@ -155,6 +108,17 @@ router.patch('/', attachCompanyForRole, requireOwnerOrHigher, asyncHandler(async
   // what produces a broken <img> on a public page.
   if (patch.logoStoragePath === null && previous?.logoStoragePath) {
     deleteLogoFile(previous.logoStoragePath);
+  }
+  // Same rule for culture photos: any file the saved section no longer references
+  // is now unreachable, so retire its bytes. After the write, best-effort — a
+  // leftover file is harmless; deleting one the row still points at is not.
+  if ('cultureSection' in patch) {
+    const keptUrls = new Set(patch.cultureSection?.photoUrls ?? []);
+    for (const url of previous?.cultureSection?.photoUrls ?? []) {
+      if (keptUrls.has(url)) continue;
+      const fileName = fileNameFromPublicUrl(url);
+      if (fileName) deleteCulturePhotoFile(fileName);
+    }
   }
   res.json({ company: toPublicCompany(company) });
 }));

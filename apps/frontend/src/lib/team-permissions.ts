@@ -137,3 +137,21 @@ export function canCloneAssignment(currentRole: Role): boolean {
 export function canArchiveAssignment(currentRole: Role): boolean {
   return isOwnerOrHigher(currentRole);
 }
+
+/**
+ * Frontend visibility only — backend enforces truth. Referrals only work if the
+ * whole team can take part, so anyone Member+ may mint and share their own link.
+ * An Interviewer is excluded: they are brought in for a single conversation, not
+ * to source candidates.
+ */
+export function canShareReferralLink(currentRole: Role): boolean {
+  return isMemberOrHigher(currentRole);
+}
+
+/**
+ * Frontend visibility only — backend enforces truth. Reading the whole team's
+ * referral stats is oversight rather than participation, so it is Owner+.
+ */
+export function canViewReferralActivity(currentRole: Role): boolean {
+  return isOwnerOrHigher(currentRole);
+}

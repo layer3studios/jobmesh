@@ -10,7 +10,7 @@ import { Stack, useToast } from '@/components/ui';
 import { useEmployer } from '@/context/employer/EmployerContext';
 import { canEditPosting, canClosePosting } from '@/lib/team-permissions';
 import PostingEditView from './parts/PostingEditView';
-import { isoToDeadlineInput, type PostingFormValues } from './posting-form-helpers';
+import { daysOpen, toFormValues, type PostingFormValues } from './posting-form-helpers';
 import PostingConfirmDialog, { type ConfirmAction } from './PostingConfirmDialog';
 import PostingActionBar from './parts/PostingActionBar';
 import PostingFillDialog from './parts/PostingFillDialog';
@@ -26,16 +26,7 @@ import { listInterviewTimes } from '@/api/employer-interview-times-api';
 import type { Posting, PostingCreateInput } from '@/types/employer-jobs';
 import { trackEvent } from '@/lib/analytics-events';
 import { getApplyUrl } from '@/lib/subdomain-urls';
-
-const daysOpen = (createdAt: string): number => Math.max(0, Math.floor((Date.now() - new Date(createdAt).getTime()) / 86400000));
-
-const toFormValues = (p: Posting): PostingFormValues => ({
-  title: p.title, description: p.description, location: p.location,
-  workplaceType: p.workplaceType, employmentType: p.employmentType,
-  salaryMinStr: p.salaryMin != null ? String(p.salaryMin) : '',
-  salaryMaxStr: p.salaryMax != null ? String(p.salaryMax) : '',
-  applicationDeadline: isoToDeadlineInput(p.applicationDeadline), autoCloseOnDeadline: p.autoCloseOnDeadline === true,
-});
+import ReferralSection from './parts/ReferralSection';
 
 export default function PostingOverview({ posting, onReload }: {
   posting: Posting;
@@ -177,6 +168,8 @@ export default function PostingOverview({ posting, onReload }: {
           <PostingDescriptionCard description={posting.description} allowEdit={allowEdit} onEdit={openEdit} />
         </div>
       </div>
+
+      <ReferralSection postingId={posting.id} />
 
       <PostingConfirmDialog
         action={confirmOpen}

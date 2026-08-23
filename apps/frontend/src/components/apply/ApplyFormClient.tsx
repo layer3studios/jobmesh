@@ -20,7 +20,9 @@ import AssignmentSection from './AssignmentSection';
 import ApplyProgress from './ApplyProgress';
 import ApplyStickyBar from './ApplyStickyBar';
 import { submitApplication, PublicApiError, expiredFilesFrom } from '@/api/public-api';
-import { validateApplyForm, fieldError, mapServerError } from './apply-form-helpers';
+import {
+  validateApplyForm, fieldError, mapServerError, validateScreeningAnswers,
+} from './apply-form-helpers';
 import type { ApplyErrors } from './apply-form-helpers';
 import { validateSubmissionLink, MAX_SUBMISSION_LINKS } from './assignment-validation';
 import { useAssignmentFiles } from './useAssignmentFiles';
@@ -29,6 +31,9 @@ import type { DraftPayload } from './assignment-draft';
 import { copyToClipboard } from '@/lib/clipboard';
 import CompanyLogoMark from '@/components/company/CompanyLogoMark';
 import { sourceFromQuery } from './apply-source';
+import ReferralBanner from './ReferralBanner';
+import { useReferralToken, REFERRAL_QUERY_KEY } from './useReferralToken';
+import ScreeningQuestionFields, { answerFieldName } from './ScreeningQuestionFields';
 import { formatDeadline } from '@/components/employer/jobs/deadline-helpers';
 import type { ApplyFormData, PublicCompany, PublicJob, PublicAssignment } from '@/types/public-apply';
 import { trackEvent } from '@/lib/analytics-events';
@@ -96,7 +101,36 @@ export default function ApplyFormClient({
   const router = useRouter();
   // Resolved once, from the URL the candidate actually arrived on. When it maps to
   // a known channel the dropdown is pre-answered and hidden.
-  const querySource = sourceFromQuery(useSearchParams().get('source'));
+  const searchParams = useSearchParams();
+  const querySource = sourceFromQuery(searchParams.get('source'));
+  // Survives a refresh mid-form; resolves the banner name from an uncached endpoint.
+  const referral = useReferralToken(jobSlug, searchParams.get(REFERRAL_QUERY_KEY));
+
+  // Screening answers live in their own map rather than in ApplyFormData: the
+  // questions are per-posting and arbitrary, so they have no fixed field names to
+  // add to that type.
+  const screeningQuestions = job.screeningQuestions ?? [];
+  const [screeningAnswers, setScreeningAnswers] = useState<Record<string, string>>({});
+  const [screeningErrors, setScreeningErrors] = useState<Record<string, string>>({});
+
+  const setScreeningAnswer = (questionId: string, value: string) => {
+    setScreeningAnswers((current) => ({ ...current, [questionId]: value }));
+    // Clear the error as soon as they start answering; re-checked on blur/submit.
+    setScreeningErrors((current) => {
+      if (!current[questionId]) return current;
+      const { [questionId]: _cleared, ...rest } = current;
+      return rest;
+    });
+  };
+
+  const blurScreeningAnswer = (questionId: string) => {
+    const question = screeningQuestions.find((row) => row.id === questionId);
+    if (!question?.isRequired) return;
+    const isEmpty = (screeningAnswers[questionId] ?? '').trim() === '';
+    setScreeningErrors((current) => (
+      isEmpty ? { ...current, [questionId]: 'This question is required.' } : current
+    ));
+  };
   const [data, setData] = useState<ApplyFormData>(
     () => (querySource ? { ...EMPTY, source: querySource } : EMPTY),
   );
@@ -396,7 +430,12 @@ export default function ApplyFormClient({
   const handleSubmit = async () => {
     if (inFlight.current) return; // synchronous double-click guard (rule 10)
     const validation = validateApplyForm(data);
-    if (Object.keys(validation).length > 0) { setErrors(validation); return; }
+    const screeningValidation = validateScreeningAnswers(screeningQuestions, screeningAnswers);
+    setScreeningErrors(screeningValidation);
+    if (Object.keys(validation).length > 0 || Object.keys(screeningValidation).length > 0) {
+      setErrors(validation);
+      return;
+    }
     inFlight.current = true;
     setSubmitting(true);
     setErrors({});
@@ -414,6 +453,15 @@ export default function ApplyFormClient({
       // Sent as utm_source: apply-service already reads that key into
       // application.sourceDetail, so this needs no new backend field.
       if (data.source) form.append('utm_source', data.source);
+      // Re-validated server-side against this posting's company; an expired or
+      // deactivated token is ignored there rather than failing the application.
+      if (referral.token) form.append('referralToken', referral.token);
+      // One flat field per question — multipart cannot carry nested objects, and a
+      // JSON blob here would be the only field on this form the backend has to parse.
+      for (const question of screeningQuestions) {
+        const answer = screeningAnswers[question.id];
+        if (answer != null && answer.trim() !== '') form.append(answerFieldName(question.id), answer.trim());
+      }
       if (data.resume) form.append('resume', data.resume);
 
       if (assignment) {
@@ -584,6 +632,8 @@ export default function ApplyFormClient({
             form as a whole, so it should not move as banners come and go. */}
         <ApplyProgress sections={progressSections} />
 
+        {referral.referrerName && <ReferralBanner referrerName={referral.referrerName} />}
+
         {draftBanner}
 
         {/* Non-dismissible: refreshing is the only correct action, and letting this
@@ -666,6 +716,15 @@ export default function ApplyFormClient({
           data={data} errors={errors} companyName={company.name}
           set={set} onBlur={onBlur} onFieldFocus={onFieldFocus}
           showSourceField={querySource === null}
+          screeningSlot={screeningQuestions.length > 0 && (
+            <ScreeningQuestionFields
+              questions={screeningQuestions}
+              answers={screeningAnswers}
+              errors={screeningErrors}
+              onChange={setScreeningAnswer}
+              onBlur={blurScreeningAnswer}
+            />
+          )}
           submissionSlot={assignment && (
           <>
             <AssignmentSection

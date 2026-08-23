@@ -22,6 +22,7 @@ import InterviewSection from '../InterviewSection';
 import CandidateTimeline from '../CandidateTimeline';
 import AssignmentReviewPanel from './AssignmentReviewPanel';
 import FeedbackSummaryCard from './FeedbackSummaryCard';
+import ScreeningAnswersCard from './ScreeningAnswersCard';
 
 export default function ApplicantSidebarCards({
   detail, stages, reasons, canEditTags, currentEmployerUserId, reviewPanel, load,
@@ -52,6 +53,9 @@ export default function ApplicantSidebarCards({
       />
       {/* Candidate-voiced (R1/R2), shown only when non-empty (R3). */}
       {coverNote && <ApplicantCoverNote coverNote={coverNote} />}
+      {/* Also "what they said", so it sits beside the cover note rather than down
+          with our own judgements. Renders nothing when the posting asked nothing. */}
+      <ScreeningAnswersCard answers={detail.application.screeningAnswers ?? []} />
       {/* Absent for a plain posting, and for a legacy application on a posting that
           gained an assignment later — in both cases this renders exactly as before. */}
       {detail.assignmentSubmission && (

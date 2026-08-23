@@ -38,6 +38,9 @@ import { enqueueScoreJob } from './resume-score-queue-service.js';
 import { queueApplicationReceivedEmail } from '../email/application-received-email-service.js';
 import { queueNewApplicationNotification } from '../employer/new-application-notification-service.js';
 import { isDoNotContact } from '../../models/public/contact-do-not-contact-model.js';
+import { resolveReferralAttribution } from './referral-attribution-service.js';
+import { validateScreeningAnswers } from './screening-answer-validators.js';
+import { incrementReferralApplicationCount } from '../../models/employer/referral-link-model.js';
 
 /** A flagged person applying again is worth a server-side breadcrumb, nothing more. */
 function logDoNotContactApplication(contact, posting) {
@@ -221,10 +224,23 @@ export async function processApplication(companySlug, jobSlug, form, resume, met
       originalFilename: resume.originalFilename, mimeType: resume.mimeType, sizeBytes: stored.sizeBytes,
     });
 
+    // Resolved BEFORE either path branches, and before the transaction opens: it is
+    // a read, and the transactional callback may not perform side effects or
+    // depend on anything it computes itself (see runApplyTransaction).
+    const referral = await resolveReferralAttribution(
+      form.referralToken, company._id, form.utm_source ?? null,
+    );
+
+    // Throws a field-level 400 when a required question is unanswered, so the
+    // candidate is told which one before anything is written.
+    const screeningAnswers = validateScreeningAnswers(posting.screeningQuestions, form);
+
     const baseApplication = {
       jobId: posting._id, contactId: contact._id, stageId: defaultStage._id,
+      screeningAnswers,
       resumeFileId: resumeRecord._id, coverNote: clean.coverNote, yearsExperience: clean.yearsExperience,
-      source: 'apply_page', sourceDetail: form.utm_source ?? null,
+      source: referral.source, sourceDetail: referral.sourceDetail,
+      referralLinkId: referral.referralLinkId,
       applicantIp: meta.applicantIp ?? null, userAgent: meta.userAgent ?? null, referer: meta.referer ?? null,
     };
 
@@ -240,6 +256,15 @@ export async function processApplication(companySlug, jobSlug, form, resume, met
         applicationId: application._id, fromStageId: null, toStageId: defaultStage._id,
         movedByUserId: null, note: 'Application received',
       });
+
+      // After the application is written, never before: a counter that outran a
+      // failed insert would report referrals that do not exist. Fire-and-forget —
+      // a missed increment costs one number on a dashboard, and taking the
+      // application down to protect that number would be the wrong trade.
+      if (referral.referralLinkId) {
+        incrementReferralApplicationCount(referral.referralLinkId)
+          .catch((err) => console.warn('[referral] application count failed:', err.message));
+      }
 
       // Enqueue AI scoring (Q1 D5): persistent, retried queue instead of fire-and-forget.
       // enqueueScoreJob never throws, but keep the .catch as a belt-and-braces guard so
@@ -369,6 +394,14 @@ export async function processApplication(companySlug, jobSlug, form, resume, met
       if (!promoteStagedFile(file.stagingPath)) {
         console.warn(`[assignments] could not promote ${file.stagingPath} for submission ${submissionId}`);
       }
+    }
+
+    // Post-commit only, for the same reason as the plain path — and additionally
+    // because the transaction callback may run more than once, which would
+    // double-count a retried attempt.
+    if (referral.referralLinkId) {
+      incrementReferralApplicationCount(referral.referralLinkId)
+        .catch((err) => console.warn('[referral] application count failed:', err.message));
     }
 
     enqueueScoreJob(applicationId, company._id, posting._id)

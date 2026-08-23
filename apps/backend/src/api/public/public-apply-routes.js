@@ -10,13 +10,19 @@ import { asyncHandler } from '../../middleware/async-handler-middleware.js';
 import { HttpError } from '../../middleware/error-handler-middleware.js';
 import { getCompanyBySlug } from '../../models/employer/company-model.js';
 import {
-  getActivePostingBySlugForCompany, listActivePostingsForCompany, toPublicPosting,
+  getActivePostingBySlugForCompany, listActivePostingsForCompany,
 } from '../../models/employer/posting-model.js';
+import {
+  companySummary, jobSummary, assignmentSummary, publicAssignment, publicJob,
+} from './apply-projections.js';
 import {
   getAssignmentForCompany, listAssignmentsForIds,
 } from '../../models/employer/assignment-model.js';
 import { processApplication } from '../../services/public/apply-service.js';
 import { countPublicPostingView } from '../../services/public/posting-view-counter.js';
+import {
+  findReferralLinkByToken, incrementReferralClickCount,
+} from '../../models/employer/referral-link-model.js';
 
 const router = Router();
 const HOUR = 60 * 60 * 1000;
@@ -38,64 +44,6 @@ const perCompanyLimiter = rateLimit({
   keyGenerator: (req) => `${ipKeyGenerator(req.ip)}:${req.params.companySlug}`,
   message: { error: 'Too many applications. Try again later.', code: 'RATE_LIMITED' },
 });
-
-function companySummary(company) {
-  return {
-    name: company.name,
-    tagline: company.tagline ?? null,
-    about: company.about ?? null,
-    socialLinks: company.socialLinks ?? null,
-    slug: company.slug,
-    website: company.website ?? null,
-    logoUrl: company.logoUrl ?? null,
-  };
-}
-// workplaceType and postedAt are here so the careers page can render a workplace
-// badge and a posted-recency value without a second request per job. Both already
-// exist on every native posting; they were simply never projected.
-function jobSummary(posting) {
-  return {
-    id: posting._id.toString(), slug: posting.slug, title: posting.title,
-    location: posting.location, employmentType: posting.employmentType,
-    workplaceType: posting.workplaceType ?? null,
-    postedAt: posting.postedAt ?? null,
-  };
-}
-
-/**
- * THE FULL TASK IS NOT SECRET, AND MUST NOT BE GATED.
- *
- * This apply page is public and unauthenticated: anyone can open it without
- * applying, and take-home tasks circulate publicly regardless of what we do. So
- * the API returns the complete assignment — description and all — in one response.
- * Showing the summary first and the full task on click is a UX choice the frontend
- * makes; it is NOT a security boundary. Do not add a token, a "reveal" endpoint,
- * or truncation here later: it would buy nothing and would break the candidate who
- * wants to read the task before deciding to apply.
- *
- * Neither projection exposes companyId, createdByEmployerUserId, archivedAt or
- * timestamps — those are employer-side fields.
- */
-function assignmentSummary(assignment) {
-  // The LIST badge only: "≈4h · pdf, zip". No task text on a company page.
-  return {
-    estimatedHours: assignment.estimatedHours ?? null,
-    allowedFileTypes: assignment.allowedFileTypes ?? [],
-  };
-}
-
-function publicAssignment(assignment) {
-  // The DETAIL page: everything a candidate needs to decide and to answer.
-  return {
-    id: assignment._id.toString(),
-    title: assignment.title ?? null,
-    publicSummary: assignment.publicSummary ?? null,
-    descriptionMarkdown: assignment.descriptionMarkdown ?? null,
-    submissionInstructionsMarkdown: assignment.submissionInstructionsMarkdown ?? null,
-    estimatedHours: assignment.estimatedHours ?? null,
-    allowedFileTypes: assignment.allowedFileTypes ?? [],
-  };
-}
 
 /** Run multer, translating size/type errors into stable codes. */
 function runUpload(req, res) {
@@ -157,7 +105,39 @@ router.get('/jobs/:companySlug/:jobSlug', asyncHandler(async (req, res) => {
       assignment = publicAssignment(found);
     }
   }
-  res.json({ company: companySummary(company), job: toPublicPosting(posting), assignment });
+  res.json({ company: companySummary(company), job: publicJob(posting), assignment });
+}));
+
+/**
+ * GET /referrals/:token — resolve a referral token to the referrer's name.
+ *
+ * A SEPARATE endpoint, deliberately, rather than a field on the job response.
+ * The job page is ISR-cached for an hour (revalidate = 3600 in the Next route), so
+ * a referral resolved there would be baked into the shared cache entry: the second
+ * candidate to open the page would be told they were referred by the first one's
+ * referrer, and clicks would be counted once per revalidation instead of once per
+ * visit. This route is called from the browser, is never cached, and is the only
+ * place the click counter moves.
+ *
+ * Unknown, deactivated and malformed tokens all return 200 with referrerName:null.
+ * A 404 would let anyone probe which tokens exist, and there is nothing here the
+ * caller can fix — the page simply renders without a banner.
+ */
+router.get('/referrals/:token', asyncHandler(async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  const link = await findReferralLinkByToken(req.params.token);
+  if (!link || link.isActive === false) {
+    res.json({ referrerName: null });
+    return;
+  }
+
+  // Fire-and-forget: a counter must never delay or fail a public page.
+  incrementReferralClickCount(link.token)
+    .catch((err) => console.warn('[referral] click count failed:', err.message));
+
+  // The referrer's NAME only. Never the token's company, id, or owning teammate —
+  // this response is public and unauthenticated.
+  res.json({ referrerName: link.referrerName ?? null });
 }));
 
 /**

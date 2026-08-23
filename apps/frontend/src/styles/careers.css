@@ -203,3 +203,116 @@
   .careers-role:hover,
   .careers-role:focus-visible { padding-left: 12px; }
 }
+
+/* ── Culture section ───────────────────────────────────────────────────────
+   Employer-brand content between the masthead and the roles: why work here,
+   what you get, what it looks like.
+
+   THE DESIGN DECISION: benefits are NOT cards. A grid of bordered, shadowed
+   tiles is the reflex answer, and it makes eight short perks look like eight
+   competing calls to action. Here the only container is the emoji disc — one
+   consistent optical size that turns whatever emoji an employer picked into a
+   set — and everything else is spacing. The section as a whole gets one surface
+   and one hairline; nothing inside it repeats that frame.
+
+   Every colour is a token, so light and dark both work with no second ruleset. */
+.careers-culture {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+}
+
+/* The one serif moment on the page. Used exactly once per section, against an
+   otherwise-sans page, so it reads as a voice rather than a decoration. */
+.careers-culture-headline {
+  font-family: var(--font-serif);
+  font-size: clamp(1.3rem, 3.4vw, 1.75rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin: 0;
+}
+
+/* Same 68ch reading measure as .careers-about, so the two paragraphs on this
+   page wrap on the same rhythm. */
+.careers-culture-description {
+  margin: 10px 0 0;
+  font-size: 0.925rem;
+  line-height: 1.65;
+  color: var(--ink-2);
+  max-width: 68ch;
+  white-space: pre-wrap;
+}
+
+/* auto-fit, not a fixed column count: 3 benefits should fill the row rather than
+   leaving a hole, and 8 should wrap evenly. Collapses to one column under ~220px
+   of available width without a media query. */
+.careers-culture-benefits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px 24px;
+  margin-top: 22px;
+}
+
+.careers-benefit {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+}
+
+/* The signature element. A fixed 36px disc regardless of the emoji inside, so a
+   row of employer-chosen emoji lines up as a set instead of a ransom note. */
+.careers-benefit-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  font-size: 17px;
+  line-height: 1;
+}
+
+.careers-benefit-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.35;
+}
+
+.careers-benefit-description {
+  margin: 3px 0 0;
+  font-size: 0.825rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.careers-culture-photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-top: 24px;
+}
+
+/* A locked aspect ratio is what keeps a mixed set of employer uploads — one
+   portrait, one panorama — from making the row ragged. Border, not shadow: a
+   drop shadow reads as plastic on a dark background. */
+.careers-culture-photo {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 0.5px solid var(--border);
+  display: block;
+  background: var(--surface-sunken);
+}
+
+@media (max-width: 560px) {
+  .careers-culture { padding: 20px; }
+  .careers-culture-benefits { gap: 16px; margin-top: 18px; }
+}

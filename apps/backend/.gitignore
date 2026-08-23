@@ -16,3 +16,6 @@ ktopjobsync-hubbackend
 # were created by the assignment feature and were NOT covered until now.
 data/assignment-staging/
 data/assignment-submissions/
+
+# Careers-page culture photos (employer uploads, never in the repo)
+data/culture-photos/

@@ -81,6 +81,9 @@ describe('New posting form', () => {
       title: 'Backend Engineer', description: DESCRIPTION, location: 'Bengaluru',
       workplaceType: 'hybrid', employmentType: 'full-time', salaryMin: 12, salaryMax: 18,
       applicationDeadline: null, autoCloseOnDeadline: false,
+      // Always sent for the same reason as the deadline keys: removing the last
+      // screening question has to reach the server as an explicit [].
+      screeningQuestions: [],
     });
     expect(routerPush).toHaveBeenCalledWith('/employer/jobs/p1');
   });

@@ -46,6 +46,8 @@ export interface Posting {
   viewCount?: number;
   /** Pool-scheduling configuration; null/absent until configured. */
   interviewDefaults?: InterviewDefaults | null;
+  /** Employer-authored apply-form questions. [] when the posting asks nothing. */
+  screeningQuestions?: ScreeningQuestion[];
 }
 
 export interface PostingCreateInput {
@@ -60,6 +62,35 @@ export interface PostingCreateInput {
   /** ISO instant the posting stops accepting applications, or null. */
   applicationDeadline?: string | null;
   autoCloseOnDeadline?: boolean;
+  /** Sent as the FULL list in display order — order is recomputed server-side. */
+  screeningQuestions?: ScreeningQuestion[];
 }
 
 export type PostingPatch = Partial<PostingCreateInput>;
+
+/** The three shapes a screening question can take. */
+export type ScreeningQuestionType = 'text' | 'single_select' | 'yes_no';
+
+/**
+ * Employer-side question, as stored on the posting. `knockoutAnswer` is present
+ * ONLY here — the candidate's copy (PublicScreeningQuestion) omits it, because
+ * showing someone which answer is flagged turns the question into a quiz with a
+ * visible answer key.
+ */
+export interface ScreeningQuestion {
+  id: string;
+  questionText: string;
+  questionType: ScreeningQuestionType;
+  isRequired: boolean;
+  /** Only ever populated for single_select; yes_no derives Yes/No. */
+  options: string[];
+  /** The one answer that flags the candidate for review. Never auto-rejects. */
+  knockoutAnswer: string | null;
+  order: number;
+}
+
+export const MAXIMUM_SCREENING_QUESTIONS = 5;
+export const MINIMUM_SELECT_OPTIONS = 2;
+export const MAXIMUM_SELECT_OPTIONS = 6;
+export const MAXIMUM_QUESTION_TEXT_LENGTH = 300;
+export const MAXIMUM_OPTION_LENGTH = 100;

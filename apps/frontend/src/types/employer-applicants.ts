@@ -206,6 +206,19 @@ export interface ResumeUrl {
   expiresAt: string;
 }
 
+/**
+ * One screening answer as stored on the application. `questionText` is a SNAPSHOT
+ * taken at apply time — the posting's current wording may differ, and this is
+ * deliberately what the candidate actually saw.
+ */
+export interface ScreeningAnswer {
+  questionId: string;
+  questionText: string;
+  answer: string;
+  /** True when the answer matched the one the employer chose to flag. */
+  isKnockout: boolean;
+}
+
 export interface Applicant {
   application: {
     id: string;
@@ -219,6 +232,14 @@ export interface Applicant {
     lastStageMovedAt: string;
     /** Recruiter-applied labels drawn from the company tag library. Max 10. */
     tags?: string[];
+    /** How this application arrived. 'referral' when a teammate's link brought them. */
+    source?: string | null;
+    /** The referrer's name when source is 'referral'; the utm answer otherwise. */
+    sourceDetail?: string | null;
+    /** Full Q&A snapshot. Present on the DETAIL response only. */
+    screeningAnswers?: ScreeningAnswer[];
+    /** Roll-up of the above. Present on BOTH the list and the detail responses. */
+    hasKnockoutAnswers?: boolean;
   };
   contact: {
     id: string;

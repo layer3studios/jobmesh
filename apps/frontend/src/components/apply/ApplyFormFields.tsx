@@ -34,13 +34,19 @@ interface Props {
    * identical to before.
    */
   submissionSlot?: React.ReactNode;
+  /**
+   * The employer's screening questions, on a posting that has any. Sits ABOVE the
+   * assignment block: these are short and often gating ("do you have a work
+   * permit?"), and a candidate should answer them before investing in a take-home.
+   */
+  screeningSlot?: React.ReactNode;
   /** False when ?source= already answered it — then the field is not rendered. */
   showSourceField?: boolean;
 }
 
 export default function ApplyFormFields({
   data, errors, companyName, set, onBlur, onFieldFocus,
-  submissionSlot = null, showSourceField = true,
+  submissionSlot = null, screeningSlot = null, showSourceField = true,
 }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -125,6 +131,8 @@ export default function ApplyFormFields({
           </select>
         </div>
       )}
+
+      {screeningSlot}
 
       {submissionSlot}
 

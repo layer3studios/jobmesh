@@ -75,7 +75,7 @@ describe('ZERO REGRESSION — toggle off', () => {
       // applicationDeadline/autoCloseOnDeadline are always present (null/false when
       // unset) — still no assignment key, which is what this test guards.
       'applicationDeadline', 'autoCloseOnDeadline',
-      'description', 'employmentType', 'location', 'title', 'workplaceType',
+      'description', 'employmentType', 'location', 'screeningQuestions', 'title', 'workplaceType',
     ]);
     expect('assignmentId' in payload).toBe(false);
     expect(setPostingAssignment).not.toHaveBeenCalled();

@@ -154,6 +154,14 @@ export async function createApplicationForCompany(companyId, data, { session } =
     archived: null,
     source: data.source ?? 'apply_page',
     sourceDetail: data.sourceDetail ?? null,
+    // Set only when the candidate arrived through a teammate's referral link, and
+    // kept even if that link is later deactivated — attribution is a historical
+    // fact about this application, not a live pointer.
+    referralLinkId: toOid(data.referralLinkId),
+    // Snapshot of what this candidate was asked and what they said. The question
+    // TEXT is stored per answer, so editing the posting later never rewrites the
+    // history of an application that was already submitted.
+    screeningAnswers: Array.isArray(data.screeningAnswers) ? data.screeningAnswers : [],
     resumeFileId: toOid(data.resumeFileId),
     assignmentSubmissionId: toOid(data.assignmentSubmissionId),
     coverNote: data.coverNote ?? null,
@@ -277,7 +285,16 @@ export function toPublicApplication(doc) {
     contactId: doc.contactId?.toString() ?? null,
     stageId: doc.stageId?.toString() ?? null,
     source: doc.source,
+    sourceDetail: doc.sourceDetail ?? null,
+    referralLinkId: doc.referralLinkId?.toString() ?? null,
     coverNote: doc.coverNote ?? null,
+    // The BOOLEAN only, never the answers: this projection feeds the ranked list,
+    // where one row per candidate is drawn and the full Q&A would bloat the
+    // payload for data the row cannot show anyway. Employer-only — the sole
+    // consumer is employer-applicants-controller (verified), and a flag is our
+    // judgement about a candidate, never something they should read about
+    // themselves.
+    hasKnockoutAnswers: (doc.screeningAnswers ?? []).some((answer) => answer.isKnockout === true),
     yearsExperience: doc.yearsExperience ?? null,
     tags: doc.tags ?? [],
     appliedAt: doc.appliedAt,

@@ -66,8 +66,39 @@ export interface EmployerCompany {
   autoArchiveStaleDays: number | null;
   privacyPolicyUrl: string | null;
   dpoEmail: string | null;
+  /** Careers-page employer branding. null when never configured. */
+  cultureSection: CultureSection | null;
   createdAt: string;
 }
+
+/** One perk on the careers page. Only `title` is required. */
+export interface CultureBenefit {
+  /** An emoji, or null. Purely decorative — the title carries the meaning. */
+  icon: string | null;
+  title: string;
+  description: string | null;
+}
+
+/**
+ * Employer-brand content on the public careers page. null when never configured,
+ * which is what both the editor and the public page render around. Any individual
+ * part may be empty — a company with only benefits still gets a section.
+ */
+export interface CultureSection {
+  headline: string | null;
+  description: string | null;
+  benefits: CultureBenefit[];
+  /** Our own /api/public/culture-photo/ URLs only — never a third-party image. */
+  photoUrls: string[];
+}
+
+export const MAXIMUM_BENEFITS = 8;
+export const MAXIMUM_CULTURE_PHOTOS = 4;
+export const MAXIMUM_CULTURE_HEADLINE_LENGTH = 80;
+export const MAXIMUM_CULTURE_DESCRIPTION_LENGTH = 1000;
+export const MAXIMUM_BENEFIT_TITLE_LENGTH = 50;
+export const MAXIMUM_BENEFIT_DESCRIPTION_LENGTH = 150;
+
 
 // The four-value company role enum. Kept as a string union here to avoid a cross-import
 // into src/types; identical to Role in src/types/employer-team.

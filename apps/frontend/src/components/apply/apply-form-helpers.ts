@@ -3,7 +3,7 @@
 // rules (apply-validators.js) and server-error-code → field mapping. Kept
 // separate so ApplyFormClient stays small and the rules are unit-testable.
 
-import type { ApplyFormData } from '@/types/public-apply';
+import type { ApplyFormData, PublicScreeningQuestion } from '@/types/public-apply';
 
 /**
  * `assignmentLinks` is not an ApplyFormData field — the assignment inputs live in
@@ -85,4 +85,25 @@ export function mapServerError(code: string | null, message: string): ApplyError
   const field = code ? CODE_TO_FIELD[code] : undefined;
   if (field) return { [field]: message };
   return { _form: message || 'Could not submit your application. Please try again.' };
+}
+
+/**
+ * Client-side screening validation, mirroring screening-answer-validators.js.
+ * Returns a map of questionId → message ({} when every required answer is present).
+ *
+ * Only REQUIREDNESS is checked here. Whether a choice is one of the offered options
+ * is guaranteed by the radio group itself, and nothing on the client knows which
+ * answer is flagged — that stays server-side by design.
+ */
+export function validateScreeningAnswers(
+  questions: PublicScreeningQuestion[], answers: Record<string, string>,
+): Record<string, string> {
+  const errors: Record<string, string> = {};
+  for (const question of questions) {
+    if (!question.isRequired) continue;
+    if ((answers[question.id] ?? '').trim() === '') {
+      errors[question.id] = 'This question is required.';
+    }
+  }
+  return errors;
 }

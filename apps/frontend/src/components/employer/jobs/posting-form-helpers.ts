@@ -4,7 +4,10 @@
 // mapping. Kept separate so the form component stays small and the rules are
 // unit-testable in isolation.
 
-import type { PostingCreateInput, WorkplaceType, EmploymentType } from '@/types/employer-jobs';
+import type {
+  Posting, PostingCreateInput, WorkplaceType, EmploymentType, ScreeningQuestion,
+} from '@/types/employer-jobs';
+import { normalizeForSave } from './parts/screening-question-helpers';
 
 export interface PostingFormValues {
   title: string;
@@ -17,6 +20,8 @@ export interface PostingFormValues {
   /** yyyy-mm-dd from the date input, or '' when no deadline is set. */
   applicationDeadline: string;
   autoCloseOnDeadline: boolean;
+  /** Full list in display order. [] when the posting asks nothing. */
+  screeningQuestions: ScreeningQuestion[];
 }
 
 export interface PostingFormErrors {
@@ -143,6 +148,9 @@ export function buildPostingInput(values: PostingFormValues): PostingCreateInput
   const deadlineIso = deadlineToIso(values.applicationDeadline);
   input.applicationDeadline = deadlineIso;
   input.autoCloseOnDeadline = deadlineIso != null && values.autoCloseOnDeadline;
+  // Always sent, so clearing every question reaches the server as an explicit []
+  // rather than being read as "leave them alone".
+  input.screeningQuestions = normalizeForSave(values.screeningQuestions);
   return input;
 }
 
@@ -160,3 +168,23 @@ export function mapServerErrorToFields(code: string | null, message: string): Po
     default: return { _form: message || 'Could not save posting. Please try again.' };
   }
 }
+
+/** Whole days since the posting was created, floored at 0. */
+export const daysOpen = (createdAt: string): number =>
+  Math.max(0, Math.floor((Date.now() - new Date(createdAt).getTime()) / 86400000));
+
+/**
+ * Saved posting → editable form values. Lives here rather than in the overview
+ * because it is the exact inverse of the form's own submit mapping, and the two
+ * have to move together: isoToDeadlineInput is already the pairing for the
+ * deadline field.
+ */
+export const toFormValues = (p: Posting): PostingFormValues => ({
+  title: p.title, description: p.description, location: p.location,
+  workplaceType: p.workplaceType, employmentType: p.employmentType,
+  salaryMinStr: p.salaryMin != null ? String(p.salaryMin) : '',
+  salaryMaxStr: p.salaryMax != null ? String(p.salaryMax) : '',
+  applicationDeadline: isoToDeadlineInput(p.applicationDeadline),
+  autoCloseOnDeadline: p.autoCloseOnDeadline === true,
+  screeningQuestions: p.screeningQuestions ?? [],
+});

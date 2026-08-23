@@ -9,6 +9,20 @@ export interface PublicSocialLinks {
   github?: string;
 }
 
+/** Mirrors CultureSection on the employer side; the public page reads the same shape. */
+export interface PublicCultureBenefit {
+  icon: string | null;
+  title: string;
+  description: string | null;
+}
+
+export interface PublicCultureSection {
+  headline: string | null;
+  description: string | null;
+  benefits: PublicCultureBenefit[];
+  photoUrls: string[];
+}
+
 export interface PublicCompany {
   name: string;
   tagline: string | null;
@@ -17,6 +31,8 @@ export interface PublicCompany {
   slug: string;
   website: string | null;
   logoUrl: string | null;
+  /** null when the employer never configured one — the section is then not rendered. */
+  cultureSection?: PublicCultureSection | null;
 }
 
 export interface PublicJob {
@@ -33,6 +49,8 @@ export interface PublicJob {
   /** ISO instant applications stop being accepted, or null. */
   applicationDeadline: string | null;
   postedAt: string | null;
+  /** Empty on a posting that asks nothing, which is the common case. */
+  screeningQuestions?: PublicScreeningQuestion[];
 }
 
 /** List surface (company page) — badge data only, no task text. */
@@ -67,6 +85,20 @@ export interface PublicJobSummary {
   workplaceType: string | null;
   postedAt: string | null;
   assignment: PublicAssignmentSummary | null;
+}
+
+/**
+ * A screening question as the CANDIDATE sees it. Deliberately has no
+ * knockoutAnswer field — the backend strips it before this ever leaves the server.
+ */
+export interface PublicScreeningQuestion {
+  id: string;
+  questionText: string;
+  questionType: 'text' | 'single_select' | 'yes_no';
+  isRequired: boolean;
+  /** Yes/No questions arrive with their two options already filled in. */
+  options: string[];
+  order: number;
 }
 
 export interface ApplyFormData {

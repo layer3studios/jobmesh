@@ -50,6 +50,14 @@ export const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 // localhost is rejected by some browsers and would silently break login.
 export const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || '';
 
+// Public origin of the apply/careers audience (apply.jobmesh.in in production).
+// The backend needs it to build shareable referral URLs — those are pasted into
+// emails and DMs, so they must be absolute and must point at the APPLY host, not
+// at whichever host happened to serve the employer's request. Falls back to the
+// same-origin /apply path under FRONTEND_URL, which is how a single-host deploy
+// serves careers pages.
+export const APPLY_URL = process.env.APPLY_URL || `${FRONTEND_URL}/apply`;
+
 // Extra browser origins allowed to call the API with credentials, comma-separated.
 // Every *.jobmesh.in host is already allowed by pattern in server.js; this exists
 // for one-off origins (a staging host, a preview deploy) without a code change.

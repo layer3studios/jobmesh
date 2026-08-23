@@ -6,7 +6,7 @@
 // Paths route through API_BASE (C10); real URL is unchanged from the Vite app.
 
 import { apiUrl } from '../lib/api-base';
-import type { EmployerCompany } from '../context/employer/employer-context-types';
+import type { EmployerCompany, CultureSection } from '../context/employer/employer-context-types';
 
 export class EmployerApiError extends Error {
   status: number;
@@ -47,6 +47,11 @@ export interface UpdateEmployerCompanyPatch {
   logoUrl?: null;
   /** Days of inactivity before a candidate is auto-archived. null turns it off. */
   autoArchiveStaleDays?: number | null;
+  /**
+   * The WHOLE careers-page culture section. Sent complete, never partially: an
+   * omitted benefit means the employer deleted it, and null clears the section.
+   */
+  cultureSection?: CultureSection | null;
 }
 
 interface CompanyEnvelope {
@@ -142,4 +147,33 @@ export async function uploadCompanyLogo(file: File): Promise<EmployerCompany> {
     );
   }
   return (body as CompanyEnvelope).company;
+}
+
+/**
+ * Upload one culture photo and get back its public URL.
+ *
+ * Deliberately does NOT attach the photo to the company: the editor holds the
+ * whole section in local state and saves it with one PATCH, so attaching here
+ * would write half the section behind the employer's back. Same multipart reason
+ * as uploadCompanyLogo for not going through request().
+ */
+export async function uploadCulturePhoto(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append('photo', file);
+
+  const response = await fetch(apiUrl('/employer/company/culture-photos'), {
+    method: 'POST',
+    credentials: 'include',
+    body: formData,
+  });
+
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new EmployerApiError(
+      response.status,
+      body?.code ?? null,
+      body?.error || `Upload failed (${response.status})`,
+    );
+  }
+  return (body as { photoUrl: string }).photoUrl;
 }

@@ -15,6 +15,7 @@ import Breadcrumbs from '@/components/employer/Breadcrumbs';
 import SettingsPageHeader from '../parts/SettingsPageHeader';
 import { COPY } from '@/theme/brand';
 import CareersPageLink from '../parts/CareersPageLink';
+import CultureEditor from './parts/CultureEditor';
 
 const ACCEPTED_TYPES = 'image/png,image/jpeg,image/webp';
 const MAXIMUM_LOGO_BYTES = 2 * 1024 * 1024;
@@ -168,6 +169,12 @@ export default function BrandingClient() {
             Set your tagline under Settings → Company. Colors and apply page theme — coming soon.
           </p>
         </div>
+
+        {/* Below the logo and the preview: the logo is what a candidate sees first,
+            and this is what they read next. Same page because both are "how your
+            careers page looks", and splitting them would make an employer visit
+            two screens to dress one page. */}
+        <CultureEditor canEdit={canEdit} />
 
         {company && (
           <CareersPageLink slug={company.slug} onCopied={() => showToast('success', 'Careers link copied.')} />

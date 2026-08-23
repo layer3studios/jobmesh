@@ -17,7 +17,7 @@ const COMPANY: EmployerCompany = {
   id: 'c1', slug: 'acme', name: 'Acme Labs', tagline: null, about: null, socialLinks: null,
   website: null, logoUrl: null,
   plan: 'free', retentionDays: 180, autoArchiveStaleDays: null,
-  privacyPolicyUrl: null, dpoEmail: null,
+  privacyPolicyUrl: null, dpoEmail: null, cultureSection: null,
   createdAt: '2026-01-01T00:00:00Z',
 };
 

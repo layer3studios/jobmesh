@@ -20,6 +20,7 @@ import {
   validateWorkplaceType, validateEmploymentType, validateSalary, validatePostingStatus,
   validateApplicationDeadline, validateAutoCloseOnDeadline, reconcileDeadlineFields,
 } from '../../services/employer/posting-validators.js';
+import { validateScreeningQuestions } from '../../services/employer/screening-question-validators.js';
 import { countApplicationsForJobs } from '../../models/public/application-model.js';
 import { fillPosting } from '../../services/employer/posting-fill-service.js';
 import { extractAndStoreRequirements } from '../../gemma/background-extractor.js';
@@ -43,6 +44,7 @@ const router = Router();
 const PATCHABLE_FIELDS = [
   'title', 'description', 'location', 'workplaceType', 'employmentType',
   'salaryMin', 'salaryMax', 'status', 'applicationDeadline', 'autoCloseOnDeadline',
+  'screeningQuestions',
 ];
 
 /** Validate + normalize a create body into the model input shape. */
@@ -62,6 +64,7 @@ function buildCreateInput(body) {
     salaryMin, salaryMax, status,
     applicationDeadline: deadline.applicationDeadline,
     autoCloseOnDeadline: deadline.autoCloseOnDeadline,
+    screeningQuestions: validateScreeningQuestions(body.screeningQuestions),
   };
 }
 
@@ -102,6 +105,12 @@ function buildPatch(body, current) {
     const reconciled = reconcileDeadlineFields(nextDeadline, nextAutoClose);
     patch.applicationDeadline = reconciled.applicationDeadline;
     patch.autoCloseOnDeadline = reconciled.autoCloseOnDeadline;
+  }
+  // The editor always sends the FULL list in display order — order is recomputed
+  // from array position inside the validator, so a partial patch is not a thing
+  // here and an empty array legitimately means "remove every question".
+  if ('screeningQuestions' in body) {
+    patch.screeningQuestions = validateScreeningQuestions(body.screeningQuestions);
   }
   if (Object.keys(patch).length === 0) {
     throw new HttpError(400, 'No valid fields to update', 'EMPTY_PATCH');
