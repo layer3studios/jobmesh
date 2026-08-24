@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '../ui';
-import { Group, Chips, MultiChips } from './DashboardFilterSheetParts';
-import { MAX_LOCATIONS, SALARY_MAX_LPA } from './dashboard/constants';
+import DashboardFilterSheetFields from './DashboardFilterSheetFields';
 import type { JobFacets } from './dashboard/useJobFacets';
 import { Z } from '@/theme/tokens';
 
@@ -60,19 +59,6 @@ export default function DashboardFilterSheet({
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [salMin, salMax]);
-
-  const clampLpa = (v: string) => {
-    if (v === '') return '';
-    const n = Math.max(0, Math.min(SALARY_MAX_LPA, Math.floor(Number(v) || 0)));
-    return String(n);
-  };
-
-  const salaryInputStyle = {
-    flex: 1, padding: '9px 12px', borderRadius: 9,
-    fontFamily: 'inherit', fontSize: '0.86rem',
-    background: 'var(--surface)', color: 'var(--ink)',
-    border: '1px solid var(--border-strong)', outline: 'none',
-  } as const;
 
   useEffect(() => {
     if (isOpen) { setMounted(true); setClosing(false); }
@@ -131,98 +117,26 @@ export default function DashboardFilterSheet({
           </button>
         </div>
 
-        <div className="thin-scroll" style={{ overflowY: 'auto', flex: 1, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <Group label="Role">
-            <Chips
-              value={roleCategoryFilter}
-              options={roleOptions}
-              onChange={v => { setRoleCategoryFilter(v); setSp(sp => { sp.set('role', v); sp.delete('page'); }); }}
-            />
-          </Group>
-          <Group label="Experience">
-            <MultiChips
-              values={experienceBandFilter}
-              options={experienceOptions.filter(o => o.value !== 'all')}
-              onToggle={band => setExperienceBandFilter(
-                experienceBandFilter.includes(band)
-                  ? experienceBandFilter.filter(b => b !== band)
-                  : [...experienceBandFilter, band],
-              )}
-            />
-          </Group>
-          <Group label="Work mode">
-            <MultiChips
-              values={workplaceFilter}
-              options={[
-                { value: 'remote', label: 'Remote' },
-                { value: 'hybrid', label: 'Hybrid' },
-                { value: 'on-site', label: 'On-site' },
-              ]}
-              onToggle={mode => setWorkplaceFilter(
-                workplaceFilter.includes(mode)
-                  ? workplaceFilter.filter(m => m !== mode)
-                  : [...workplaceFilter, mode],
-              )}
-            />
-          </Group>
-          <Group label="Posted">
-            <Chips
-              value={dateFilter}
-              options={[
-                { value: 'all', label: 'Any time' },
-                { value: 'today', label: 'Today' },
-                { value: '3d', label: '3 days' },
-                { value: '7d', label: '1 week' },
-                { value: '30d', label: '1 month' },
-              ]}
-              onChange={v => { setDateFilter(v); setSp(sp => { sp.set('date', v); sp.delete('page'); }); }}
-            />
-          </Group>
-          {facets.cities.length > 0 && (
-            <Group label={`Location${locationsFilter.length ? ` · ${locationsFilter.length}/${MAX_LOCATIONS}` : ''}`}>
-              <MultiChips
-                values={locationsFilter}
-                options={facets.cities.slice(0, 12).map(c => ({ value: c.city, label: c.city }))}
-                disabledWhenUnselected={locationsFilter.length >= MAX_LOCATIONS}
-                onToggle={city => setLocationsFilter(
-                  locationsFilter.includes(city)
-                    ? locationsFilter.filter(c => c !== city)
-                    : [...locationsFilter, city],
-                )}
-              />
-            </Group>
-          )}
-          {facets.techStack.length > 0 && (
-            <Group label="Tech stack">
-              <MultiChips
-                values={techStackFilter}
-                options={facets.techStack.slice(0, 18).map(t => ({ value: t.tag, label: t.tag }))}
-                onToggle={tag => setTechStackFilter(
-                  techStackFilter.includes(tag)
-                    ? techStackFilter.filter(t => t !== tag)
-                    : [...techStackFilter, tag],
-                )}
-              />
-            </Group>
-          )}
-          <Group label="Salary (₹ LPA)">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <input
-                type="number" inputMode="numeric" min={0} max={SALARY_MAX_LPA}
-                value={salMin} placeholder="Min"
-                onChange={e => setSalMin(clampLpa(e.target.value))}
-                style={salaryInputStyle}
-              />
-              <span style={{ color: 'var(--ink-muted)' }}>–</span>
-              <input
-                type="number" inputMode="numeric" min={0} max={SALARY_MAX_LPA}
-                value={salMax} placeholder="Max"
-                onChange={e => setSalMax(clampLpa(e.target.value))}
-                style={salaryInputStyle}
-              />
-            </div>
-          </Group>
-        </div>
+        <DashboardFilterSheetFields
+          roleCategoryFilter={roleCategoryFilter}
+          experienceBandFilter={experienceBandFilter}
+          workplaceFilter={workplaceFilter}
+          dateFilter={dateFilter}
+          roleOptions={roleOptions}
+          experienceOptions={experienceOptions}
+          setRoleCategoryFilter={setRoleCategoryFilter}
+          setExperienceBandFilter={setExperienceBandFilter}
+          setWorkplaceFilter={setWorkplaceFilter}
+          setDateFilter={setDateFilter}
+          setSp={setSp}
+          facets={facets}
+          locationsFilter={locationsFilter}
+          setLocationsFilter={setLocationsFilter}
+          techStackFilter={techStackFilter}
+          setTechStackFilter={setTechStackFilter}
+          salMin={salMin} salMax={salMax}
+          setSalMin={setSalMin} setSalMax={setSalMax}
+        />
 
         <div style={{
           padding: '12px 20px',
