@@ -16,6 +16,7 @@ import DetailSettings from '@/components/employer/jobs/DetailSettings';
 import PostingOverview from '@/components/employer/jobs/PostingOverview';
 import PipelineTab from '@/components/employer/jobs/PipelineTab';
 import RankedTab from '@/components/employer/jobs/RankedTab';
+import DiscoverTab from '@/components/employer/jobs/DiscoverTab';
 import { getEmployerPosting, EmployerJobsApiError } from '@/api/employer-jobs-api';
 import { getInterviewTimeCount } from '@/api/employer-interview-times-api';
 import { Badge } from '@/components/ui';
@@ -26,7 +27,10 @@ const LOAD_ERROR_MESSAGE = 'Could not load this posting.';
 
 // No magic strings for tab ids (C2) — shared with the ?tab query-param plumbing.
 // Existing ?tab=pipeline / ?tab=ranked / ?tab=settings links stay valid.
-const TAB_IDS = { OVERVIEW: 'overview', SETTINGS: 'settings', PIPELINE: 'pipeline', RANKED: 'ranked' } as const;
+const TAB_IDS = {
+  OVERVIEW: 'overview', SETTINGS: 'settings', PIPELINE: 'pipeline',
+  RANKED: 'ranked', DISCOVER: 'discover',
+} as const;
 const VALID_TAB_IDS: string[] = Object.values(TAB_IDS);
 
 /** Settings tab label with a low-pool nudge: red "0", amber "1", nothing at 2+. */
@@ -124,6 +128,9 @@ export function PostingDetail({ postingId }: { postingId: string }) {
       { id: TAB_IDS.OVERVIEW, label: 'Overview', content: <PostingOverview posting={posting} onReload={loadPosting} /> },
       { id: TAB_IDS.PIPELINE, label: 'Pipeline', content: <PipelineTab postingId={posting.id} /> },
       { id: TAB_IDS.RANKED, label: 'Ranked', content: <RankedTab postingId={posting.id} /> },
+      // After Ranked, before Settings: Discover is about people who have NOT
+      // applied, so it reads as the step you take once the inbound list is spent.
+      { id: TAB_IDS.DISCOVER, label: 'Discover', content: <DiscoverTab postingId={posting.id} /> },
       { id: TAB_IDS.SETTINGS, label: settingsTabLabel(availableCount), content: <DetailSettings posting={posting} /> },
     ];
     return <Tabs tabs={tabs} defaultTabId={defaultTabId} onChange={handleTabChange} compact />;

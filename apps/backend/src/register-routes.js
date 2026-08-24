@@ -27,6 +27,7 @@ import { createEmployerAuthRouter } from './api/employer/employer-auth-routes.js
 import employerCompanyRouter from './api/employer/employer-company-routes.js';
 import employerCulturePhotoRouter from './api/employer/employer-culture-photo-routes.js';
 import employerPostingsRouter from './api/employer/employer-postings-routes.js';
+import employerDiscoverRouter from './api/employer/employer-discover-routes.js';
 import employerAssignmentsRouter from './api/employer/employer-assignments-routes.js';
 import employerAssignmentReviewsRouter from './api/employer/employer-assignment-reviews-routes.js';
 import employerMeRouter from './api/employer/employer-me-routes.js';
@@ -111,6 +112,10 @@ export function registerRoutes(app) {
   app.use('/api/employer/company', requireEmployer, employerCulturePhotoRouter);
   app.use('/api/employer/company', requireEmployer, employerCompanyRouter);
   app.use('/api/employer/jobs', requireEmployer, requireEmployerCompany, employerPostingsRouter);
+  // Its own base path, matching the Discover spec's URLs. Postings are served at
+  // /jobs for historical reasons; this feature is new and reads better as what it
+  // acts on.
+  app.use('/api/employer/postings', requireEmployer, requireEmployerCompany, employerDiscoverRouter);
   app.use('/api/employer/jobs', requireEmployer, requireEmployerCompany, employerSavedViewsRouter);
   app.use('/api/employer/jobs', requireEmployer, requireEmployerCompany, employerExportRouter);
   app.use('/api/employer/jobs', requireEmployer, requireEmployerCompany, employerImportRouter);

@@ -9,6 +9,7 @@
 @import "../styles/jobs-table.css";
 @import "../styles/leetcode.css";
 @import "../styles/github.css";
+@import "../styles/discover.css";
 
 /* Tailwind v4 CSS-first tokens (R7). Mapped from frontend/src/theme/tokens.ts +
    themes.ts. Colors reference the runtime CSS vars in theme-tokens.css so both

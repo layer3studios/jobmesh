@@ -1,0 +1,137 @@
+/* FILE: src/styles/discover.css
+   The Discover tab: suggestion cards and the match-rating pill.
+
+   Layout lives here rather than inline because these blocks need the two things a
+   style attribute cannot express: a breakpoint, and a reduced-motion query.
+
+   Every colour is a token. The rating scale reuses the SEMANTIC trio rather than
+   literal greens and ambers, so it survives a theme flip — and it matches the
+   difficulty bars on the LeetCode panel, which is the other place this product
+   grades something on three levels. */
+
+.dv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 12px;
+}
+
+.dv-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px 15px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-raised);
+}
+
+/* A candidate already moved into the pipeline stays on screen — removing the card
+   under the cursor would leave the recruiter unsure whether the click worked —
+   but recedes, because there is nothing left to do with it. */
+.dv-card--added {
+  background: var(--surface-sunken);
+  border-color: var(--border-strong);
+}
+
+.dv-card__name {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dv-card__meta {
+  margin: 2px 0 0;
+  font-size: 0.76rem;
+  color: var(--ink-faint);
+}
+
+/* ── Match rating ───────────────────────────────────────────────────────────
+   Three levels, semantic tokens, and the WORD is always present — colour alone
+   would leave the scale unreadable to anyone who cannot separate the hues. */
+.dv-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.dv-rating--strong { background: var(--success-soft); color: var(--success); }
+.dv-rating--good { background: var(--accent-soft); color: var(--accent); }
+.dv-rating--possible { background: var(--surface-muted); color: var(--ink-muted); }
+
+/* ── Matched skills ─────────────────────────────────────────────────────────
+   The evidence behind the ranking. Shown as the candidate wrote them. */
+.dv-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.dv-skill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.dv-review {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+/* The review arrives a second or two after the card. Fading it in stops the card
+   from appearing to jump when the text lands. */
+.dv-review--enter {
+  animation: dvFadeIn 0.25s ease-out;
+}
+
+@keyframes dvFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.dv-proof {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  font-size: 0.73rem;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.dv-proof-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dv-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+@media (max-width: 560px) {
+  .dv-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* The fade is decoration — the text is the information and it is correct at rest. */
+@media (prefers-reduced-motion: reduce) {
+  .dv-review--enter { animation: none; }
+}

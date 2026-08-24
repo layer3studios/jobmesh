@@ -11,6 +11,7 @@ import {
   ensureGitHubUserIndexes, ensureGitHubCacheIndexes,
 } from './models/seeker/index.js';
 import { ensureJobIndexes } from './models/shared/job-model.js';
+import { ensureRecommendationCacheIndexes } from './models/employer/recommendation-cache-model.js';
 import { ensureAdminUserIndexes } from './models/admin/index.js';
 import { ensureInterviewIndexes, ensureInterviewReminderJobIndexes, ensureInterviewTimeIndexes } from './models/interview/index.js';
 import { ensureUsageStatsIndexes } from './gemma/usage-stats.js';
@@ -47,6 +48,7 @@ export async function runBootSequence() {
   await ensureLeetCodeCacheIndexes();
   await ensureGitHubUserIndexes();
   await ensureGitHubCacheIndexes();
+  await ensureRecommendationCacheIndexes();
     await ensureJobIndexes();
     await ensureEmployerUserIndexes();
     await ensureAdminUserIndexes();
