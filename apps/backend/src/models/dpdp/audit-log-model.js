@@ -19,7 +19,8 @@ export async function ensureAuditLogIndexes() {
   const collection = await auditCol();
   await collection.createIndex({ actorId: 1, createdAt: -1 }, { name: 'audit_actor' });
   await collection.createIndex({ event: 1, createdAt: -1 }, { name: 'audit_event' });
-  await collection.createIndex({ targetId: 1, createdAt: -1 }, { name: 'audit_target' });
+  // No targetId index: targetId is written on every entry but no code path has ever
+  // queried it. Add one back the day a "history for this record" view exists.
 }
 
 /** The ONLY exported writer. Insert-only; no updatedAt (records never change). */

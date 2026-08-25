@@ -36,7 +36,7 @@ export async function ensureEmployerAccessIndexes() {
       name: 'employer_access_kind_email',
     },
   );
-  await collection.createIndex({ kind: 1 }, { name: 'employer_access_kind' });
+  // { kind } is not created: strict prefix of the { kind, email } index above.
 }
 
 /** Read the gate config. Returns a default-deny shape when no doc exists (R7). */

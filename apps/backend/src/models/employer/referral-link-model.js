@@ -36,7 +36,7 @@ export async function ensureReferralLinkIndexes() {
     { companyId: 1, postingId: 1, employerUserId: 1 },
     { unique: true, name: 'referral_links_companyId_postingId_employerUserId' },
   );
-  await collection.createIndex({ companyId: 1, postingId: 1 }, { name: 'referral_links_companyId_postingId' });
+  // { companyId, postingId } is not created: strict prefix of the unique index above.
 }
 
 /**

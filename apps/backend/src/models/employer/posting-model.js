@@ -16,8 +16,9 @@ import {
 // Re-exported so existing imports of this module keep resolving unchanged.
 export { generateUniquePostingSlugForCompany } from './posting-slug-queries.js';
 export {
-  listPostingsForCompany, getPostingForCompany, getActivePostingBySlugForCompany,
-  getPostingBySlugForCompany, listActivePostingsForCompany,
+  listPostingsForCompany, countPostingsForCompany, getPostingForCompany,
+  getActivePostingBySlugForCompany, getPostingBySlugForCompany,
+  listActivePostingsForCompany,
 } from './posting-queries.js';
 import {
   slugifyPostingTitle, buildPostingSlugCandidate, randomPostingSlugSuffix,

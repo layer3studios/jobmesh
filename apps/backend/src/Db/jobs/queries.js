@@ -3,7 +3,7 @@
 
 import { ObjectId } from 'mongodb';
 import { col } from '../connection.js';
-import { buildJobsQuery } from './jobs-query-builder.js';
+import { buildJobsQuery, hasTextSearch } from './jobs-query-builder.js';
 import { FEED_PROJECTION, clampFeedLimit } from './jobs-feed-projection.js';
 
 const JOBS = 'jobs';
@@ -49,15 +49,31 @@ export async function getJobsPaginated(
     locations: locationsFilter, salaryMinLpa, salaryMaxLpa,
   });
 
-  const [totalJobs, results, companies] = await Promise.all([
+  // RELEVANCE FIRST, BUT ONLY WHEN SEARCHING. $text ORs its terms, so "software
+  // engineer" matches anything with either word; ordering those by date alone
+  // would float a weak one-word match above an exact title hit. When no search is
+  // active the feed is a reverse-chronological list and must stay one.
+  const textSearch = hasTextSearch(query);
+  const cursor = jobs.find(query);
+  if (textSearch) {
+    cursor.project({ ...FEED_PROJECTION, _searchScore: { $meta: 'textScore' } })
+      .sort({ _searchScore: { $meta: 'textScore' }, PostedDate: -1 });
+  } else {
+    cursor.project(FEED_PROJECTION).sort({ PostedDate: -1, scrapedAt: -1 });
+  }
+
+  const [totalJobs, rows, companies] = await Promise.all([
     jobs.countDocuments(query),
-    jobs.find(query)
-      .sort({ PostedDate: -1, scrapedAt: -1 })
-      .skip(skip).limit(safeLimit)
-      .project(FEED_PROJECTION)
-      .toArray(),
+    cursor.skip(skip).limit(safeLimit).toArray(),
     getActiveCompaniesCached(jobs),
   ]);
+
+  // The score is a sort key, not a field of a job. It has to be projected for
+  // Mongo to sort on it, so it is stripped here rather than shipped to a client
+  // that has no use for it and no way to interpret it.
+  const results = textSearch
+    ? rows.map(({ _searchScore, ...job }) => job)
+    : rows;
 
   return {
     jobs: results,

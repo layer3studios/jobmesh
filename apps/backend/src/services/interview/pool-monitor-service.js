@@ -6,8 +6,8 @@
 
 import { interviewTimesCol, INTERVIEW_TIME_STATUSES } from '../../models/interview/interview-time-model.js';
 import { col } from '../../Db/connection.js';
-import { getCompanyById as defaultGetCompanyById } from '../../models/employer/company-model.js';
-import { getEmployerUserById as defaultGetEmployerUserById } from '../../models/employer/employer-user-model.js';
+import { mapCompaniesById as defaultGetCompaniesByIds } from '../../models/employer/company-model.js';
+import { mapEmployerUsersById as defaultGetEmployerUsersByIds } from '../../models/employer/employer-user-model.js';
 import { sendTransactionalEmail as defaultSendEmail } from '../email/send-email-service.js';
 import { renderEmailShell, renderPlainText } from '../email/templates/email-layout-helpers.js';
 
@@ -47,34 +47,82 @@ function buildLowPoolEmail(postingTitle, availableCount) {
   };
 }
 
+/**
+ * Which of these low pools actually warrant an email: the posting still exists in
+ * the right tenant, is active, runs pool scheduling, and is outside its cooldown.
+ *
+ * Batched. This was a findOne per pool inside the sweep loop; one $in covers the
+ * whole pass, and the companyId equality that keeps a pool from reading another
+ * tenant's posting is re-checked here rather than delegated to the query.
+ */
+async function loadNotifiablePostings(pools, cooldownCutoff) {
+  const postingsCollection = await col('jobs');
+  const postings = await postingsCollection
+    .find({ _id: { $in: pools.map((pool) => pool._id.postingId) } })
+    .toArray();
+  const postingById = new Map(postings.map((posting) => [posting._id.toString(), posting]));
+
+  return pools.flatMap((pool) => {
+    const posting = postingById.get(pool._id.postingId?.toString());
+    if (!posting) return [];
+    // The pool row and the posting must belong to the same company. Previously the
+    // findOne filter enforced this; with one batched read it is an explicit check.
+    if (String(posting.companyId) !== String(pool._id.companyId)) return [];
+    if (posting.status !== 'active' || !posting.interviewDefaults) return [];
+    if (posting.lastPoolLowNotifiedAt && posting.lastPoolLowNotifiedAt > cooldownCutoff) return [];
+    return [{ pool, posting }];
+  });
+}
+
 /** One sweep pass. Returns how many notifications were sent. Never throws. */
 export async function checkPoolLevelsAndNotify(now = new Date(), deps = {}) {
   const {
-    getCompanyById = defaultGetCompanyById,
-    getEmployerUserById = defaultGetEmployerUserById,
+    getCompaniesByIds = defaultGetCompaniesByIds,
+    getEmployerUsersByIds = defaultGetEmployerUsersByIds,
     sendEmail = defaultSendEmail,
   } = deps;
   let notifiedCount = 0;
   try {
     const lowPools = await findLowPools(now);
     if (lowPools.length === 0) return 0;
-    const postingsCollection = await col('jobs');
+
     const cooldownCutoff = new Date(now.getTime() - NOTIFY_COOLDOWN_MILLISECONDS);
+    const candidates = await loadNotifiablePostings(lowPools, cooldownCutoff);
+    if (candidates.length === 0) return 0;
 
-    for (const pool of lowPools) {
-      const posting = await postingsCollection.findOne({ _id: pool._id.postingId, companyId: pool._id.companyId });
-      if (!posting || posting.status !== 'active' || !posting.interviewDefaults) continue;
-      if (posting.lastPoolLowNotifiedAt && posting.lastPoolLowNotifiedAt > cooldownCutoff) continue;
+    // Three batched reads replace three queries PER POOL. The founder lookup
+    // depends on the companies, so it is the one thing that still waits.
+    const companyById = await getCompaniesByIds(candidates.map(({ pool }) => pool._id.companyId));
+    const founderById = await getEmployerUsersByIds(
+      [...companyById.values()].map((company) => company.claimedByEmployerUserId),
+    );
 
-      const company = await getCompanyById(pool._id.companyId);
-      const founder = company?.claimedByEmployerUserId ? await getEmployerUserById(company.claimedByEmployerUserId) : null;
+    const stamps = [];
+    for (const { pool, posting } of candidates) {
+      const company = companyById.get(String(pool._id.companyId));
+      const founder = company?.claimedByEmployerUserId
+        ? founderById.get(String(company.claimedByEmployerUserId))
+        : null;
       if (!founder?.email) continue;
 
       const { subject, html, text } = buildLowPoolEmail(posting.title, pool.availableCount);
+      // Sends stay sequential on purpose: this is an outbound provider with its own
+      // rate limits, and a watchdog is never the thing that should saturate it.
       const result = await sendEmail({ to: founder.email, subject, html, text });
-      await postingsCollection.updateOne({ _id: posting._id }, { $set: { lastPoolLowNotifiedAt: now } });
+      // Stamped whether or not the send landed — exactly as before. The cooldown
+      // records that we TRIED, so a hard-failing address cannot become an hourly
+      // retry loop against the mail provider.
+      stamps.push({
+        updateOne: {
+          filter: { _id: posting._id },
+          update: { $set: { lastPoolLowNotifiedAt: now } },
+        },
+      });
       if (result.sent) notifiedCount += 1;
     }
+
+    // One write for the whole sweep instead of one per notification.
+    if (stamps.length > 0) await (await col('jobs')).bulkWrite(stamps, { ordered: false });
   } catch (err) {
     console.warn(`[pool-monitor] check failed: ${err.message}`);
   }

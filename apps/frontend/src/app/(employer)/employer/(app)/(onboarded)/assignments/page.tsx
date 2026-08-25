@@ -39,8 +39,21 @@ async function fetchAssignments(): Promise<EmployerAssignment[]> {
  */
 async function fetchPostings(): Promise<Posting[]> {
   try {
-    const body = await serverFetch<{ postings: Posting[] }>('/employer/jobs');
-    return body.postings;
+    // /employer/jobs is paged (default 25). This page counts how many postings use
+    // each assignment, so a partial list would silently UNDER-report usage — and an
+    // under-reported count is what unlocks the "archive this assignment" button.
+    // Follow totalCount to the end rather than trusting one response.
+    const PAGE_SIZE = 50;
+    const all: Posting[] = [];
+    for (let page = 1; ; page += 1) {
+      const body = await serverFetch<{ postings: Posting[]; totalCount?: number }>(
+        `/employer/jobs?page=${page}&limit=${PAGE_SIZE}`,
+      );
+      all.push(...body.postings);
+      const total = body.totalCount ?? all.length;
+      if (all.length >= total || body.postings.length === 0) break;
+    }
+    return all;
   } catch (error) {
     // A viewer who cannot list postings simply sees no usage data. They also cannot
     // edit or archive, so nothing they are permitted to do depends on it.

@@ -3,7 +3,7 @@
 
 import { ObjectId } from 'mongodb';
 import { connectToDb } from '../../Db/connection.js';
-import { usersCol, toOid, normaliseApplied, VALID_STAGES } from './seeker-user-shared-helpers.js';
+import { usersCol, toOid, normaliseApplied, VALID_STAGES, SEEKER_LIST_MAX } from './seeker-user-shared-helpers.js';
 
 /** Return the user's applied jobs array (normalised). */
 export async function getAppliedJobs(userId) {
@@ -85,10 +85,15 @@ export async function addAppliedJob(userId, jobId, snapshot = {}) {
     stageUpdatedAt: new Date(),
   };
 
-  // Only push + increment if this jobId isn't already there.
+  // Only push + increment if this jobId isn't already there. $slice keeps the
+  // newest SEEKER_LIST_MAX entries; appliedCount is $inc'd independently and stays
+  // the lifetime total rather than the array length.
   const result = await col.findOneAndUpdate(
     { _id: oid, 'appliedJobs.jobId': { $ne: jobId } },
-    { $push: { appliedJobs: entry }, $inc: { appliedCount: 1 } },
+    {
+      $push: { appliedJobs: { $each: [entry], $slice: -SEEKER_LIST_MAX } },
+      $inc: { appliedCount: 1 },
+    },
     { returnDocument: 'after' },
   );
   if (result) return normaliseApplied(result.appliedJobs);

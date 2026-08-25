@@ -12,27 +12,8 @@ export {
   countApplicationsForJob, countApplicationsForJobs, listApplicationsForContact,
 } from './application-queries.js';
 
-/** Idempotent index setup. Called on boot. */
-export async function ensureApplicationIndexes() {
-  const collection = await applicationsCol();
-  await collection.createIndex({ companyId: 1, jobId: 1 }, { name: 'applications_companyId_jobId' });
-  await collection.createIndex({ contactId: 1 }, { name: 'applications_contactId' });
-  await collection.createIndex({ stageId: 1 }, { name: 'applications_stageId' });
-  await collection.createIndex({ companyId: 1, jobId: 1, appliedAt: -1 }, { name: 'applications_companyId_jobId_appliedAt' });
-  // Reverse lookup from a submission back to its application. Partial on the $type
-  // so the explicit nulls most applications carry are never indexed (never sparse:
-  // sparse skips MISSING fields, not explicit nulls).
-  await collection.createIndex(
-    { assignmentSubmissionId: 1 },
-    {
-      partialFilterExpression: { assignmentSubmissionId: { $type: 'objectId' } },
-      name: 'applications_assignmentSubmissionId',
-    },
-  );
-}
-
-
-
+// Same reason: boot calls ensureApplicationIndexes from this path today.
+export { ensureApplicationIndexes } from './application-indexes.js';
 
 /**
  * Insert an application for a company. Stamps appliedAt + timestamps.
@@ -117,8 +98,6 @@ export async function getApplicationForCompany(companyId, appId) {
   const collection = await applicationsCol();
   return collection.findOne({ _id: appOid, companyId: companyOid });
 }
-
-
 
 
 /**

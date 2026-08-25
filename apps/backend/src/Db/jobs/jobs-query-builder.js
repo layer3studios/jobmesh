@@ -40,6 +40,16 @@ function workplaceClause(mode) {
 
 const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+/** At this length and above, a query is treated as words and goes to $text. */
+export const MIN_TEXT_SEARCH_LENGTH = 3;
+
+/** True when this filter carries a $text clause — the caller sorts by relevance. */
+export function hasTextSearch(query) {
+  if (!query || typeof query !== 'object') return false;
+  if (query.$text) return true;
+  return Array.isArray(query.$and) && query.$and.some((clause) => clause?.$text);
+}
+
 function buildJobsQuery({
   company, workplace, entryLevel,
   roleCategory, experienceBand, techStack, dateFilter, searchFilter,
@@ -135,9 +145,19 @@ function buildJobsQuery({
     }
   }
 
-  if (searchFilter && searchFilter.trim().length >= 2) {
-    const escaped = searchFilter.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const re = { $regex: escaped, $options: 'i' };
+  // Free text. $text rides the jobs_text_search index (see job-indexes.js); the
+  // $regex this replaced could not use any index and scanned the collection.
+  //
+  // The two paths are not interchangeable, so the length gate is deliberate:
+  //   - $text matches whole WORDS (stemmed, case- and diacritic-insensitive), so
+  //     "engineering" finds "engineer" but "Jav" does not find "Java".
+  //   - a 1-2 character query is almost always someone mid-prefix, which is
+  //     exactly what $text cannot do, so those keep the old substring regex.
+  const search = searchFilter?.trim();
+  if (search && search.length >= MIN_TEXT_SEARCH_LENGTH) {
+    must.push({ $text: { $search: search } });
+  } else if (search && search.length >= 2) {
+    const re = { $regex: escapeRegex(search), $options: 'i' };
     must.push({ $or: [
       { JobTitle: re },
       { Company: re },

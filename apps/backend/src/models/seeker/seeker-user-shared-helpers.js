@@ -4,6 +4,24 @@
 import { ObjectId } from 'mongodb';
 import { col } from '../../Db/connection.js';
 
+/**
+ * Hard cap on every per-user list that grows by one entry per interaction:
+ * appliedJobs, comeBackTo, dismissedJobs.
+ *
+ * These live INSIDE the user document, so they are not merely large — they are
+ * large in a document that every authenticated request loads. Uncapped, a heavy
+ * user walks the 16MB document ceiling and slows down every read they make along
+ * the way. `$slice: -SEEKER_LIST_MAX` keeps the newest entries and drops the tail
+ * on write.
+ *
+ * WHAT THE CAP COSTS. `appliedJobs` is what marks a job as already-applied in the
+ * feed, so past entry 500 the oldest applications stop being flagged. `appliedCount`
+ * is a separate $inc counter and stays a true lifetime total — it is deliberately
+ * NOT the array length, and removeAppliedJob can no longer decrement it for an
+ * entry that has already aged out.
+ */
+export const SEEKER_LIST_MAX = 500;
+
 /** Returns true if id is a non-empty string and valid ObjectId. */
 export function isValidId(id) {
   return typeof id === 'string' && id.length > 0 && ObjectId.isValid(id);

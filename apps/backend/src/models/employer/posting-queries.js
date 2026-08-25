@@ -18,14 +18,37 @@ function toOid(id) {
   return null;
 }
 
-/** List a company's native postings, newest first; optional status filter. */
-export async function listPostingsForCompany(companyId, { status } = {}) {
+/** The filter every posting list read shares. Kept in one place so the list and
+ *  its count can never drift apart and report a total for a different query. */
+function postingListQuery(companyOid, status) {
+  const query = { source: NATIVE, companyId: companyOid };
+  if (status) query.status = status;
+  return query;
+}
+
+/**
+ * List a company's native postings, newest first; optional status filter.
+ *
+ * Still returns a plain array — callers and tests that pass no paging options get
+ * exactly what they always got. `limit`/`skip` are opt-in so the route can page
+ * without every other caller having to learn a new return shape.
+ */
+export async function listPostingsForCompany(companyId, { status, limit, skip } = {}) {
   const companyOid = toOid(companyId);
   if (!companyOid) return [];
   const collection = await postingsCol();
-  const query = { source: NATIVE, companyId: companyOid };
-  if (status) query.status = status;
-  return collection.find(query).sort({ createdAt: -1 }).toArray();
+  let cursor = collection.find(postingListQuery(companyOid, status)).sort({ createdAt: -1 });
+  if (skip) cursor = cursor.skip(skip);
+  if (limit) cursor = cursor.limit(limit);
+  return cursor.toArray();
+}
+
+/** How many postings that same filter matches — the total behind a page. */
+export async function countPostingsForCompany(companyId, { status } = {}) {
+  const companyOid = toOid(companyId);
+  if (!companyOid) return 0;
+  const collection = await postingsCol();
+  return collection.countDocuments(postingListQuery(companyOid, status));
 }
 
 /** Fetch one native posting scoped to the company — cross-tenant returns null. */

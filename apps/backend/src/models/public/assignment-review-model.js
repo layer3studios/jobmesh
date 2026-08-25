@@ -32,7 +32,8 @@ export async function ensureAssignmentReviewIndexes() {
     { assignmentSubmissionId: 1 },
     { unique: true, name: 'assignment_reviews_assignmentSubmissionId' },
   );
-  await collection.createIndex({ companyId: 1 }, { name: 'assignment_reviews_companyId' });
+  // { companyId } is not created: reads look a review up by its submission, which
+  // the unique index above answers directly.
 }
 
 /** Integer within [1,5] or throw. Rejects 3.5 and '3' — no coercion. */

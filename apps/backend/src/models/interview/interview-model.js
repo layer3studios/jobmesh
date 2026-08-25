@@ -46,6 +46,24 @@ export async function ensureInterviewIndexes() {
   await collection.createIndex({ bookingToken: 1 }, { unique: true, name: 'interviews_bookingToken' });
   await collection.createIndex({ companyId: 1, applicationId: 1 }, { name: 'interviews_companyId_applicationId' });
   await collection.createIndex({ companyId: 1, status: 1, startAtUtc: 1 }, { name: 'interviews_companyId_status_startAtUtc' });
+  // Same filter, different sort. The dashboard and activity feeds order booked
+  // interviews by WHEN THEY WERE BOOKED, not when they start, and the index above
+  // ends in startAtUtc — so those reads fell back to a blocking sort.
+  await collection.createIndex(
+    { companyId: 1, status: 1, bookedAt: -1 },
+    { name: 'interviews_companyId_status_bookedAt' },
+  );
+  // Its twin. loadInterviewEvents runs the scheduled and cancelled reads as a
+  // pair; covering only the first would have left the slower half of that
+  // Promise.all still sorting in memory, and a pair is only as fast as its
+  // slowest side. Partial on status so it indexes cancelled rows alone.
+  await collection.createIndex(
+    { companyId: 1, cancelledAt: -1 },
+    {
+      partialFilterExpression: { status: INTERVIEW_STATUSES.CANCELLED },
+      name: 'interviews_companyId_cancelledAt_cancelled',
+    },
+  );
   // For the chunk 5 reminder sweep — sparse: only booked interviews have startAtUtc.
   await collection.createIndex({ startAtUtc: 1 }, { sparse: true, name: 'interviews_startAtUtc' });
 }

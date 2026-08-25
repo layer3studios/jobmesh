@@ -1,7 +1,7 @@
 // FILE: src/models/seeker/comeback-jobs-model.js
 // "Save for later" bookmarks with optional notes.
 
-import { usersCol, toOid } from './seeker-user-shared-helpers.js';
+import { usersCol, toOid, SEEKER_LIST_MAX } from './seeker-user-shared-helpers.js';
 
 export async function getComeBackTo(userId) {
   const oid = toOid(userId);
@@ -24,7 +24,12 @@ export async function upsertComeBackTo(userId, jobId, note) {
   await col.updateOne({ _id: oid }, { $pull: { comeBackTo: { jobId } } });
   const result = await col.findOneAndUpdate(
     { _id: oid },
-    { $push: { comeBackTo: { jobId, note: safeNote, addedAt: new Date() } } },
+    { $push: {
+      comeBackTo: {
+        $each: [{ jobId, note: safeNote, addedAt: new Date() }],
+        $slice: -SEEKER_LIST_MAX,
+      },
+    } },
     { returnDocument: 'after' },
   );
   return Array.isArray(result?.comeBackTo) ? result.comeBackTo : [];

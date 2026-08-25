@@ -30,11 +30,15 @@ async function reset() {
   await ensureAssignmentReviewIndexes();
 }
 
-test('ensureAssignmentReviewIndexes creates both expected indexes', async () => {
+test('ensureAssignmentReviewIndexes creates the submission index and NOT a companyId one', async () => {
   const db = await connectTestDb();
   const names = (await db.collection('assignment_reviews').indexes()).map((i) => i.name);
   assert.ok(names.includes('assignment_reviews_assignmentSubmissionId'));
-  assert.ok(names.includes('assignment_reviews_companyId'));
+  // Deliberately absent. Every read finds a review by its submission, which the
+  // unique index above answers on its own; the standalone { companyId } index was
+  // pure write cost. tasks/drop-unused-indexes.js removes it from live databases,
+  // so this asserts the intent rather than merely tolerating its absence.
+  assert.ok(!names.includes('assignment_reviews_companyId'));
 });
 
 test('the first review inserts and reports conflict: false', async () => {

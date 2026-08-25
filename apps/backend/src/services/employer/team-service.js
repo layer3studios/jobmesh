@@ -5,7 +5,7 @@
 
 import { findCompanyMembersByCompanyId } from '../../models/employer/company-member-model.js';
 import { findPendingInvitesByCompanyId } from '../../models/employer/company-invite-model.js';
-import { getEmployerUserById } from '../../models/employer/employer-user-model.js';
+import { mapEmployerUsersById } from '../../models/employer/employer-user-model.js';
 
 /**
  * The company's members, each enriched with the employer_users identity (name,
@@ -15,8 +15,11 @@ import { getEmployerUserById } from '../../models/employer/employer-user-model.j
 export async function getTeamMembersForCompany(companyId) {
   if (!companyId) return [];
   const members = await findCompanyMembersByCompanyId(companyId);
-  const enriched = await Promise.all(members.map(async (member) => {
-    const user = await getEmployerUserById(member.employerUserId);
+  // ONE query for the roster's identities. A getEmployerUserById per member was a
+  // round trip per row on a page that is nothing but rows.
+  const userById = await mapEmployerUsersById(members.map((member) => member.employerUserId));
+  const enriched = members.map((member) => {
+    const user = userById.get(member.employerUserId?.toString()) ?? null;
     return {
       id: member._id.toString(),
       employerUserId: member.employerUserId.toString(),
@@ -32,7 +35,7 @@ export async function getTeamMembersForCompany(companyId) {
         : null,
       joinedAt: member.joinedAt,
     };
-  }));
+  });
   return enriched;
 }
 

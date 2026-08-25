@@ -34,10 +34,8 @@ export async function ensureInterviewerAvailabilityIndexes() {
     { companyId: 1, employerUserId: 1, dayOfWeek: 1 },
     { unique: true, name: 'interviewer_availability_companyId_employerUserId_dayOfWeek' },
   );
-  await collection.createIndex(
-    { companyId: 1, employerUserId: 1 },
-    { name: 'interviewer_availability_companyId_employerUserId' },
-  );
+  // { companyId, employerUserId } is not created: it is a strict prefix of the
+  // unique index above and served no read of its own.
 }
 
 /** "09:30" → 570. Returns null for anything that is not a real HH:mm. */

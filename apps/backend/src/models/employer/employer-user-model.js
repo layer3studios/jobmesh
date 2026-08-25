@@ -37,6 +37,25 @@ export async function ensureEmployerUserIndexes() {
   await collection.createIndex({ companyId: 1 }, { name: 'employer_users_companyId' });
 }
 
+/**
+ * Batch-load employer users by id → Map(idString → user doc).
+ *
+ * The roster, the activity feed and the interview summary each render a list of
+ * people; resolving them one getEmployerUserById at a time is a query per row on
+ * pages whose whole job is showing rows. Ids that are malformed or gone are simply
+ * absent from the map, so a caller's `.get()` returning undefined means what a
+ * null findOne meant before.
+ */
+export async function mapEmployerUsersById(userIds) {
+  const oids = [...new Set((userIds ?? []).filter(Boolean).map(String))]
+    .map(toOid)
+    .filter(Boolean);
+  if (oids.length === 0) return new Map();
+  const collection = await employerUsersCol();
+  const docs = await collection.find({ _id: { $in: oids } }).toArray();
+  return new Map(docs.map((doc) => [doc._id.toString(), doc]));
+}
+
 /** Fetch an employer user by ObjectId string. Returns null when missing/invalid. */
 export async function getEmployerUserById(employerUserId) {
   const oid = toOid(employerUserId);

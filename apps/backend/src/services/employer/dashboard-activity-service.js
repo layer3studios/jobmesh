@@ -16,6 +16,9 @@ import {
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 50;
+/** How many stage_changes to read per requested event, before reducing to the
+ *  latest per application. See loadStageMoveEvents. */
+const STAGE_CHANGE_FANOUT = 4;
 
 /** Recent applications → 'application' events. */
 async function loadApplicationEvents(companyOid, limit) {
@@ -38,9 +41,18 @@ async function loadStageMoveEvents(companyOid, limit) {
     .toArray();
   if (recentlyMoved.length === 0) return [];
 
+  // Bounded. This reduces to the LATEST change per application, so it only ever
+  // needed the newest rows — but it was fetching every stage change those
+  // applications had ever accumulated, which on a long-lived posting is thousands
+  // of documents read to keep `limit` of them.
+  //
+  // The cap is a multiple of `limit` rather than `limit` itself: the newest N
+  // changes can all belong to a handful of busy applications, and taking exactly
+  // N would leave the quieter ones with no change found at all.
   const changes = await (await col('stage_changes'))
     .find({ applicationId: { $in: recentlyMoved.map((doc) => doc._id) }, fromStageId: { $ne: null } })
     .sort({ movedAt: -1 })
+    .limit(limit * STAGE_CHANGE_FANOUT)
     .toArray();
   const latestByApp = new Map();
   for (const change of changes) {

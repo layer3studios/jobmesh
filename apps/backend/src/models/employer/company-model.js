@@ -37,6 +37,20 @@ export async function getCompanyById(companyId) {
   return collection.findOne({ _id: oid });
 }
 
+/**
+ * Batch-load companies by id → Map(idString → company doc). Same contract as
+ * mapEmployerUsersById: unknown ids are absent rather than null entries.
+ */
+export async function mapCompaniesById(companyIds) {
+  const oids = [...new Set((companyIds ?? []).filter(Boolean).map(String))]
+    .map(toOid)
+    .filter(Boolean);
+  if (oids.length === 0) return new Map();
+  const collection = await companiesCol();
+  const docs = await collection.find({ _id: { $in: oids } }).toArray();
+  return new Map(docs.map((doc) => [doc._id.toString(), doc]));
+}
+
 /** Fetch a company by slug. Returns null when missing. */
 export async function getCompanyBySlug(slug) {
   if (typeof slug !== 'string' || !slug) return null;

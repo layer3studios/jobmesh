@@ -12,7 +12,7 @@ import {
   requireInterviewerOrHigher, requireMemberOrHigher, requireOwnerOrHigher,
 } from '../../middleware/require-company-role-middleware.js';
 import {
-  createPostingForCompany, listPostingsForCompany, updatePostingForCompany,
+  createPostingForCompany, updatePostingForCompany,
   closePostingForCompany, toPublicPosting,
 } from '../../models/employer/posting-model.js';
 import {
@@ -21,12 +21,12 @@ import {
   validateApplicationDeadline, validateAutoCloseOnDeadline, reconcileDeadlineFields,
 } from '../../services/employer/posting-validators.js';
 import { validateScreeningQuestions } from '../../services/employer/screening-question-validators.js';
-import { countApplicationsForJobs } from '../../models/public/application-model.js';
 import { fillPosting } from '../../services/employer/posting-fill-service.js';
 import { extractAndStoreRequirements } from '../../gemma/background-extractor.js';
 import { listApplicantsForPosting, listApplicantFacetsForPosting } from './employer-applicants-controller.js';
 import { getPostingAssignment, patchPostingAssignment } from './posting-assignment-handlers.js';
 import { reopenPosting, deletePosting } from './posting-lifecycle-handlers.js';
+import { listPostingsForCompanyRoute } from './employer-postings-list-controller.js';
 
 /**
  * Fire-and-forget JD extraction; never blocks or fails the HTTP response (D6/D8).
@@ -128,22 +128,8 @@ router.post('/', requireMemberOrHigher, asyncHandler(async (req, res) => {
   res.status(201).json({ posting: toPublicPosting(posting) });
 }));
 
-// GET /api/employer/jobs — list, optional ?status= filter.
-router.get('/', requireInterviewerOrHigher, asyncHandler(async (req, res) => {
-  const filter = {};
-  if (req.query.status !== undefined) filter.status = validatePostingStatus(req.query.status);
-  const postings = await listPostingsForCompany(req.employerCompanyId, filter);
-  // One grouped count for the whole page, never a query per row.
-  const counts = await countApplicationsForJobs(
-    req.employerCompanyId, postings.map((posting) => posting._id),
-  );
-  res.json({
-    postings: postings.map((posting) => ({
-      ...toPublicPosting(posting),
-      applicantCount: counts.get(posting._id.toString()) ?? 0,
-    })),
-  });
-}));
+// GET /api/employer/jobs?status=&page=&limit= — list, newest first.
+router.get('/', requireInterviewerOrHigher, asyncHandler(listPostingsForCompanyRoute));
 
 // GET /api/employer/jobs/:postingId — single posting.
 router.get('/:postingId', requireInterviewerOrHigher, requireEmployerPosting, (req, res) => {

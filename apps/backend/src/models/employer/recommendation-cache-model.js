@@ -38,7 +38,8 @@ export async function ensureRecommendationCacheIndexes() {
     { postingId: 1, isStale: 1, totalScore: -1 },
     { name: 'recommendation_cache_posting_rank' },
   );
-  await collection.createIndex({ companyId: 1 }, { name: 'recommendation_cache_companyId' });
+  // { companyId } is not created: every read also carries postingId, which the two
+  // indexes above already lead with.
 }
 
 /** This posting's suggestions, best first. Company-scoped (§6.5). */

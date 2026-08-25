@@ -26,6 +26,14 @@ export async function ensureApplicantNoteIndexes() {
     { companyId: 1, applicationId: 1, createdAt: -1 },
     { name: 'applicant_notes_company_application_createdAt' },
   );
+  // The company-wide activity feed pages notes by createdAt with no applicationId
+  // to pin. The index above cannot serve that sort — applicationId sits between
+  // the equality key and the sort key, and an index cannot skip a key and stay
+  // ordered — so the feed was sorting every note the company has ever written.
+  await collection.createIndex(
+    { companyId: 1, createdAt: -1 },
+    { name: 'applicant_notes_companyId_createdAt' },
+  );
 }
 
 /**

@@ -126,57 +126,8 @@ function buildPayload(data = {}, siteName) {
 export const createJobModel = (mappedJob, siteName) =>
   buildPayload({ ...mappedJob, sourceSite: siteName, Company: mappedJob.Company || siteName }, siteName);
 
-/**
- * Create an index, self-healing if an index with the same name already exists
- * with different options (e.g. leftover TTL from the old Mongoose schema).
- */
-async function safeCreateIndex(coll, keys, options = {}) {
-  try {
-    await coll.createIndex(keys, options);
-  } catch (err) {
-    if (err?.code === 85 || err?.codeName === 'IndexOptionsConflict') {
-      // Find the conflicting index by key shape and drop it, then recreate.
-      const indexes = await coll.indexes();
-      const keyJson = JSON.stringify(keys);
-      const conflict = indexes.find(i => JSON.stringify(i.key) === keyJson);
-      if (conflict) {
-        console.warn(`[indexes] dropping conflicting index ${conflict.name} on ${coll.collectionName}`);
-        await coll.dropIndex(conflict.name);
-        await coll.createIndex(keys, options);
-        return;
-      }
-    }
-    throw err;
-  }
-}
-
-/**
- * Uniqueness on JobID applies to scraped jobs ONLY. The `jobs` collection is
- * shared with native postings, which carry no JobID — and MongoDB indexes a
- * missing field as null, so a plain unique index would permit exactly one
- * native posting collection-wide. The filter keys off `sourceSite` (required on
- * every scraped job, absent on every native posting) because
- * partialFilterExpression forbids $ne and $exists:false.
- */
-export const JOB_ID_UNIQUE_INDEX_NAME = 'jobs_JobID_unique_scraped';
-export const JOB_ID_UNIQUE_INDEX_OPTIONS = {
-  unique: true,
-  partialFilterExpression: { sourceSite: { $exists: true } },
-  name: JOB_ID_UNIQUE_INDEX_NAME,
-};
-
-/** Idempotent index setup. Called from server boot. */
-export async function ensureJobIndexes() {
-  const jobs = await col('jobs');
-  await safeCreateIndex(jobs, { JobID: 1 }, JOB_ID_UNIQUE_INDEX_OPTIONS);
-  await safeCreateIndex(jobs, { Status: 1, PostedDate: -1 });
-  await safeCreateIndex(jobs, { Status: 1, Company: 1 });
-  await safeCreateIndex(jobs, { Status: 1, 'autoTags.roleCategory': 1 });
-  await safeCreateIndex(jobs, { Status: 1, 'autoTags.experienceBand': 1 });
-  await safeCreateIndex(jobs, { Status: 1, 'autoTags.techStack': 1 });
-  await safeCreateIndex(jobs, { Status: 1, WorkplaceType: 1 });
-  await safeCreateIndex(jobs, { Status: 1, SalaryMin: 1, SalaryMax: 1 });
-  await safeCreateIndex(jobs, { scrapedAt: 1 });
-  await safeCreateIndex(jobs, { ATSPlatform: 1 });
-  await safeCreateIndex(jobs, { sourceSite: 1, JobID: 1 });
-}
+// Index setup lives next door; re-exported so every existing import path holds.
+export {
+  safeCreateIndex, ensureJobIndexes,
+  JOBS_TEXT_INDEX_NAME, JOB_ID_UNIQUE_INDEX_NAME, JOB_ID_UNIQUE_INDEX_OPTIONS,
+} from './job-indexes.js';
