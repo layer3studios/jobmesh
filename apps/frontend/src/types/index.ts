@@ -24,7 +24,9 @@ export interface IJob {
   Location: string;
   ApplicationURL: string;
   PostedDate: string | null;
-  Description: string;
+  /** Absent on feed rows — the list is projected down to card fields. Present on
+   *  the by-id detail response. See Db/jobs/jobs-feed-projection.js. */
+  Description?: string;
   Department?: string;
   ContractType?: string;
   sourceSite?: string;

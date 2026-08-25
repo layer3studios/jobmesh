@@ -10,7 +10,7 @@ import {
   toPublicApplication, EXPERIENCE_BUCKETS,
 } from '../../models/public/application-model.js';
 import { countApplicationsForJob } from '../../models/public/application-model.js';
-import { getContactForCompany, toPublicContact } from '../../models/public/contact-model.js';
+import { mapContactsByIdForCompany, toPublicContact } from '../../models/public/contact-model.js';
 import { listResumeScoresForJob, toPublicResumeScore } from '../../models/public/resume-score-model.js';
 import { countApplicationsByContact } from '../../models/public/contact-application-model.js';
 import {
@@ -102,8 +102,9 @@ export async function listApplicantsForPosting(req, res) {
   const contactIds = [...new Set(
     applications.map((application) => application.contactId?.toString()).filter(Boolean),
   )];
-  const contacts = await Promise.all(contactIds.map((contactId) => getContactForCompany(companyId, contactId)));
-  const contactById = new Map(contacts.filter(Boolean).map((contact) => [contact._id.toString(), contact]));
+  // ONE query for the whole page. A getContactForCompany per row was N round
+  // trips on the list every recruiter opens first.
+  const contactById = await mapContactsByIdForCompany(companyId, contactIds);
 
   const scores = await listResumeScoresForJob(companyId, jobId, applicationIds);
   const scoreByApplicationId = new Map(scores.map((score) => [score.applicationId.toString(), score]));
@@ -190,10 +191,5 @@ export async function listApplicantsForPosting(req, res) {
   const visible = filterByAssignmentReview(merged, assignmentFilter);
   res.json({ applicants: sortApplicants(visible, sortKey), stats });
 }
-
-
-
-
-
 
 export default listApplicantsForPosting;

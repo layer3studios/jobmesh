@@ -4,6 +4,7 @@
 import { ObjectId } from 'mongodb';
 import { col } from '../connection.js';
 import { buildJobsQuery } from './jobs-query-builder.js';
+import { FEED_PROJECTION, clampFeedLimit } from './jobs-feed-projection.js';
 
 const JOBS = 'jobs';
 
@@ -36,7 +37,10 @@ export async function getJobsPaginated(
   locationsFilter = [], salaryMinLpa = null, salaryMaxLpa = null,
 ) {
   const jobs = await col(JOBS);
-  const skip = (Math.max(1, page) - 1) * limit;
+  // Clamped here rather than only at the route, so no caller can ask this
+  // function for the whole collection.
+  const safeLimit = clampFeedLimit(limit);
+  const skip = (Math.max(1, page) - 1) * safeLimit;
   const query = buildJobsQuery({
     company: companyFilter, workplace: workplaceFilter,
     entryLevel: entryLevelFilter, roleCategory: roleCategoryFilter,
@@ -49,8 +53,8 @@ export async function getJobsPaginated(
     jobs.countDocuments(query),
     jobs.find(query)
       .sort({ PostedDate: -1, scrapedAt: -1 })
-      .skip(skip).limit(limit)
-      .project({ __v: 0 })
+      .skip(skip).limit(safeLimit)
+      .project(FEED_PROJECTION)
       .toArray(),
     getActiveCompaniesCached(jobs),
   ]);
@@ -58,7 +62,7 @@ export async function getJobsPaginated(
   return {
     jobs: results,
     totalJobs,
-    totalPages: Math.max(1, Math.ceil(totalJobs / limit)),
+    totalPages: Math.max(1, Math.ceil(totalJobs / safeLimit)),
     currentPage: page,
     companies,
   };

@@ -31,29 +31,36 @@ export async function getApplicantDetailForCompany(companyId, applicationId) {
   const application = await getApplicationForCompany(companyId, applicationId);
   if (!application) throw new HttpError(404, 'Application not found', 'APPLICATION_NOT_FOUND');
 
-  const contact = await getContactForCompany(companyId, application.contactId);
-  const score = await getResumeScoreForApplication(application._id);
-  const stageChanges = await listStageChangesForApplication(application._id);
-  const resumeFile = await getResumeFileForApplication(application._id);
-  // Queue lifecycle, separate axis from score.processingError — lets the UI show
-  // "Rescoring…" while a job is queued/processing. null when no job doc exists.
-  const scoreJobStatus = await getScoreJobStatusForApplication(application._id);
-
-  // Legacy applications carry no assignmentSubmissionId, so neither collection is
-  // queried at all for them — the UI renders "No assignment required" from nulls.
-  const assignmentSubmission = application.assignmentSubmissionId
-    ? await getAssignmentSubmissionForCompany(companyId, application.assignmentSubmissionId)
-    : null;
-  const assignmentReview = assignmentSubmission
-    ? await getAssignmentReviewForSubmission(companyId, assignmentSubmission._id)
-    : null;
-
-  // The same person's other applications at this company (contacts are deduped by
-  // email, so this is identity, not a guess). Omitted from the response entirely
-  // when empty — the UI's signal to render nothing rather than an empty section.
-  const otherApplications = application.contactId
-    ? await listOtherApplicationsForContact(companyId, application.contactId, application._id)
-    : [];
+  // ONE ROUND TRIP. Every read below needs nothing but `application`, which is
+  // already in hand, so queueing them cost seven sequential latencies for no
+  // ordering that anything actually required.
+  //
+  // The two conditional reads keep their guards INSIDE the batch rather than in
+  // front of it: a legacy application with no contactId or no assignment still
+  // issues exactly the queries it did before, which is none.
+  const [
+    contact, score, stageChanges, resumeFile, scoreJobStatus,
+    otherApplications, assignmentSubmission,
+  ] = await Promise.all([
+    getContactForCompany(companyId, application.contactId),
+    getResumeScoreForApplication(application._id),
+    listStageChangesForApplication(application._id),
+    getResumeFileForApplication(application._id),
+    // Queue lifecycle, separate axis from score.processingError — lets the UI show
+    // "Rescoring…" while a job is queued/processing. null when no job doc exists.
+    getScoreJobStatusForApplication(application._id),
+    // The same person's other applications at this company (contacts are deduped by
+    // email, so this is identity, not a guess). Omitted from the response entirely
+    // when empty — the UI's signal to render nothing rather than an empty section.
+    application.contactId
+      ? listOtherApplicationsForContact(companyId, application.contactId, application._id)
+      : [],
+    // Legacy applications carry no assignmentSubmissionId, so the collection is
+    // not queried at all for them — the UI renders "No assignment required".
+    application.assignmentSubmissionId
+      ? getAssignmentSubmissionForCompany(companyId, application.assignmentSubmissionId)
+      : null,
+  ]);
 
   // Public proof-of-work, resolved in priority order:
   //   1. the snapshot ON THIS APPLICATION — typed on the apply form, or looked up
@@ -67,9 +74,17 @@ export async function getApplicantDetailForCompany(companyId, applicationId) {
   // Both providers resolve the same way and are independent of each other, so
   // they race rather than queue — two 5s ceilings in sequence would be a 10s
   // ceiling on a page that must not wait on anyone.
-  const [leetcode, github] = await Promise.all([
+  //
+  // The assignment review joins this wave rather than preceding it: it is the only
+  // read that genuinely had to wait (it keys off the submission we just verified
+  // belongs to this company), and it has nothing to do with the proof-of-work
+  // lookups, so the two should not queue behind each other.
+  const [leetcode, github, assignmentReview] = await Promise.all([
     application.leetcodeData ?? resolveApplicantLeetCode(contact?.email ?? null),
     application.githubData ?? resolveApplicantGitHub(contact?.email ?? null),
+    assignmentSubmission
+      ? getAssignmentReviewForSubmission(companyId, assignmentSubmission._id)
+      : null,
   ]);
 
   const resumeMeta = resumeFile ? toResumeMeta(resumeFile) : null;

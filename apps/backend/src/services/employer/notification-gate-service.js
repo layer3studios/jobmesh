@@ -18,25 +18,32 @@
 // the gap between reads, never a stale value after a user changes a switch.
 
 import { getEmployerUserById } from '../../models/employer/employer-user-model.js';
+import { createBoundedCache } from '../shared/bounded-cache.js';
 import {
   toNotificationPreferences, NOTIFICATION_EVENT_KEYS,
 } from '../../models/employer/employer-user-profile-model.js';
 
 const CACHE_TTL_MS = 30_000;
+/** Comfortably above any real company's headcount; the point is that a ceiling
+ *  exists at all. Entries expire on read, so nothing evicts a user who stops
+ *  receiving mail — only this bound does. */
+const CACHE_MAX_ENTRIES = 5_000;
 
-/** userId string → { preferences, expiresAt }. */
-const cache = new Map();
+/** userId string → preferences. */
+const cache = createBoundedCache({
+  ttlMilliseconds: CACHE_TTL_MS, maxEntries: CACHE_MAX_ENTRIES,
+});
 
 /** Drop one user's cached preferences. Called by the PATCH handler after a write. */
 export function invalidateNotificationCache(employerUserId) {
-  if (employerUserId) cache.delete(String(employerUserId));
-  else cache.clear();
+  if (employerUserId) cache.invalidate(String(employerUserId));
+  else cache.invalidate();
 }
 
 async function loadPreferences(employerUserId) {
   const key = String(employerUserId);
   const cached = cache.get(key);
-  if (cached && cached.expiresAt > Date.now()) return cached.preferences;
+  if (cached) return cached;
 
   let preferences;
   try {
@@ -47,7 +54,7 @@ async function loadPreferences(employerUserId) {
     console.warn(`[notify-gate] preference read failed for ${key}: ${error.message}`);
     return toNotificationPreferences(null);
   }
-  cache.set(key, { preferences, expiresAt: Date.now() + CACHE_TTL_MS });
+  cache.set(key, preferences);
   return preferences;
 }
 

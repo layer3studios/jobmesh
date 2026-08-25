@@ -110,9 +110,31 @@ export async function hydrateRecommendations(rows) {
   });
 }
 
-/** The facts stage 3's prompt is given, for one cached row. */
+/**
+ * The facts stage 3's prompt is given, for one cached row.
+ *
+ * PROJECTED DELIBERATELY, AND NARROWLY. This loaded the whole seeker document and
+ * handed it to a prompt built on an employer's behalf — which meant `appliedJobs`
+ * and `dismissedJobs`, i.e. where this person applied at OTHER companies and which
+ * roles they turned down, plus `googleId` and their resume review. None of it is
+ * this employer's business and none of it was ever read.
+ *
+ * The allowlist below is exactly what the two consumers touch: seekerSkillSet()
+ * reads `skills` + `parsedProfile.skills`, and buildSeekerSummary() reads
+ * `parsedProfile.totalExperienceYears` + `parsedProfile.summary`. Not even name or
+ * email — a skills-fit review does not need to know who it is judging. Anything
+ * added to the prompt later must be added here, on purpose.
+ */
+const REVIEW_INPUT_PROJECTION = {
+  skills: 1,
+  'parsedProfile.skills': 1,
+  'parsedProfile.totalExperienceYears': 1,
+  'parsedProfile.summary': 1,
+};
+
 export async function reviewInputFor(companyId, postingId, seekerUserId) {
-  const seeker = await (await col('users')).findOne({ _id: toOid(seekerUserId) });
+  const seeker = await (await col('users'))
+    .findOne({ _id: toOid(seekerUserId) }, { projection: REVIEW_INPUT_PROJECTION });
   if (!seeker) return null;
   const proof = await proofOfWorkFor([seekerUserId]);
   const key = String(toOid(seekerUserId));

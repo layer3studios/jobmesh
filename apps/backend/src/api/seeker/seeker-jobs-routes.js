@@ -5,6 +5,7 @@ import {
   getJobsPaginated, getPublicBaitJobs, findJobById,
   addCuratedJob, deleteJobById, getJobFacets,
 } from '../../Db/jobs/index.js';
+import { clampFeedLimit } from '../../Db/jobs/jobs-feed-projection.js';
 import { getCompanyDirectoryStats, getCompanyIntel } from '../../Db/companies/index.js';
 import { getSimilarJobs, getMarketPulse } from '../../Db/analytics/index.js';
 import { asyncHandler } from '../../middleware/async-handler-middleware.js';
@@ -34,7 +35,8 @@ const FEED_CACHE_HEADER = 'public, max-age=60, s-maxage=120, stale-while-revalid
 
 jobsApiRouter.get('/', asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
-  const limit = Math.min(parseInt(req.query.limit, 10) || 50, 100);
+  // getJobsPaginated clamps again; this keeps the route's own contract honest.
+  const limit = clampFeedLimit(parseInt(req.query.limit, 10) || 50);
   const company = req.query.company?.trim() || null;
   const workplace = req.query.workplace?.trim()?.toLowerCase()
     || (req.query.remote === 'true' ? 'remote' : null);

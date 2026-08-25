@@ -26,6 +26,8 @@ export default function Dashboard() {
   const [jobSheetOpen, setJobSheetOpen] = useState(false);
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+  /** Job ids whose full document has already been fetched — see the effect below. */
+  const hydratedIds = useRef<Set<string>>(new Set());
 
   const { isMobile, useSplit } = useViewport();
   const { appliedJobIds, dismissedJobIds, toggleApplied, toggleDismissed, userSkills, currentUser } = useSeeker();
@@ -70,18 +72,44 @@ export default function Dashboard() {
     return () => { cancelled = true; };
   }, []);
 
-  // Restore selectedJob from URL
+  // Restore selectedJob from URL, then make sure it is the FULL document.
+  //
+  // The feed is projected down to what a card renders and deliberately carries no
+  // description (see Db/jobs/jobs-feed-projection.js), but the detail panel is fed
+  // from this same array — so a row picked out of `jobs` paints instantly and then
+  // has to be topped up by id. `hydratedIds` makes that at most one fetch per job:
+  // without it, the effect would see a still-partial doc and refetch forever.
   useEffect(() => {
     if (!f.selectedJobParam) return;
-    const found = jobs.find(j => j._id === f.selectedJobParam);
-    if (found) setSelectedJob(found);
-    else if (f.selectedJobParam !== selectedJob?._id) {
-      fetch(`/api/seeker/jobs/${encodeURIComponent(f.selectedJobParam)}`, { credentials: 'include' })
-        .then(r => r.ok ? r.json() : null)
-        .then((j: IJob | null) => { if (j) setSelectedJob(j); })
-        .catch(() => { });
-    }
-  }, [f.selectedJobParam, jobs, selectedJob?._id]);
+    const id = f.selectedJobParam;
+    const found = jobs.find(j => j._id === id);
+
+    // Paint immediately from the list row when we have one — the header, salary
+    // and tags are all present there; only the body is missing.
+    if (found && id !== selectedJob?._id) setSelectedJob(found);
+
+    // Completeness of the doc we actually hold decides this, never identity: a job
+    // reached from the Similar Jobs rail is already `selectedJob` by the time this
+    // runs and is not in `jobs` at all, yet still arrived without a body.
+    const current = found ?? (selectedJob?._id === id ? selectedJob : null);
+    const needsBody = !current || current.Description === undefined;
+    if (!needsBody || hydratedIds.current.has(id)) return;
+    hydratedIds.current.add(id);
+
+    let cancelled = false;
+    fetch(`/api/seeker/jobs/${encodeURIComponent(id)}`, { credentials: 'include' })
+      .then(r => r.ok ? r.json() : null)
+      .then((j: IJob | null) => {
+        // Ignore a response that lost the race to a newer selection.
+        if (!cancelled && j && j._id === id) setSelectedJob(j);
+      })
+      .catch(() => { hydratedIds.current.delete(id); });
+    return () => { cancelled = true; };
+    // `selectedJob` in full, not just its id: the body reads the object to decide
+    // whether it still needs a description. Re-running on the hydrated value is
+    // harmless — the id then matches, so nothing is overwritten and `hydratedIds`
+    // stops a second fetch.
+  }, [f.selectedJobParam, jobs, selectedJob]);
 
   const companyDomainMap = useMemo(() => {
     const m = new Map<string, string>();

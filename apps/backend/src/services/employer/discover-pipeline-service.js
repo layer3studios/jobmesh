@@ -77,6 +77,17 @@ async function notify({ email, name, companyName, postingTitle, postingSlug, com
   }
 }
 
+/** Every seeker field addSeekerToPipeline reads — nothing else is loaded. */
+const ADD_TO_PIPELINE_PROJECTION = {
+  name: 1,
+  email: 1,
+  leetcodeUsername: 1,
+  githubUsername: 1,
+  'parsedProfile.fullName': 1,
+  'parsedProfile.currentLocation': 1,
+  'parsedProfile.totalExperienceYears': 1,
+};
+
 /**
  * Add one suggested seeker to a posting's pipeline.
  * @throws HttpError 403 (not eligible / no consent), 404, 409 (already there).
@@ -87,7 +98,13 @@ export async function addSeekerToPipeline(companyId, postingId, seekerUserId) {
   });
   if (!posting) throw new HttpError(404, 'Posting not found', 'POSTING_NOT_FOUND');
 
-  const seeker = await (await col('users')).findOne({ _id: toOid(seekerUserId) });
+  // Allowlisted, not the whole document. The seven fields below are every one this
+  // function reads; loading the rest pulled `appliedJobs` / `dismissedJobs` — this
+  // candidate's history at OTHER employers — into a request made by this one.
+  const seeker = await (await col('users')).findOne(
+    { _id: toOid(seekerUserId) },
+    { projection: ADD_TO_PIPELINE_PROJECTION },
+  );
   if (!seeker?.email) throw new HttpError(404, 'Candidate not found', 'SEEKER_NOT_FOUND');
   const email = String(seeker.email).trim().toLowerCase();
 

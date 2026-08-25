@@ -5,7 +5,7 @@
 // different questions about the same collection.
 
 import { listApplicationsForJob } from '../../models/public/application-model.js';
-import { getContactForCompany } from '../../models/public/contact-model.js';
+import { mapContactsByIdForCompany } from '../../models/public/contact-model.js';
 import { listResumeScoresForJob } from '../../models/public/resume-score-model.js';
 
 /** Non-city noise seen in free-text contact locations. */
@@ -46,10 +46,11 @@ export async function listApplicantFacetsForPosting(req, res) {
     applications.map((application) => application.contactId?.toString()).filter(Boolean),
   )];
 
-  const [scores, contacts] = await Promise.all([
+  const [scores, contactById] = await Promise.all([
     listResumeScoresForJob(companyId, jobId, applicationIds),
-    Promise.all(contactIds.map((contactId) => getContactForCompany(companyId, contactId))),
+    mapContactsByIdForCompany(companyId, contactIds),
   ]);
+  const contacts = [...contactById.values()];
 
   const skillCounts = new Map();
   for (const score of scores) {

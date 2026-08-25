@@ -8,7 +8,7 @@
 // guess. Missing values are empty cells — never the string "null".
 
 import { listApplicationsForJob } from '../../models/public/application-model.js';
-import { getContactForCompany } from '../../models/public/contact-model.js';
+import { mapContactsByIdForCompany } from '../../models/public/contact-model.js';
 import { listResumeScoresForJob } from '../../models/public/resume-score-model.js';
 import { mapStageNamesById } from './dashboard-helpers.js';
 
@@ -51,12 +51,11 @@ export async function buildApplicantCsvRows(companyId, jobId, now = new Date()) 
   const contactIds = [...new Set(
     applications.map((application) => application.contactId?.toString()).filter(Boolean),
   )];
-  const [contacts, scores, stageNameById] = await Promise.all([
-    Promise.all(contactIds.map((contactId) => getContactForCompany(companyId, contactId))),
+  const [contactById, scores, stageNameById] = await Promise.all([
+    mapContactsByIdForCompany(companyId, contactIds),
     listResumeScoresForJob(companyId, jobId, applications.map((application) => application._id)),
     mapStageNamesById(companyId),
   ]);
-  const contactById = new Map(contacts.filter(Boolean).map((doc) => [doc._id.toString(), doc]));
   const scoreByApplicationId = new Map(scores.map((doc) => [doc.applicationId.toString(), doc]));
 
   return applications.map((application) => {

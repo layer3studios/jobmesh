@@ -40,8 +40,16 @@ export async function getUserById(userId) {
 }
 
 /**
- * Find a user by Google profile, or create one. Migrates any pre-existing
- * email/name match by linking googleId onto the existing doc.
+ * Find a user by Google profile, or create one. Migrates a pre-existing account
+ * by linking googleId onto the doc with the SAME EMAIL.
+ *
+ * The legacy lookup was `$or: [{ email }, { name }]`, which was wrong twice over.
+ * Correctness first: `name` is a display name and is not unique, so two people
+ * called "Priya Sharma" collided — the second to sign in with Google had our
+ * googleId stamped onto the FIRST one's document and was handed that account,
+ * applications and all. Email is the identifier Google actually verifies, and it
+ * is the only safe thing to link on. Performance second: `name` carries no index,
+ * so every first-time sign-in scanned the whole users collection.
  */
 export async function findOrCreateGoogleUser({ googleId, email, name, picture }) {
   const col = await usersCol();
@@ -49,7 +57,9 @@ export async function findOrCreateGoogleUser({ googleId, email, name, picture })
   let user = await col.findOne({ googleId });
   if (user) return user;
 
-  user = await col.findOne({ $or: [{ email }, { name }] });
+  // Email only, and only when Google actually gave us one — `findOne({ email:
+  // undefined })` would match any document that simply has no email field.
+  user = email ? await col.findOne({ email }) : null;
   if (user) {
     await col.updateOne(
       { _id: user._id },

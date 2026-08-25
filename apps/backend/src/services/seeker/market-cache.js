@@ -5,6 +5,13 @@
 // injectable (now) so tests advance the clock without real waits.
 // Cache keys always embed the userId (C8) so a hit for user A can never
 // surface for user B.
+//
+// The mechanism now lives in services/shared/bounded-cache.js — it was the only
+// bounded cache in the codebase, so the other callers that needed one were
+// copying it or, more often, not. This file keeps its own name, constants and
+// API; only the implementation moved.
+
+import { createBoundedCache } from '../shared/bounded-cache.js';
 
 export const TTL_MILLISECONDS = 600_000;
 export const MAX_ENTRIES = 500;
@@ -15,38 +22,9 @@ export function createMarketCache({
   ttlMilliseconds = TTL_MILLISECONDS,
   maxEntries = MAX_ENTRIES,
 } = {}) {
-  // Map preserves insertion order → oldest key is first; a get re-inserts a
-  // live entry to bump its recency (LRU).
-  const store = new Map();
-
-  function get(key) {
-    const entry = store.get(key);
-    if (!entry) return null;
-    if (now() - entry.storedAt >= ttlMilliseconds) {
-      store.delete(key);
-      return null;
-    }
-    store.delete(key);
-    store.set(key, entry);
-    return entry.value;
-  }
-
-  function set(key, value) {
-    if (store.has(key)) {
-      store.delete(key);
-    } else if (store.size >= maxEntries) {
-      const oldest = store.keys().next().value;
-      store.delete(oldest);
-    }
-    store.set(key, { value, storedAt: now() });
-  }
-
-  // Tests only — never called from request paths.
-  function clear() {
-    store.clear();
-  }
-
-  return { get, set, clear };
+  const cache = createBoundedCache({ ttlMilliseconds, maxEntries, now });
+  // The original surface, unchanged: get, set, and a tests-only clear.
+  return { get: cache.get, set: cache.set, clear: cache.clear };
 }
 
 /** Shared singleton used by the match-count + salary-benchmark services. */

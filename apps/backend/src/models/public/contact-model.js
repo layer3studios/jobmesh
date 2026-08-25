@@ -62,6 +62,26 @@ export async function getContactForCompany(companyId, contactId) {
   return collection.findOne({ _id: contactOid, companyId: companyOid });
 }
 
+/**
+ * Batch-load the company's contacts for a set of ids, in ONE query. The list views
+ * (applicants, facets, CSV export) resolve every row's contact through this — a
+ * getContactForCompany per row is an N+1 on the hottest employer page.
+ *
+ * Returns Map(idString -> contact doc). Ids that are null, malformed, or belong to
+ * another tenant are simply absent from the map, so a caller's `.get()` returning
+ * undefined means exactly what a null findOne meant before.
+ */
+export async function mapContactsByIdForCompany(companyId, contactIds) {
+  const companyOid = toOid(companyId);
+  const oids = [...new Set((contactIds ?? []).filter(Boolean).map(String))]
+    .map(toOid)
+    .filter(Boolean);
+  if (!companyOid || oids.length === 0) return new Map();
+  const collection = await contactsCol();
+  const docs = await collection.find({ companyId: companyOid, _id: { $in: oids } }).toArray();
+  return new Map(docs.map((doc) => [doc._id.toString(), doc]));
+}
+
 /** The company's contact for this email, or null. Never creates one. */
 export async function getContactByEmailForCompany(companyId, email) {
   const companyOid = toOid(companyId);
