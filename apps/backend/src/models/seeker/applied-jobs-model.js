@@ -104,40 +104,55 @@ export async function addAppliedJob(userId, jobId, snapshot = {}) {
 }
 
 /**
- * Remove a job from appliedJobs.
- * FIX: decrement appliedCount when something was actually removed.
- * Also clamps to >= 0 so legacy bad data can't go negative.
+ * Remove a job from appliedJobs and decrement appliedCount.
+ *
+ * ONE ATOMIC OPERATION. This used to be four round trips — read to see whether the
+ * job was there, pull the legacy string form, pull the object form, then decrement
+ * if the first read had found something. Deciding the decrement from a read taken
+ * before the pull is a race: two concurrent removes of the same job both saw it
+ * present, both pulled (the second a no-op), and both decremented, so the count
+ * drifted DOWN by two for one removal. A crash between the pull and the $inc left
+ * it drifted the other way.
+ *
+ * The pipeline form fixes all of that at once. The filter admits only a user who
+ * actually has the job, so the decrement cannot fire for a no-op; the $filter
+ * removes it in the same operation; and $max clamps at zero so legacy bad data
+ * still cannot go negative. Both element shapes are handled inline — legacy rows
+ * stored a bare jobId string, current ones store { jobId, ... } — which is why
+ * this reads the element's $type rather than running two separate pulls.
  */
 export async function removeAppliedJob(userId, jobId) {
   const oid = toOid(userId);
   if (!oid || !jobId) return [];
   const col = await usersCol();
 
-  // Step 1: did this user actually have this jobId? Check both formats.
-  const found = await col.findOne(
-    { _id: oid, $or: [{ 'appliedJobs.jobId': jobId }, { appliedJobs: jobId }] },
-    { projection: { _id: 1 } },
-  );
-
-  // Pull both legacy string form and current object form.
-  await col.updateOne(
-    { _id: oid },
-    { $pull: { appliedJobs: jobId } },
-  );
   const result = await col.findOneAndUpdate(
-    { _id: oid },
-    { $pull: { appliedJobs: { jobId } } },
+    { _id: oid, $or: [{ 'appliedJobs.jobId': jobId }, { appliedJobs: jobId }] },
+    [{
+      $set: {
+        appliedJobs: {
+          $filter: {
+            input: { $ifNull: ['$appliedJobs', []] },
+            cond: {
+              $ne: [
+                // Object rows carry the id under .jobId; legacy rows ARE the id.
+                { $cond: [{ $eq: [{ $type: '$$this' }, 'object'] }, '$$this.jobId', '$$this'] },
+                jobId,
+              ],
+            },
+          },
+        },
+        appliedCount: { $max: [0, { $subtract: [{ $ifNull: ['$appliedCount', 0] }, 1] }] },
+      },
+    }],
     { returnDocument: 'after' },
   );
+  if (result) return normaliseApplied(result.appliedJobs);
 
-  // Step 2: decrement counter only if we actually removed something.
-  if (found && result) {
-    await col.updateOne(
-      { _id: oid, appliedCount: { $gt: 0 } },
-      { $inc: { appliedCount: -1 } },
-    );
-  }
-  return result ? normaliseApplied(result.appliedJobs) : [];
+  // The user does not have this job applied (or does not exist). Removing twice is
+  // idempotent, so report the list as it stands rather than an empty one.
+  const existing = await col.findOne({ _id: oid }, { projection: { appliedJobs: 1, _id: 0 } });
+  return existing ? normaliseApplied(existing.appliedJobs) : [];
 }
 
 /** Update the pipeline stage for an applied job. */

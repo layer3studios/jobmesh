@@ -111,13 +111,29 @@ test('missing author (employer user not found) → throws 401 and writes nothing
   assert.equal(await (await col('applicant_notes')).countDocuments({}), 0);
 });
 
-test('author snapshot is immutable history — renaming the employer user does not rewrite past notes', async () => {
+test('the stored author snapshot is never rewritten, but the DISPLAY name is live', async () => {
   const note = await createApplicantNoteForApplicant(COMPANY_ID, APP_ID, AUTHOR_ID, 'written as Ada');
   assert.equal(note.authorName, 'Ada Owner');
   // The source-of-truth user record changes AFTER the note was written (R2).
   await (await col('employer_users')).updateOne({ _id: AUTHOR_ID }, { $set: { name: 'Ada Renamed' } });
+
+  // The DOCUMENT is still immutable history — nothing rewrote the row on disk.
+  const stored = await (await col('applicant_notes')).findOne({ _id: new ObjectId(note.id) });
+  assert.equal(stored.authorName, 'Ada Owner');
+
+  // The READ resolves the author's current name: a note is attributed to a person,
+  // and after a rename the snapshot names somebody the team no longer recognises.
   const [listed] = await listApplicantNotesForApplicant(COMPANY_ID, APP_ID);
-  assert.equal(listed.authorName, 'Ada Owner'); // name-at-time-of-write survives
+  assert.equal(listed.authorName, 'Ada Renamed');
+});
+
+test('a note whose author has left the roster falls back to the stored snapshot', async () => {
+  await createApplicantNoteForApplicant(COMPANY_ID, APP_ID, AUTHOR_ID, 'written before leaving');
+  // The author is gone from employer_users entirely — the snapshot is now the only
+  // record of who wrote this, which is exactly the case it exists for.
+  await (await col('employer_users')).deleteOne({ _id: AUTHOR_ID });
+  const [listed] = await listApplicantNotesForApplicant(COMPANY_ID, APP_ID);
+  assert.equal(listed.authorName, 'Ada Owner');
 });
 
 test('listApplicantNotesForApplicant returns the model result in client shape, newest first', async () => {

@@ -16,7 +16,7 @@ import { storeResumeFile, deleteResumeFile } from '../public/resume-storage-serv
 import { enqueueScoreJob } from '../public/resume-score-queue-service.js';
 import { HttpError } from '../../middleware/error-handler-middleware.js';
 import { col } from '../../Db/connection.js';
-import { createTag, normalizeTagName, TAGS_PER_APPLICATION_MAX } from '../../models/employer/candidate-tag-model.js';
+import { registerImportedTags } from './candidate-import-prefetch.js';
 
 export const MAX_IMPORT_FILES = 200;
 export const IMPORT_SOURCE = 'bulk-import';
@@ -69,29 +69,30 @@ export async function requireDefaultStage(companyId) {
  * copy is skipped outright. Across batches, an existing contact is reused (that is
  * what a contact is for) but a second application to the SAME posting is a duplicate.
  */
-/**
- * Put every imported tag into the company's library before it lands on an
- * application. Without this, a CSV could write a name the library has never heard
- * of — and the next time someone edited that candidate's tags, the whole list
- * would be refused as unknown.
- */
-async function registerImportedTags(companyId, tags) {
-  const names = [...new Set((tags ?? []).map(normalizeTagName).filter(Boolean))]
-    .slice(0, TAGS_PER_APPLICATION_MAX);
-  for (const name of names) {
-    await createTag(companyId, name);
-  }
-  return names;
-}
 
-export async function importCandidate(companyId, posting, stage, row, { resume = null } = {}) {
+export async function importCandidate(
+  companyId, posting, stage, row, { resume = null, prefetch = null } = {},
+) {
   const email = String(row.email).trim().toLowerCase();
 
-  const { contact } = await findOrCreateContactForCompany(companyId, {
-    email,
-    fullName: [row.firstName, row.lastName].filter(Boolean).join(' ').trim() || null,
-    phone: row.phone ?? null,
-  });
+  // A contact the batch already knows about costs no query. Anything else falls
+  // through to the real upsert, which still owns the E11000 race retry — the
+  // prefetch is a cache in front of it, never a replacement for it.
+  let contact = prefetch?.contactByEmail.get(email) ?? null;
+  if (!contact) {
+    const created = await findOrCreateContactForCompany(companyId, {
+      email,
+      fullName: [row.firstName, row.lastName].filter(Boolean).join(' ').trim() || null,
+      phone: row.phone ?? null,
+    });
+    contact = created.contact;
+    // So a later row with the same email reuses it instead of re-upserting.
+    prefetch?.contactByEmail.set(email, contact);
+    // A contact this batch just created cannot have applied before, so the
+    // duplicate set is authoritative for it. One we merely FOUND here was not in
+    // the prefetch's applications read, so it stays uncovered and gets the query.
+    if (created.isNew) prefetch?.coveredContactIds.add(contact._id.toString());
+  }
 
   // A flagged contact is skipped BEFORE any application is written. The flag means
   // "never reach out to this person again", and importing them onto a posting is
@@ -99,13 +100,18 @@ export async function importCandidate(companyId, posting, stage, row, { resume =
   if (isDoNotContact(contact)) return { status: 'do_not_contact' };
 
   // Already applied to this posting — reuse nothing, create nothing.
-  const applications = await col('applications');
-  const existing = await applications.findOne({
-    companyId: contact.companyId, jobId: posting._id, contactId: contact._id,
-  });
-  if (existing) return { status: 'duplicate' };
+  const contactKey = contact._id.toString();
+  if (prefetch?.coveredContactIds.has(contactKey)) {
+    if (prefetch.appliedContactIds.has(contactKey)) return { status: 'duplicate' };
+  } else {
+    const applications = await col('applications');
+    const existing = await applications.findOne({
+      companyId: contact.companyId, jobId: posting._id, contactId: contact._id,
+    });
+    if (existing) return { status: 'duplicate' };
+  }
 
-  const tags = await registerImportedTags(companyId, row.tags);
+  const tags = await registerImportedTags(companyId, row.tags, prefetch?.knownTagNames);
 
   let resumeRecord = null;
   let storedPath = null;
@@ -144,6 +150,10 @@ export async function importCandidate(companyId, posting, stage, row, { resume =
       enqueueScoreJob(application._id, companyId, posting._id)
         .catch((err) => console.warn('[import] score enqueue failed:', err.message));
     }
+    // Record it so a later row for the same person on the same posting is caught as
+    // a duplicate without a query — the same answer the per-row findOne gave.
+    prefetch?.appliedContactIds.add(contactKey);
+    prefetch?.coveredContactIds.add(contactKey);
     return { status: 'imported', applicationId: application._id };
   } catch (err) {
     // The application never landed, so nothing references these bytes.

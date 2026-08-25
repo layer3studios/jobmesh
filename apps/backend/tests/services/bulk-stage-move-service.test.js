@@ -42,6 +42,35 @@ test('moves 3 applications successfully with correct counts', async () => {
   const moved = await (await col('applications'))
     .countDocuments({ companyId, stageId: stageByText.get('Shortlisted') });
   assert.equal(moved, 3);
+
+  // The audit trail is the half a batched rewrite is most likely to drop, so it is
+  // asserted explicitly: one stage_change per move, pointing from the old stage to
+  // the new one, and lastStageMovedAt advanced on the application itself.
+  const changes = await (await col('stage_changes')).find({ applicationId: { $in: ids } }).toArray();
+  assert.equal(changes.length, 3);
+  for (const change of changes) {
+    assert.equal(change.fromStageId.toString(), stageByText.get('Applied').toString());
+    assert.equal(change.toStageId.toString(), stageByText.get('Shortlisted').toString());
+    assert.ok(change.movedAt instanceof Date);
+  }
+  const applications = await (await col('applications')).find({ _id: { $in: ids } }).toArray();
+  for (const application of applications) {
+    assert.ok(application.lastStageMovedAt instanceof Date);
+  }
+});
+
+test('re-running the same move is a no-op: counted as moved, no duplicate audit rows', async () => {
+  const { companyId, stageByText } = await seedCompany('noop');
+  const id = await seedApplication(companyId, stageByText.get('Applied'));
+  const args = {
+    applicationIds: [id.toString()], targetStageId: stageByText.get('Shortlisted').toString(),
+  };
+  await bulkMoveStage(companyId, args);
+  const again = await bulkMoveStage(companyId, args);
+  // Already in the target stage — the single-move path reports success and writes
+  // nothing, and the bulk path must agree rather than logging a move to itself.
+  assert.deepEqual(again, { moved: 1, failed: 0, failures: [] });
+  assert.equal(await (await col('stage_changes')).countDocuments({ applicationId: id }), 1);
 });
 
 test('an archived application is skipped with a failure reason', async () => {

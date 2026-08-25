@@ -75,7 +75,13 @@ export async function buildCandidateTimeline(companyId, applicationId, deps = {}
       .project({ score: 1 }).toArray(),
   ]);
   const stageNameById = new Map(stages.map((stage) => [stage._id.toString(), stage.text]));
-  const actorNameById = await mapActorNames(stageChanges.map((change) => change.movedByUserId));
+  // Note authors ride the SAME batched name lookup as stage-move actors — one read
+  // covers both, and both surfaces then show the person's current name rather than
+  // whatever it was when they typed. See applicant-notes-service for the reasoning.
+  const actorNameById = await mapActorNames([
+    ...stageChanges.map((change) => change.movedByUserId),
+    ...notes.map((note) => note.authorEmployerUserId),
+  ]);
 
   const events = [
     { type: 'applied', timestamp: application.createdAt },
@@ -92,7 +98,12 @@ export async function buildCandidateTimeline(companyId, applicationId, deps = {}
     })),
     ...interviews.flatMap(interviewEvents),
     ...notes.map((note) => ({
-      type: 'note_added', text: note.body, authorName: note.authorName ?? null, timestamp: note.createdAt,
+      type: 'note_added',
+      text: note.body,
+      // Live name, snapshot only when the author has left the roster.
+      authorName: actorNameById.get(note.authorEmployerUserId?.toString())
+        ?? note.authorName ?? null,
+      timestamp: note.createdAt,
     })),
   ];
 

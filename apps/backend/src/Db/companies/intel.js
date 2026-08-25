@@ -15,7 +15,15 @@ import { createBoundedCache } from '../../services/shared/bounded-cache.js';
 const TTL_MS = 60 * 60 * 1000;
 const MAX_ENTRIES = 200;
 
-const cache = createBoundedCache({ ttlMilliseconds: TTL_MS, maxEntries: MAX_ENTRIES });
+const SWEEP_INTERVAL_MS = 5 * 60 * 1000;
+
+const cache = createBoundedCache({
+  ttlMilliseconds: TTL_MS,
+  maxEntries: MAX_ENTRIES,
+  // Same reason as the notification gate: the ceiling stops growth, the sweep
+  // stops us holding an hour of dead company snapshots between reads.
+  sweepIntervalMilliseconds: SWEEP_INTERVAL_MS,
+});
 
 const EMPTY = {
   companyName: '', totalOpenRoles: 0, newRolesThisWeek: 0, newRolesLastWeek: 0,

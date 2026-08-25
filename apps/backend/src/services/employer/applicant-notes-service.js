@@ -1,9 +1,20 @@
 // FILE: src/services/employer/applicant-notes-service.js
 // Employer notes on an applicant (C3). Append-only: create + list, no edit or delete.
 // Notes are plain text (R3) — control characters are stripped and "<script" is refused
-// outright, matching validatePostingDescription. The author's name + email are snapshot
-// onto the note at write time (D7/R2): the note is immutable history, so a later rename
-// of the employer user must not rewrite what was already recorded.
+// outright, matching validatePostingDescription.
+//
+// AUTHOR NAME: STORED, BUT DISPLAYED LIVE. The name and email are still snapshot onto
+// the note at write time (D7/R2) and the stored row is never rewritten — the document
+// remains immutable history. What changed is the READ: listing resolves the author's
+// current name from employer_users and prefers it, falling back to the snapshot when
+// that user is gone from the roster.
+//
+// The reason is that the snapshot was solving the wrong problem. "Immutable history"
+// protects what was SAID; a display name is not a fact about the note, it is a pointer
+// to a person, and a teammate who married or fixed a typo in their name had every note
+// they ever wrote attributed to a name nobody recognises. The id was always stored, so
+// the live name is the accurate one; the snapshot is the fallback for authors who have
+// left, which is the only case where history genuinely is the best we have.
 //
 // companyId always arrives from req.employerCompanyId, never from input (§6.5). The
 // application is re-fetched company-scoped here as defence-in-depth: the route already
@@ -11,7 +22,7 @@
 
 import { HttpError } from '../../middleware/error-handler-middleware.js';
 import { getApplicationForCompany } from '../../models/public/application-model.js';
-import { getEmployerUserById } from '../../models/employer/employer-user-model.js';
+import { getEmployerUserById, mapEmployerUsersById } from '../../models/employer/employer-user-model.js';
 import {
   createApplicantNote, listApplicantNotesForApplication, toPublicApplicantNote,
 } from '../../models/public/applicant-note-model.js';
@@ -97,8 +108,32 @@ export async function createApplicantNoteForApplicant(
   return toPublicApplicantNote(note);
 }
 
+/**
+ * Overlay each note's CURRENT author name, in one batched read.
+ *
+ * Shared with the candidate timeline so both surfaces agree — a note showing one
+ * name in the notes card and another in the timeline would be worse than a stale
+ * name in both. Notes whose author has left the roster keep their snapshot, and a
+ * snapshot-less legacy note still falls through to authorEmail in the UI.
+ *
+ * Takes and returns the CLIENT shape, so nothing here can write to the stored doc.
+ */
+export async function withLiveAuthorNames(publicNotes) {
+  if (publicNotes.length === 0) return publicNotes;
+  const authorById = await mapEmployerUsersById(
+    publicNotes.map((note) => note.authorEmployerUserId),
+  );
+  return publicNotes.map((note) => {
+    const author = authorById.get(note.authorEmployerUserId?.toString());
+    // `?? note.authorName` and not `||`: an author whose name is an empty string
+    // should fall back, but one who genuinely has no name field should not
+    // resurrect a stale snapshot either — both land on the email in the UI.
+    return author ? { ...note, authorName: author.name ?? note.authorName } : note;
+  });
+}
+
 /** An application's notes, newest first, in the client shape. */
 export async function listApplicantNotesForApplicant(companyId, applicationId) {
   const notes = await listApplicantNotesForApplication(companyId, applicationId);
-  return notes.map(toPublicApplicantNote);
+  return withLiveAuthorNames(notes.map(toPublicApplicantNote));
 }

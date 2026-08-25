@@ -8,6 +8,9 @@ import { col } from '../../Db/connection.js';
 
 const stageChangesCol = () => col('stage_changes');
 
+/** How long a stage move is retained. See the warning in ensureStageChangeIndexes. */
+const STAGE_CHANGE_TTL_SECONDS = 365 * 24 * 60 * 60;
+
 function toOid(id) {
   if (id instanceof ObjectId) return id;
   if (typeof id === 'string' && ObjectId.isValid(id)) return new ObjectId(id);
@@ -18,6 +21,20 @@ function toOid(id) {
 export async function ensureStageChangeIndexes() {
   const collection = await stageChangesCol();
   await collection.createIndex({ applicationId: 1, movedAt: -1 }, { name: 'stage_changes_application_movedAt' });
+
+  // Retention. Append-only and never pruned, this grows for the lifetime of every
+  // tenant; it also backs the candidate timeline, so rows leaving is user-visible.
+  //
+  // THIS NUMBER IS A POLICY, NOT A TUNING KNOB. companies.retentionDays is
+  // configurable from 30 to 3650 days (company-validators), and this TTL is fixed
+  // at 365 — so a customer who set a longer retention loses stage history before
+  // their own policy says they should. Raise STAGE_CHANGE_TTL_SECONDS to the 3650
+  // ceiling, or drive it per-tenant with a sweep task, before anyone relies on a
+  // retention above a year.
+  await collection.createIndex(
+    { movedAt: 1 },
+    { name: 'stage_changes_ttl', expireAfterSeconds: STAGE_CHANGE_TTL_SECONDS },
+  );
 }
 
 /**

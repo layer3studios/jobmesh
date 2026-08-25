@@ -21,7 +21,9 @@
  * now             — time source, injectable so tests advance the clock without
  *                   real waits.
  */
-export function createBoundedCache({ ttlMilliseconds, maxEntries, now = Date.now } = {}) {
+export function createBoundedCache({
+  ttlMilliseconds, maxEntries, now = Date.now, sweepIntervalMilliseconds = 0,
+} = {}) {
   if (!(ttlMilliseconds > 0)) throw new Error('createBoundedCache: ttlMilliseconds must be > 0');
   if (!(maxEntries > 0)) throw new Error('createBoundedCache: maxEntries must be > 0');
 
@@ -59,8 +61,42 @@ export function createBoundedCache({ ttlMilliseconds, maxEntries, now = Date.now
     else store.delete(key);
   }
 
+  /**
+   * Drop every expired entry. The size ceiling already makes unbounded growth
+   * impossible, so this is about not HOLDING what is already dead: entries expire
+   * on read, and an entry nobody reads again keeps its value (and whatever that
+   * value references) alive until eviction pushes it out.
+   *
+   * Returns how many it removed, so a test can assert on it.
+   */
+  function sweep() {
+    const cutoff = now();
+    let removed = 0;
+    for (const [key, entry] of store) {
+      if (cutoff - entry.storedAt >= ttlMilliseconds) {
+        store.delete(key);
+        removed += 1;
+      }
+    }
+    return removed;
+  }
+
+  // unref'd on purpose: a housekeeping timer must never be the reason a process
+  // (or a test runner) refuses to exit.
+  let timer = null;
+  if (sweepIntervalMilliseconds > 0) {
+    timer = setInterval(sweep, sweepIntervalMilliseconds);
+    timer.unref?.();
+  }
+
+  /** Stop the sweep timer. Tests only — nothing in app code tears a cache down. */
+  function stop() {
+    if (timer) clearInterval(timer);
+    timer = null;
+  }
+
   /** Tests and diagnostics only — never a request path. */
   const size = () => store.size;
 
-  return { get, set, invalidate, clear: () => store.clear(), size };
+  return { get, set, invalidate, clear: () => store.clear(), size, sweep, stop };
 }

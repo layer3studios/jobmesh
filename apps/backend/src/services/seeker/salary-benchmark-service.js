@@ -15,18 +15,6 @@ export const MIN_SAMPLE_SIZE = 10;
 const CURRENCY = 'INR';
 const UNIT = 'LPA';
 
-// Midpoint of an inferred salary range: both bounds → mean, else the present
-// bound, else null (skip).
-function salaryMidpoint(range) {
-  if (!range || typeof range !== 'object') return null;
-  const min = typeof range.min === 'number' ? range.min : null;
-  const max = typeof range.max === 'number' ? range.max : null;
-  if (min !== null && max !== null) return (min + max) / 2;
-  if (min !== null) return min;
-  if (max !== null) return max;
-  return null;
-}
-
 // Linear-interpolation percentile over an ascending array. Rounded to 0.5 LPA.
 function percentile(sorted, fraction) {
   if (sorted.length === 1) return sorted[0];
@@ -53,21 +41,42 @@ export async function getSalaryBenchmarkForUser(userId) {
   match['parsedRequirements.salary_range_inferred'] = { $exists: true, $ne: null };
   if (seniority) match['parsedRequirements.experience_level'] = seniority;
 
+  // The midpoint and the sort happen IN MONGO; only an ascending array of numbers
+  // crosses the wire. This used to pull whole job documents — four copies of the
+  // description apiece — to read one nested pair of numbers from each.
+  //
+  // salaryMidpoint's rule (both bounds → mean, one bound → that bound, neither →
+  // skip) is $avg over the numeric bounds: $avg of a one-element array is that
+  // element, and $filter drops anything non-numeric exactly as the `typeof` guard
+  // did. The percentile maths stays in JS — it is pure, tested, and interpolates
+  // in a way $percentile does not reproduce.
   const jobs = await col('jobs');
-  const docs = await jobs.aggregate([{ $match: match }]).toArray();
+  const rows = await jobs.aggregate([
+    { $match: match },
+    { $project: {
+      _id: 0,
+      midpoint: { $let: {
+        vars: { bounds: { $filter: {
+          input: [
+            '$parsedRequirements.salary_range_inferred.min',
+            '$parsedRequirements.salary_range_inferred.max',
+          ],
+          cond: { $isNumber: '$$this' },
+        } } },
+        in: { $cond: [{ $gt: [{ $size: '$$bounds' }, 0] }, { $avg: '$$bounds' }, null] },
+      } },
+    } },
+    { $match: { midpoint: { $ne: null } } },
+    { $sort: { midpoint: 1 } },
+  ]).toArray();
 
-  const midpoints = [];
-  for (const job of docs) {
-    const midpoint = salaryMidpoint(job.parsedRequirements?.salary_range_inferred);
-    if (midpoint !== null) midpoints.push(midpoint);
-  }
+  const midpoints = rows.map((row) => row.midpoint);
   const sampleSize = midpoints.length;
 
   let p25 = null;
   let p50 = null;
   let p75 = null;
   if (sampleSize >= MIN_SAMPLE_SIZE) {
-    midpoints.sort((a, b) => a - b);
     p25 = percentile(midpoints, 0.25);
     p50 = percentile(midpoints, 0.5);
     p75 = percentile(midpoints, 0.75);

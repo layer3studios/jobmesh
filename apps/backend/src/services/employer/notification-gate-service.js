@@ -28,10 +28,17 @@ const CACHE_TTL_MS = 30_000;
  *  exists at all. Entries expire on read, so nothing evicts a user who stops
  *  receiving mail — only this bound does. */
 const CACHE_MAX_ENTRIES = 5_000;
+/** How often expired preference rows are purged without waiting for a read. */
+const CACHE_SWEEP_INTERVAL_MS = 5 * 60 * 1000;
 
 /** userId string → preferences. */
 const cache = createBoundedCache({
-  ttlMilliseconds: CACHE_TTL_MS, maxEntries: CACHE_MAX_ENTRIES,
+  ttlMilliseconds: CACHE_TTL_MS,
+  maxEntries: CACHE_MAX_ENTRIES,
+  // Entries expire on read, so a user who stops receiving mail keeps their row
+  // (and the preferences object it holds) alive until eviction. The sweep releases
+  // those on a timer instead. It is unref'd, so it never holds the process open.
+  sweepIntervalMilliseconds: CACHE_SWEEP_INTERVAL_MS,
 });
 
 /** Drop one user's cached preferences. Called by the PATCH handler after a write. */

@@ -16,6 +16,7 @@ import {
   createImportSummary, recordFailure, toPublicSummary, applyRowToSummary,
   requireDefaultStage, isValidEmail, MAX_IMPORT_FILES,
 } from './candidate-import-service.js';
+import { buildImportPrefetch } from './candidate-import-prefetch.js';
 
 const PDF_MAGIC = '%PDF';
 
@@ -58,6 +59,14 @@ export async function importResumesFromZip(companyId, posting, zipBuffer) {
     );
   }
 
+  // Seeded empty on purpose: this path only learns a candidate's email by parsing
+  // the PDF, so there is nothing to look up in advance. It is still worth carrying
+  // — the maps ACCUMULATE, so two resumes for the same person cost one contact
+  // upsert instead of two, and the tag library is probed once instead of per row.
+  // Contacts it did not pre-read stay uncovered, so their duplicate check still
+  // goes to the database (see buildImportPrefetch).
+  const prefetch = await buildImportPrefetch(companyId, posting, []);
+
   for (const entry of files) {
     const filename = basename(entry.name);
     let buffer;
@@ -84,7 +93,7 @@ export async function importResumesFromZip(companyId, posting, zipBuffer) {
     await applyRowToSummary(
       summary, companyId, posting, stage,
       { ...identity, filename, sourceDetail: filename },
-      { resume: { buffer, filename } },
+      { resume: { buffer, filename }, prefetch },
     );
   }
 
@@ -149,9 +158,12 @@ export async function importCandidatesFromCsv(companyId, posting, csvBuffer, { r
     }
   }
 
+  // Three reads for the whole file, threaded through every row. See
+  // buildImportPrefetch — the maps are live and each row updates them.
+  const prefetch = await buildImportPrefetch(companyId, posting, rows);
   for (const row of rows) {
     const resume = resumeForRow(row, uploadedByName, zipEntries, resumeZip?.buffer);
-    await applyRowToSummary(summary, companyId, posting, stage, row, { resume });
+    await applyRowToSummary(summary, companyId, posting, stage, row, { resume, prefetch });
   }
 
   return toPublicSummary(summary);

@@ -18,6 +18,9 @@ const cacheCol = () => col('recommendation_cache');
 /** How long a computed ranking counts as fresh. */
 export const RECOMMENDATION_TTL_MS = 6 * 60 * 60 * 1000;
 
+/** How long a row is KEPT (distinct from how long it is served fresh). */
+const RECOMMENDATION_ROW_TTL_SECONDS = 7 * 24 * 60 * 60;
+
 /** Never suggest more than this many people for one posting. */
 export const RECOMMENDATION_LIMIT = 10;
 
@@ -40,6 +43,21 @@ export async function ensureRecommendationCacheIndexes() {
   );
   // { companyId } is not created: every read also carries postingId, which the two
   // indexes above already lead with.
+
+  // Hard expiry. isStale and RECOMMENDATION_TTL_MS are app-level: they decide
+  // whether a row is SERVED, never whether it still exists, so every posting ever
+  // opened in Discover left ten rows behind for good. This is the only lifecycle
+  // rule that actually reclaims them.
+  //
+  // Safe to delete outright because the row is derived data — reopening the tab
+  // recomputes it. The audit fields it also carries (addedToPipeline,
+  // notificationSentAt) record that a suggestion led to real contact, which is why
+  // the window is a week rather than the six-hour freshness TTL: long enough to
+  // outlive any reasonable "did we already email this person" question.
+  await collection.createIndex(
+    { computedAt: 1 },
+    { name: 'recommendation_cache_ttl', expireAfterSeconds: RECOMMENDATION_ROW_TTL_SECONDS },
+  );
 }
 
 /** This posting's suggestions, best first. Company-scoped (§6.5). */

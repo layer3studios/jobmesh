@@ -18,6 +18,32 @@ import {
 
 const TOP_N = 5;
 
+/**
+ * The only fields matchesJobForProfile and buildBreakdown read. Both schemas are
+ * listed because the pool is mixed: scraped rows are PascalCase, native postings
+ * camelCase, and resolveJobLocation/isJobActive/resolvePostedDate each try both.
+ *
+ * WHY NOT PUSH THE WHOLE PREDICATE INTO MONGO. The match is not a field
+ * comparison — it normalises skills through the SKILL_ALIASES table, takes a
+ * set intersection against a threshold of min(3, required.length), and applies a
+ * -1/+2 fuzz to the experience band. Reproducing that in $expr would fork the
+ * alias table into a second, untested copy, and this file's header keeps it in JS
+ * on purpose so the pure helper stays testable.
+ *
+ * So the fix is what is LOADED, not where the maths runs: the pool was arriving
+ * as whole job documents, four renderings of the description each, to be read for
+ * a handful of fields. This is the same predicate over a fraction of the bytes.
+ * (The Watch in the header still stands — past ~10k active postings this wants a
+ * precomputed match table, not a bigger projection.)
+ */
+const MATCH_PROJECTION = {
+  parsedRequirements: 1,
+  status: 1, Status: 1,
+  postedAt: 1, PostedDate: 1, createdAt: 1,
+  location: 1, Location: 1,
+  'autoTags.roleCategory': 1,
+};
+
 function locationMatches(job, location) {
   const jobLocation = resolveJobLocation(job);
   if (!jobLocation) return false;
@@ -56,7 +82,9 @@ export async function getMatchCountForUser(userId, filters = {}) {
 
   const now = Date.now();
   const jobs = await col('jobs');
-  const docs = await jobs.aggregate([{ $match: buildBaseJobMatch(now) }]).toArray();
+  const docs = await jobs
+    .aggregate([{ $match: buildBaseJobMatch(now) }, { $project: MATCH_PROJECTION }])
+    .toArray();
 
   const matched = docs.filter((job) => matchesJobForProfile(job, profile, now));
   const scoped = location ? matched.filter((job) => locationMatches(job, location)) : matched;

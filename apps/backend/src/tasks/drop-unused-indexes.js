@@ -37,7 +37,10 @@ export const INDEXES_TO_DROP = [
     supersededBy: 'employer_access_kind_email' },
 
   // --- No query reads these fields at all.
-  { collection: 'audit_logs', key: { targetId: 1, createdAt: -1 },
+  // NOTE THE SINGULAR. The collection is `audit_log`; an earlier version of this
+  // list said `audit_logs`, which matches nothing and reported a clean "absent"
+  // while leaving the index in place.
+  { collection: 'audit_log', key: { targetId: 1, createdAt: -1 },
     supersededBy: 'nothing — targetId is written, never queried' },
   { collection: 'jobs', key: { ATSPlatform: 1 },
     supersededBy: 'nothing — never filtered on' },
