@@ -4,6 +4,7 @@
 // to just the static routes rather than failing the build/request.
 import type { MetadataRoute } from 'next';
 import { getSeekerJobsServer, getSeekerDirectoryServer } from '@/lib/server-api/seeker';
+import { getPublicProfileSlugsServer } from '@/lib/server-api/public-profile';
 import { slugifyCompanyName } from '@/utils/slugify-company';
 import { absoluteUrl } from '@/lib/site-url';
 
@@ -37,6 +38,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   } catch {
     // Degrade to static routes only if the backend is unreachable.
+  }
+
+  // Published candidate profiles. Listed in their own try so a failure here costs
+  // the sitemap its profiles, not its jobs.
+  try {
+    for (const slug of await getPublicProfileSlugsServer()) {
+      entries.push({
+        url: absoluteUrl(`/u/${slug}`),
+        changeFrequency: 'weekly',
+        priority: 0.5,
+      });
+    }
+  } catch {
+    // No profiles in the sitemap this hour. They are still crawlable by link.
   }
 
   return entries;

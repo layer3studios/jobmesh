@@ -10,3 +10,6 @@ export * from './seeker-leetcode-model.js';
 export * from './leetcode-cache-model.js';
 export * from './seeker-github-model.js';
 export * from './github-cache-model.js';
+export * from './seeker-public-profile-model.js';
+export * from './public-profile-slug-lookup.js';
+export * from './seeker-resume-file-model.js';

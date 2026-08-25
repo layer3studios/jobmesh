@@ -1,0 +1,326 @@
+/* FILE: src/styles/public-profile.css
+   The shareable public profile at /u/{slug} — a candidate's personal landing page.
+
+   THE PAGE IS THE PERSON, NOT THE PRODUCT. One column, 720px, generous vertical
+   rhythm, and no chrome: everything here is tuned so the name is the first thing
+   read and "Powered by JobMesh" is the last. The LeetCode/GitHub panels reuse the
+   .lc-* system from leetcode.css and github.css unchanged and are simply framed as
+   cards, so the numbers a recruiter sees here are literally the same component the
+   candidate sees on their own profile.
+
+   Every colour is a token, so light/dark come free — this page is opened by
+   strangers on whatever their OS is set to, and the root layout's theme script
+   resolves that before first paint. */
+
+.pp-page {
+  min-height: 100dvh;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.pp-shell {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 56px 24px 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────── */
+
+.pp-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pp-name {
+  font-family: var(--font-serif, ui-serif, Georgia, serif);
+  font-size: 1.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 0;
+}
+
+.pp-headline {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+.pp-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+}
+
+.pp-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Green pill. Soft fill rather than a solid block: it should read as a fact about
+   the person, not as a call-to-action competing with the buttons below it. */
+.pp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.pp-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.pp-summary {
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--ink-2, var(--ink));
+  margin: 4px 0 0;
+}
+
+.pp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.pp-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.pp-action:hover {
+  background: var(--surface-sunken);
+  border-color: var(--border-strong);
+}
+
+.pp-action--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.pp-action--primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.pp-action:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ─── Sections ───────────────────────────────────────────────────── */
+
+.pp-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pp-section-heading {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0;
+}
+
+.pp-section-heading a {
+  color: var(--link);
+  text-decoration: none;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 500;
+}
+
+.pp-section-heading a:hover { text-decoration: underline; }
+
+.pp-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.pp-skill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  background: var(--surface-sunken);
+  color: var(--ink-2, var(--ink));
+}
+
+/* A skill backed by a LeetCode topic or a GitHub repo language. Quiet on purpose:
+   a loud badge would imply we certified the skill, when all we can say is that a
+   public record mentions it. */
+.pp-skill--verified {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.pp-entry { display: flex; flex-direction: column; gap: 3px; }
+
+.pp-entry-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+}
+
+.pp-entry-meta {
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+.pp-entry-bullets {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 0.8438rem;
+  line-height: 1.65;
+  color: var(--ink-muted);
+}
+
+.pp-entry-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.pp-tech {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  background: var(--surface-sunken);
+  color: var(--ink-muted);
+}
+
+.pp-entries { display: flex; flex-direction: column; gap: 22px; }
+
+/* ─── Embedded LeetCode / GitHub panels ──────────────────────────── */
+
+.pp-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.pp-stale {
+  margin: 12px 0 0;
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+}
+
+/* ─── Footer ─────────────────────────────────────────────────────── */
+
+.pp-footer {
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.pp-footer a {
+  color: var(--ink-muted);
+  text-decoration: none;
+}
+
+.pp-footer a:hover { text-decoration: underline; }
+
+/* ─── Not found ──────────────────────────────────────────────────── */
+
+.pp-empty {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 96px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+/* ─── Contact modal form ─────────────────────────────────────────── */
+
+.pp-form { display: flex; flex-direction: column; gap: 12px; }
+
+/* The honeypot. Off-screen rather than display:none — some bots skip hidden
+   fields but happily fill positioned ones. aria-hidden + tabIndex keep it away
+   from screen readers and the keyboard. */
+.pp-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* ─── Mobile ─────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .pp-shell { padding: 36px 18px 56px; gap: 32px; }
+  .pp-name { font-size: 1.5rem; }
+  .pp-card { padding: 18px; border-radius: 14px; }
+  .pp-action { flex: 1 1 auto; justify-content: center; }
+}
+
+/* ─── Print ──────────────────────────────────────────────────────── */
+
+/* The page doubles as the backup for someone who still wants paper. Actions and
+   the footer go; the content prints on white with black text and no card fills,
+   which is what a printer can actually reproduce. */
+@media print {
+  .pp-page { background: #fff; }
+  .pp-shell { max-width: none; padding: 0; gap: 24px; }
+  .pp-actions, .pp-footer { display: none !important; }
+  .pp-card {
+    background: none;
+    border: 1px solid #ddd;
+    padding: 12px 0;
+    break-inside: avoid;
+  }
+  .pp-section { break-inside: avoid; }
+  .pp-name, .pp-entry-title { color: #000; }
+  .pp-headline, .pp-entry-meta, .pp-entry-bullets { color: #333; }
+}

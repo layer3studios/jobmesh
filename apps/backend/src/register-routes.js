@@ -15,6 +15,7 @@ import authRouter from './api/seeker/seeker-auth-routes.js';
 import meRouter from './api/seeker/seeker-me-routes.js';
 import seekerLeetCodeRouter from './api/seeker/seeker-leetcode-routes.js';
 import seekerGitHubRouter from './api/seeker/seeker-github-routes.js';
+import seekerPublicProfileRouter from './api/seeker/seeker-public-profile-routes.js';
 import { jobsApiRouter } from './api/seeker/seeker-jobs-routes.js';
 import usersRouter from './api/seeker/seeker-users-routes.js';
 import adminRouter from './api/admin/admin-routes.js';
@@ -62,6 +63,7 @@ import seekerResumeRouter from './api/seeker/seeker-resume-routes.js';
 import seekerProfileRouter from './api/seeker/seeker-profile-routes.js';
 import seekerMarketRouter from './api/seeker/seeker-market-routes.js';
 import publicApplyRouter from './api/public/public-apply-routes.js';
+import publicProfileRouter from './api/public/public-profile-routes.js';
 import { requireSeeker } from './middleware/require-seeker-middleware.js';
 import { requireAdmin } from './middleware/require-admin-middleware.js';
 import { requireConsentForPurpose } from './middleware/require-consent-middleware.js';
@@ -89,6 +91,9 @@ export function registerRoutes(app) {
   app.use('/api/seeker/auth', authRouter);
   app.use('/api/seeker/me', requireSeeker, seekerLeetCodeRouter);
   app.use('/api/seeker/me', requireSeeker, seekerGitHubRouter);
+  // Before meRouter: both declare paths under /api/seeker/me, and the specific
+  // /profile-settings routes must not be shadowed by anything generic there.
+  app.use('/api/seeker/me', requireSeeker, seekerPublicProfileRouter);
   app.use('/api/seeker/me', requireSeeker, meRouter);
   app.use('/api/seeker/jobs', jobsApiRouter);
   app.use('/api/seeker/users', usersRouter); // legacy 410 wildcard
@@ -154,6 +159,10 @@ export function registerRoutes(app) {
   // DPDP right of access. Unauthenticated by necessity — the emailed one-time token
   // is the credential. Mounted before the apply catch-all.
   app.use('/api/public/dpdp', publicDpdpExportRouter);
+  // Shareable candidate profiles (/u/{slug}). Fully public by design — no auth
+  // middleware ahead of it; the router itself uses optionalAuth only to avoid
+  // counting a seeker's own visit. Before the apply catch-all.
+  app.use('/api/public/profile', publicProfileRouter);
   app.use('/api/public/assignment-files', assignmentStagingRouter); // staging upload (before the apply catch-all)
   app.use('/api/public/assignment-download', assignmentDownloadRouter); // signed-token file stream (before the apply catch-all)
   app.use('/api/public', publicInterviewRouter); // unauthenticated interview booking (before the apply catch-all)

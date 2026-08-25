@@ -15,6 +15,8 @@ import ProfileSkills from './ProfileSkills';
 import LeetCodeConnect from './LeetCodeConnect';
 import GitHubConnect from './GitHubConnect';
 import ProfilePreferences from './ProfilePreferences';
+import ProfileSettingsCard from './ProfileSettingsCard';
+import ProfileShareButton from './ProfileShareButton';
 import { ProfileExperience, ProfileEducation } from './ProfileReadonly';
 import ProfileReviewCard from '../ProfileReviewCard';
 import ProfileMarketCard from '../ProfileMarketCard';
@@ -86,9 +88,18 @@ export default function Profile() {
         label="SEEKER"
         title="Your profile"
         subtitle={`Last parsed ${relTime(profile.parsedAt)}`}
-        actions={<Link href="/resume"><Button variant="ghost">Re-upload resume</Button></Link>}
+        actions={(
+          <Stack gap={8} dir="row" wrap>
+            <ProfileShareButton />
+            <Link href="/resume"><Button variant="ghost">Re-upload resume</Button></Link>
+          </Stack>
+        )}
       />
       <Stack gap={16}>
+        {/* Above the review card: the shareable link is the thing a candidate
+            comes here to get, and burying it under the resume critique makes it
+            a feature people never find. */}
+        <ProfileSettingsCard />
         <ProfileReviewCard profileUpdatedAt={(profile as ProfileWithMeta).profileUpdatedAt ?? profile.parsedAt} />
         <ProfileMarketCard />
         <ProfileContact profile={profile} onSaved={setProfile} />

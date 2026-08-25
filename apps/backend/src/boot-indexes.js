@@ -8,7 +8,7 @@
 import { connectToDb, closeDb } from './Db/connection.js';
 import {
   ensureUserIndexes, ensureLeetCodeUserIndexes, ensureLeetCodeCacheIndexes,
-  ensureGitHubUserIndexes, ensureGitHubCacheIndexes,
+  ensureGitHubUserIndexes, ensureGitHubCacheIndexes, ensurePublicProfileIndexes,
 } from './models/seeker/index.js';
 import { ensureJobIndexes } from './models/shared/job-model.js';
 import { ensureRecommendationCacheIndexes } from './models/employer/recommendation-cache-model.js';
@@ -21,6 +21,7 @@ import { ensureAvatarDirectory } from './services/employer/avatar-storage-servic
 import { ensureCulturePhotoDirectory } from './services/employer/culture-photo-storage-service.js';
 import { ensureResumeParseJobIndexes } from './models/seeker/resume-parse-job-model.js';
 import { ensureTmpDirectory } from './services/seeker/resume-tmp-storage.js';
+import { ensureSeekerResumeDirectory } from './services/seeker/seeker-resume-storage.js';
 import { ensureResumeScoreJobIndexes } from './models/public/resume-score-job-model.js';
 
 import {
@@ -48,6 +49,7 @@ export async function runBootSequence() {
   await ensureLeetCodeCacheIndexes();
   await ensureGitHubUserIndexes();
   await ensureGitHubCacheIndexes();
+  await ensurePublicProfileIndexes();
   await ensureRecommendationCacheIndexes();
     await ensureJobIndexes();
     await ensureEmployerUserIndexes();
@@ -85,4 +87,5 @@ export async function runBootSequence() {
     ensureAvatarDirectory();
     ensureCulturePhotoDirectory();
     ensureTmpDirectory();
+    ensureSeekerResumeDirectory();
 }

@@ -6,6 +6,9 @@ import { IS_PRODUCTION } from '../env.js';
 // HttpError — throw this from any handler to control the response status.
 // `code` is an optional stable machine-readable error code (UPPER_SNAKE_CASE)
 // that clients can branch on; omitting it preserves the existing behaviour.
+// Handlers may also attach `err.details` (a plain object) for structured extras a
+// client can act on — e.g. alternative slugs alongside a SLUG_TAKEN 409. It is
+// echoed verbatim, so it must never carry anything the caller may not see.
 export class HttpError extends Error {
   constructor(status, message, code) {
     super(message);
@@ -28,6 +31,7 @@ export function errorHandler(err, req, res, _next) {
   res.status(status).json({
     error: err.message || 'Internal server error',
     ...(err.code ? { code: err.code } : {}),
+    ...(err.details ? { details: err.details } : {}),
     ...(IS_PRODUCTION ? {} : { stack: err.stack }),
   });
 }

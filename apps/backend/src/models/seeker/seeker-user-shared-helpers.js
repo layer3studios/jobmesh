@@ -9,8 +9,14 @@ export function isValidId(id) {
   return typeof id === 'string' && id.length > 0 && ObjectId.isValid(id);
 }
 
-/** Convert a string id to ObjectId. Returns null if invalid. */
+/**
+ * Convert an id to ObjectId. Returns null if invalid. Accepts an ObjectId
+ * unchanged: callers that already hold a document's _id (rather than the hex
+ * string an HTTP layer produced) would otherwise get a silent null and a write
+ * that matches nothing.
+ */
 export function toOid(id) {
+  if (id instanceof ObjectId) return id;
   return isValidId(id) ? new ObjectId(id) : null;
 }
 

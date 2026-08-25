@@ -45,6 +45,9 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
         '/login',
         '/status',
         '/apply/*/success',
+        // /u/{slug} is deliberately NOT here: shareable candidate profiles are
+        // public by their owner's explicit choice and should be indexable. A
+        // profile turned off exports noindex from its own metadata.
         // Booking tokens are live credentials — never crawled. The page ALSO
         // exports noindex metadata: robots.txt alone cannot stop indexing of a
         // URL linked from elsewhere.

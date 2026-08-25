@@ -37,6 +37,15 @@ export const ASSIGNMENT_URL_SECRET = process.env.ASSIGNMENT_URL_SECRET
   || process.env.EMPLOYER_JWT_SECRET
   || 'dev-assignment-secret';
 
+// Secret for signing PUBLIC PROFILE resume links (HMAC-SHA256). Separate from
+// RESUME_URL_SECRET on purpose: those tokens cover one application and live 15
+// minutes; these cover one published profile slug and live 24 hours, and rotating
+// one audience's links must never invalidate the other's. Production MUST set this
+// explicitly; the fallbacks are a dev convenience only.
+export const PUBLIC_PROFILE_URL_SECRET = process.env.PUBLIC_PROFILE_URL_SECRET
+  || process.env.JWT_SECRET
+  || 'dev-public-profile-secret';
+
 export const NODE_ENV = process.env.NODE_ENV || 'development';
 export const IS_PRODUCTION = NODE_ENV === 'production';
 export const PORT = parseInt(process.env.PORT, 10) || 3000;
@@ -57,6 +66,12 @@ export const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || '';
 // same-origin /apply path under FRONTEND_URL, which is how a single-host deploy
 // serves careers pages.
 export const APPLY_URL = process.env.APPLY_URL || `${FRONTEND_URL}/apply`;
+
+// Public origin of the SEEKER audience (jobmesh.in in production) — where a
+// shareable profile lives at /u/{slug}. The backend needs it to hand the candidate
+// an absolute link to copy, and to put one in the "someone messaged you" email.
+export const PUBLIC_PROFILE_BASE_URL = (process.env.PUBLIC_PROFILE_BASE_URL || FRONTEND_URL)
+  .replace(/\/$/, '');
 
 // Extra browser origins allowed to call the API with credentials, comma-separated.
 // Every *.jobmesh.in host is already allowed by pattern in server.js; this exists

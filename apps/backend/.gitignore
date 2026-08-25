@@ -7,6 +7,9 @@ deploy.ps1
 data/resumes/
 # Short-lived temp PDFs for the async parse queue
 data/tmp/
+# A seeker's own retained resume PDF, served by their public profile page.
+# Same rule as data/resumes/: real candidate documents, never in the repo.
+data/seeker-resumes/
 
 ktopjobsync-hubbackend
 *jobsync-hub*backend
