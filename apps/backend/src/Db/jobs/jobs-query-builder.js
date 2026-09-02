@@ -7,6 +7,16 @@
 
 
 /**
+ * Admin-hidden jobs are excluded from every seeker-facing read below.
+ * `{ adminHiddenAt: null }` matches documents where the field is null OR
+ * absent, so the existing corpus needs no backfill. This is the ONLY hook the
+ * admin job browser has into the seeker read path — hiding never touches
+ * `Status` (which means expired/inactive) or a native posting's `status`
+ * (which belongs to the employer).
+ */
+export const NOT_ADMIN_HIDDEN = { adminHiddenAt: null };
+
+/**
  * Build the Mongo query for /api/jobs given a set of filters. Returns an
  * object suitable to pass directly to `find()` / `countDocuments()`.
  */
@@ -55,7 +65,7 @@ function buildJobsQuery({
   roleCategory, experienceBand, techStack, dateFilter, searchFilter,
   locations, salaryMinLpa, salaryMaxLpa,
 }) {
-  const must = [{ Status: 'active' }];
+  const must = [{ Status: 'active' }, NOT_ADMIN_HIDDEN];
 
   if (company?.trim()) {
     must.push({ Company: { $regex: escapeRegex(company.trim()), $options: 'i' } });

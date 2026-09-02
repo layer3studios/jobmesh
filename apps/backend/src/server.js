@@ -27,6 +27,11 @@ import { startScoreWorker } from './services/public/resume-score-worker.js';
 
 import { registerRoutes } from './register-routes.js';
 import { runBootSequence } from './boot-indexes.js';
+import { startIndexingWorker } from './services/admin/indexing-worker.js';
+import { checkAndAlert } from './services/admin/ai-alert-service.js';
+import { sendWeeklyDigest } from './services/admin/weekly-digest-service.js';
+import { getAlertSettings } from './models/admin/alert-settings-model.js';
+import { isFeatureEnabled } from './models/admin/feature-flags-model.js';
 
 const app = express();
 
@@ -70,12 +75,20 @@ const server = app.listen(PORT, async () => {
     // 24h interview reminders (same in-process pattern as the score worker).
     await ensureInterviewReminderJobIndexes();
     startInterviewReminderWorker();
+    startIndexingWorker();
 
     console.log(`[server] listening on http://localhost:${PORT}`);
 
     // Daily scrape at 06:00 server time — gated on SYNC_ENABLED so .env can disable it.
     if (SYNC_ENABLED) {
-      cron.schedule('0 6 * * *', () => {
+      cron.schedule('0 6 * * *', async () => {
+        // SYNC_ENABLED (above) decides whether the job is ever scheduled; the
+        // flag is the runtime pause an admin can toggle without a redeploy.
+        // isFeatureEnabled fails open, so a DB problem still runs the scrape.
+        if (!(await isFeatureEnabled('scraperCronEnabled'))) {
+          console.log('[cron] daily scrape SKIPPED (scraperCronEnabled=false)');
+          return;
+        }
         console.log('[cron] daily scrape');
         runScraper();
       });
@@ -83,6 +96,18 @@ const server = app.listen(PORT, async () => {
     } else {
       console.log('[cron] scrape schedule DISABLED (SYNC_ENABLED=false)');
     }
+
+    // AI budget alerts every 30 minutes, and the digest on Monday 08:00.
+    // Both no-op silently unless alertsEnabled is on, so an unconfigured
+    // install never emails anyone. checkAndAlert re-checks the flag itself.
+    cron.schedule('*/30 * * * *', () => { void checkAndAlert(); });
+    cron.schedule('0 8 * * 1', async () => {
+      const settings = await getAlertSettings().catch(() => null);
+      if (!settings?.alertsEnabled) return;
+      console.log('[cron] weekly admin digest');
+      void sendWeeklyDigest();
+    });
+    console.log('[cron] alert checks + weekly digest scheduled');
 
     if (RUN_SCRAPER_ON_START) {
       console.log('[boot] RUN_SCRAPER_ON_START is true — running initial scrape');

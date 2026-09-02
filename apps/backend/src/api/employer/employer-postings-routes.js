@@ -27,6 +27,7 @@ import { listApplicantsForPosting, listApplicantFacetsForPosting } from './emplo
 import { getPostingAssignment, patchPostingAssignment } from './posting-assignment-handlers.js';
 import { reopenPosting, deletePosting } from './posting-lifecycle-handlers.js';
 import { listPostingsForCompanyRoute } from './employer-postings-list-controller.js';
+import { fireIndexing } from '../../services/admin/posting-indexing-hook.js';
 
 /**
  * Fire-and-forget JD extraction; never blocks or fails the HTTP response (D6/D8).
@@ -125,6 +126,8 @@ router.post('/', requireMemberOrHigher, asyncHandler(async (req, res) => {
     req.employerCompanyId, input, req.employerUser.employerUserId,
   );
   fireExtraction(posting);
+  // A draft has no public URL yet; only a live posting is worth submitting.
+  if (posting.status === 'active') fireIndexing(posting, 'updated');
   res.status(201).json({ posting: toPublicPosting(posting) });
 }));
 
@@ -138,10 +141,19 @@ router.get('/:postingId', requireInterviewerOrHigher, requireEmployerPosting, (r
 
 // PATCH /api/employer/jobs/:postingId — update mutable fields.
 router.patch('/:postingId', requireMemberOrHigher, requireEmployerPosting, asyncHandler(async (req, res) => {
+  const wasLive = req.posting.status === 'active';
   const patch = buildPatch(req.body || {}, req.posting);
   const posting = await updatePostingForCompany(req.employerCompanyId, req.posting._id, patch);
   // Re-extract only when the description actually changed — not on status-only edits.
   if ('description' in patch) fireExtraction(posting, { force: true });
+  // Index on the TRANSITION, not on every edit: going live or changing a field the
+  // JSON-LD renders is worth a submission; leaving live is a removal; a private
+  // edit to an already-draft posting is neither.
+  const isLive = posting.status === 'active';
+  const materialEdit = 'title' in patch || 'location' in patch
+    || 'employmentType' in patch || 'salaryMin' in patch || 'salaryMax' in patch;
+  if (isLive && (!wasLive || materialEdit)) fireIndexing(posting, 'updated');
+  else if (wasLive && !isLive) fireIndexing(posting, 'deleted');
   res.json({ posting: toPublicPosting(posting) });
 }));
 
@@ -160,6 +172,7 @@ router.patch('/:postingId/assignment', requireMemberOrHigher, requireEmployerPos
 // POST /api/employer/jobs/:postingId/close — status → 'closed'.
 router.post('/:postingId/close', requireMemberOrHigher, requireEmployerPosting, asyncHandler(async (req, res) => {
   const posting = await closePostingForCompany(req.employerCompanyId, req.posting._id);
+  fireIndexing(posting, 'deleted');
   res.json({ posting: toPublicPosting(posting) });
 }));
 
@@ -168,6 +181,7 @@ router.post('/:postingId/fill', requireMemberOrHigher, requireEmployerPosting, a
   const result = await fillPosting(
     req.employerCompanyId, req.posting._id, req.employerUser.employerUserId,
   );
+  if (result.posting) fireIndexing(result.posting, 'deleted');
   res.json({
     posting: result.posting ? toPublicPosting(result.posting) : null,
     closedCount: result.closedCount,

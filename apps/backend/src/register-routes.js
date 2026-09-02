@@ -23,6 +23,17 @@ import { createAdminAuthRouter } from './api/admin/admin-auth-routes.js';
 import { createAdminAnalyticsRouter } from './api/admin/admin-analytics-routes.js';
 import adminTeamRouter from './api/admin/admin-team-routes.js';
 import { createAdminAiUsageRouter } from './api/admin/admin-ai-usage-routes.js';
+import { createScraperHealthRouter } from './api/admin/scraper-health-routes.js';
+import { createQueueMonitorRouter } from './api/admin/queue-monitor-routes.js';
+import { createAuditLogRouter } from './api/admin/audit-log-routes.js';
+import { createFeatureFlagsRouter } from './api/admin/feature-flags-routes.js';
+import { createJobBrowserRouter } from './api/admin/job-browser-routes.js';
+import { createEmailLogRouter } from './api/admin/email-log-routes.js';
+import { createAlertSettingsRouter } from './api/admin/alert-settings-routes.js';
+import { createResendWebhookRouter } from './api/public/resend-webhook-route.js';
+import { createSeoRouter } from './api/admin/seo-routes.js';
+import { createCompanyHealthRouter } from './api/admin/company-health-routes.js';
+import { createMissionControlRouter } from './api/admin/mission-control-routes.js';
 import newsRouter from './api/seeker/news-routes.js';
 import { createEmployerAuthRouter } from './api/employer/employer-auth-routes.js';
 import employerCompanyRouter from './api/employer/employer-company-routes.js';
@@ -76,6 +87,10 @@ import { corsMiddleware } from './middleware/cors-middleware.js';
 export function registerRoutes(app) {
   // ─── Middleware ───────────────────────────────────────────────────
   app.use(corsMiddleware);
+  // Svix signs the EXACT request bytes, so this one path takes the raw buffer.
+  // It MUST precede the global express.json below: once json() has parsed the
+  // body, the original bytes are unrecoverable and no signature can verify.
+  app.use('/api/public/webhooks/resend', express.raw({ type: '*/*', limit: '1mb' }));
   app.use(express.json({ limit: '1mb' }));
   app.use(cookieParser());
 
@@ -104,6 +119,23 @@ export function registerRoutes(app) {
   // AI spend dashboard. Mounted before /api/admin so the generic admin router
   // never shadows it.
   app.use('/api/admin/ai-usage', requireAdmin, createAdminAiUsageRouter());
+  // Scraper health. Same reason as ai-usage: mounted before the generic admin
+  // router so it is never shadowed.
+  app.use('/api/admin/scraper-health', requireAdmin, createScraperHealthRouter());
+  // Queue monitor. Same reason as ai-usage: mounted before the generic admin
+  // router so it is never shadowed.
+  app.use('/api/admin/queues', requireAdmin, createQueueMonitorRouter());
+  // Company health + mission control. Same reason as ai-usage: mounted before
+  // the generic admin router so neither is ever shadowed.
+  app.use('/api/admin/companies-health', requireAdmin, createCompanyHealthRouter());
+  app.use('/api/admin/overview', requireAdmin, createMissionControlRouter());
+  app.use('/api/admin/audit-log', requireAdmin, createAuditLogRouter());
+  app.use('/api/admin/feature-flags', requireAdmin, createFeatureFlagsRouter());
+  app.use('/api/admin/jobs', requireAdmin, createJobBrowserRouter());
+  app.use('/api/admin/email-log', requireAdmin, createEmailLogRouter());
+  app.use('/api/admin/alerts', requireAdmin, createAlertSettingsRouter());
+  app.use('/api/admin/seo', requireAdmin, createSeoRouter());
+  app.use('/api/public/webhooks/resend', createResendWebhookRouter());
   app.use('/api/admin', adminRouter);
   // Admin analytics: jm_admin_token via new require-admin-middleware (D5 — standalone,
   // no seeker chain). Kept mounted separately (not under adminRouter) to preserve

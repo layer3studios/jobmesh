@@ -154,6 +154,72 @@ export const fetchAssignmentStats = async (since: SinceRange | string): Promise<
 export const fetchAssignmentFunnel = async (since: SinceRange | string): Promise<AssignmentFunnelResponse> =>
   normalizeAssignmentFunnel(await getJson('/assignments/funnel', since));
 
+// ─── Retention & stickiness (Chunk 10) ──────────────────────────────────────
+// Fetched SEPARATELY from the six-bundle, exactly like the assignment blocks: it is
+// an additive section, and folding it into fetchAllAnalyticsBundles would change
+// AdminAnalyticsData and therefore the SSR page.
+
+export interface StickinessResponse {
+  dau: number;
+  wau: number;
+  mau: number;
+  /** Already rounded to one decimal by the backend. */
+  dauMauPct: number;
+}
+
+export interface RetentionCohort {
+  /** ISO week start, e.g. '2026-07-20'. */
+  week: string;
+  /** People first seen that week — the denominator of approxW1Pct. */
+  cohortSize: number;
+  /**
+   * People still active 7+ days after they were first seen. NOT textbook W1
+   * retention; see w1Method. Named `approx` so no caller can mistake it.
+   */
+  approxW1Returns: number;
+  approxW1Pct: number;
+  /** Seeker signups that week — a DIFFERENT population; shown, never divided. */
+  signups: number;
+  isLowSample: boolean;
+}
+
+export interface RetentionResponse {
+  cachedAt: string;
+  since: string;
+  stickiness: StickinessResponse;
+  cohorts: RetentionCohort[];
+  w1IsApproximate: boolean;
+  w1Method: string;
+  lowSampleThreshold: number;
+}
+
+export const normalizeRetention = (r: Row): RetentionResponse => {
+  const stickiness = (r.stickiness ?? {}) as Row;
+  return {
+    ...meta(r),
+    stickiness: {
+      dau: num(stickiness.dau),
+      wau: num(stickiness.wau),
+      mau: num(stickiness.mau),
+      dauMauPct: num(stickiness.dauMauPct),
+    },
+    cohorts: (Array.isArray(r.cohorts) ? r.cohorts : []).map((row: Row) => ({
+      week: str(row.week),
+      cohortSize: num(row.cohortSize),
+      approxW1Returns: num(row.approxW1Returns),
+      approxW1Pct: num(row.approxW1Pct),
+      signups: num(row.signups),
+      isLowSample: Boolean(row.isLowSample),
+    })),
+    w1IsApproximate: r.w1IsApproximate !== false,
+    w1Method: str(r.w1Method),
+    lowSampleThreshold: num(r.lowSampleThreshold) || 20,
+  };
+};
+
+export const fetchRetention = async (since: SinceRange | string): Promise<RetentionResponse> =>
+  normalizeRetention(await getJson('/retention', since));
+
 // Bundle wrapper for client-side range switching: fires all six in parallel and
 // assembles the same AdminAnalyticsData shape the SSR page produces. Bundle-level
 // success/failure — any rejection (AdminAnalyticsApiError) rejects the whole call;

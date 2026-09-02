@@ -3,10 +3,12 @@
 
 import { ObjectId } from 'mongodb';
 import { col } from '../connection.js';
-import { buildJobsQuery, hasTextSearch } from './jobs-query-builder.js';
+import { buildJobsQuery, hasTextSearch, NOT_ADMIN_HIDDEN } from './jobs-query-builder.js';
 import { FEED_PROJECTION, clampFeedLimit } from './jobs-feed-projection.js';
 
 const JOBS = 'jobs';
+
+export { NOT_ADMIN_HIDDEN };
 
 
 
@@ -21,7 +23,7 @@ async function getActiveCompaniesCached(jobs) {
   if (companiesCache.value && now - companiesCache.at < COMPANIES_TTL_MS) {
     return companiesCache.value;
   }
-  const value = await jobs.distinct('Company', { Status: 'active' });
+  const value = await jobs.distinct('Company', { Status: 'active', ...NOT_ADMIN_HIDDEN });
   companiesCache = { value, at: now };
   return value;
 }
@@ -118,14 +120,14 @@ export async function getJobFacets() {
   const jobs = await col(JOBS);
   const [techAgg, locAgg] = await Promise.all([
     jobs.aggregate([
-      { $match: { Status: 'active', 'autoTags.techStack.0': { $exists: true } } },
+      { $match: { Status: 'active', ...NOT_ADMIN_HIDDEN, 'autoTags.techStack.0': { $exists: true } } },
       { $unwind: '$autoTags.techStack' },
       { $group: { _id: '$autoTags.techStack', count: { $sum: 1 } } },
       { $sort: { count: -1, _id: 1 } },
       { $limit: 30 },
     ]).toArray(),
     jobs.aggregate([
-      { $match: { Status: 'active' } },
+      { $match: { Status: 'active', ...NOT_ADMIN_HIDDEN } },
       { $group: { _id: '$Location', count: { $sum: 1 } } },
     ]).toArray(),
   ]);
@@ -172,7 +174,7 @@ export async function getAllJobs(page = 1, limit = 50) {
 /** Return the 9 freshest active jobs for the unauthenticated landing page. */
 export async function getPublicBaitJobs() {
   const jobs = await col(JOBS);
-  return jobs.find({ Status: 'active' })
+  return jobs.find({ Status: 'active', ...NOT_ADMIN_HIDDEN })
     .sort({ PostedDate: -1, createdAt: -1 })
     .limit(9)
     .project({
@@ -186,5 +188,5 @@ export async function getPublicBaitJobs() {
 export async function findJobById(id) {
   if (!ObjectId.isValid(id)) return null;
   const jobs = await col(JOBS);
-  return jobs.findOne({ _id: new ObjectId(id) });
+  return jobs.findOne({ _id: new ObjectId(id), ...NOT_ADMIN_HIDDEN });
 }

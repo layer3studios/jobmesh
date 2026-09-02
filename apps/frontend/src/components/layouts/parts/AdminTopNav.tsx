@@ -111,6 +111,15 @@ export default function AdminTopNav({ isCompact, currentUser, onLogout }: Props)
           {renderNavLink(ADMIN_ROUTES.EMPLOYER_ACCESS, 'Employer Access')}
           {renderNavLink(ADMIN_ROUTES.ANALYTICS, 'Analytics')}
           {renderNavLink(ADMIN_ROUTES.AI_USAGE, 'AI Usage', <Sparkles size={14} />)}
+          {renderNavLink('/admin/scraper-health', 'Scraper')}
+          {renderNavLink('/admin/queues', 'Queues')}
+          {renderNavLink('/admin/companies', 'Companies')}
+          {renderNavLink('/admin/jobs-browser', 'Jobs')}
+          {renderNavLink('/admin/flags', 'Flags')}
+          {renderNavLink('/admin/audit-log', 'Audit')}
+          {renderNavLink('/admin/email-log', 'Email')}
+          {renderNavLink('/admin/alerts', 'Alerts')}
+          {renderNavLink('/admin/seo', 'SEO')}
           {renderNavLink(ADMIN_ROUTES.DPDP, 'DPDP')}
           {/* Literal path: ADMIN_ROUTES lives in routes.ts, outside this chunk's allowlist. */}
           {renderNavLink('/admin/team', 'Team')}

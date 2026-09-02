@@ -15,6 +15,7 @@ import type { AdminAnalyticsData, SinceRange } from '@/types/admin-analytics';
 import { fetchAllAnalyticsBundles, AdminAnalyticsApiError } from '@/api/admin-analytics-api';
 import AnalyticsSections from './parts/AnalyticsSections';
 import AssignmentAnalyticsSection from './parts/AssignmentAnalyticsSection';
+import RetentionSection from './parts/RetentionSection';
 import TimeRangeSelector from './parts/TimeRangeSelector';
 import EmptyStateNotice from './parts/EmptyStateNotice';
 import { PageShell } from '@/components/ui';
@@ -132,6 +133,10 @@ export default function AdminAnalyticsClient({
       {/* Outside the bundle branch on purpose: its Mongo half has no PostHog
           dependency, so it must render even when the bundle above 503s. */}
       <AssignmentAnalyticsSection since={currentSince} />
+
+      {/* Also outside the bundle branch: it fetches its own endpoint and degrades
+          to the same notice on its own when the analytics key is missing. */}
+      <RetentionSection since={currentSince} />
     </PageShell>
   );
 }
