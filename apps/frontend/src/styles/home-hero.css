@@ -1,0 +1,79 @@
+/* FILE: src/styles/home-hero.css
+   The hero, and the shared ink-photograph layer every image band uses.
+   Layers back to front:
+     0. .hm-ink            — the ink-in-water photograph (InkImage), masked
+     1. .hm-hero__canvas   — globe + orbiting cubes + gravity dust + connection
+     2. .hm-hero__veil     — keeps the centre dark enough for the headline
+     3. content            — badge, the statement, two doors
+   No search field: the landing states what happens; the product is behind
+   the door. Every decorative layer is aria-hidden, pointer-events:none, and
+   still under prefers-reduced-motion. */
+
+/* ── The ink layer. Treatments mirror the reference: hero fades at the
+   bottom only, band fades top and bottom, final fades at the top only. ──── */
+.hm-ink { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.hm-ink__img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.hm-ink--hero { mask-image: linear-gradient(to bottom, black 50%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%); }
+.hm-ink--band { mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%); }
+.hm-ink--final { mask-image: linear-gradient(to bottom, transparent 0%, black 22%, black 100%); -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 22%, black 100%); }
+
+/* Slow Ken-Burns drift so the photograph never reads as a static wallpaper. */
+@keyframes hm-ink-drift { 0% { transform: scale(1.04) translate3d(0, 0, 0); } 100% { transform: scale(1.12) translate3d(-1.5%, -1%, 0); } }
+.hm-ink--hero .hm-ink__img { animation: hm-ink-drift 38s ease-in-out infinite alternate; will-change: transform; }
+
+/* ── Hero ───────────────────────────────────────────────────────────── */
+.hm-hero {
+  position: relative; overflow: hidden; isolation: isolate;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: min(96svh, 960px);
+  padding-top: var(--s-9); padding-bottom: var(--s-9);
+  text-align: center;
+}
+.hm-hero__canvas { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
+.hm-hero__veil {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: radial-gradient(ellipse 48% 42% at 50% 52%, rgba(9, 9, 11, 0.78) 0%, rgba(9, 9, 11, 0.32) 55%, rgba(9, 9, 11, 0) 80%);
+}
+.hm-hero__content { position: relative; z-index: 3; width: 100%; max-width: 960px; }
+
+@keyframes hm-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.hm-hero__badge {
+  display: inline-flex; align-items: center; gap: var(--s-2);
+  margin-bottom: var(--s-6); padding: 6px 16px;
+  border: 1px solid var(--border-strong); border-radius: var(--r-pill);
+  background: rgba(9, 9, 11, 0.5);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  font-size: var(--t-label); text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-2);
+}
+.hm-hero__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ink); animation: hm-pulse 2.4s ease-in-out infinite; }
+
+/* The statement. Instrument Serif italic, 72px on desktop per the system. */
+.hm-hero__title {
+  margin: 0 auto var(--s-7); max-width: 16ch;
+  font-size: var(--t-display-1); line-height: 1.08; letter-spacing: -0.02em; color: var(--ink);
+  text-wrap: balance;
+}
+
+.hm-hero__lede {
+  max-width: 48ch; margin: 0 auto var(--s-7);
+  font-size: var(--t-body-lg); line-height: 1.6; color: var(--ink-muted); text-wrap: pretty;
+}
+.hm-hero__doors { display: flex; justify-content: center; gap: var(--s-4); flex-wrap: wrap; }
+
+@keyframes hm-cue { 0% { transform: scaleY(0); transform-origin: top; opacity: 0; } 40% { transform: scaleY(1); transform-origin: top; opacity: 1; } 60% { transform: scaleY(1); transform-origin: bottom; opacity: 1; } 100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; } }
+.hm-hero__cue {
+  position: absolute; z-index: 3; bottom: var(--s-6); left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: var(--s-2);
+  font-size: 9px; text-transform: uppercase; letter-spacing: 0.28em; color: var(--ink-faint);
+}
+.hm-hero__cue-line { width: 1px; height: 32px; background: var(--border-loud); animation: hm-cue 2.6s ease-in-out infinite; }
+
+@media (max-width: 767px) {
+  .hm-hero { min-height: min(84svh, 760px); padding-top: var(--s-8); padding-bottom: var(--s-8); }
+  .hm-hero__title { max-width: 12ch; }
+  .hm-hero__doors { flex-direction: column; align-items: stretch; }
+  .hm-hero__cue { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hm-hero__dot, .hm-hero__cue-line, .hm-ink--hero .hm-ink__img { animation: none; }
+}

@@ -30,11 +30,11 @@ export function SectionHeader({ eyebrow, heading, headingId, linkHref, linkLabel
   return (
     <div className="hm-section-head">
       <div>
-        <p className="hm-eyebrow hm-mono" style={{ marginBottom: 5 }}>{eyebrow}</p>
+        <p className="hm-eyebrow hm-mono" style={{ marginBottom: 6 }}>{eyebrow}</p>
         <h2 id={headingId} className="hm-heading">{heading}</h2>
       </div>
       <Link href={linkHref} className="hm-more">
-        {linkLabel} <ArrowRight size={12} aria-hidden="true" />
+        {linkLabel} <ArrowRight size={12} className="hm-pill__arrow" aria-hidden="true" />
       </Link>
     </div>
   );

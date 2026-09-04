@@ -1,0 +1,124 @@
+/* FILE: src/styles/home-controls.css
+   Every interactive element on the landing page, with all FIVE states spelled
+   out: Default, Hover, Active (pressed), Focus-visible, Disabled. Nothing here
+   invents a number — sizes, radii, durations and easings come from the token
+   block in home.css.
+
+   THE RULES, applied identically to every control:
+   - Hover      lifts 1px and brightens one step. Never changes size.
+   - Active     drops back to 0 and scales to 0.98 on the faster curve, so a
+                press feels like the control absorbs the click.
+   - Focus      is ALWAYS a 2px ring at 3px offset — visible on the ink ground
+                whatever the control's own colour is. Never removed, never
+                replaced by a colour change alone.
+   - Disabled   is 38% opacity, `not-allowed`, and cancels every transform and
+                transition. A disabled control must not respond to a hover.
+   - Reduced motion cancels transforms only; colour feedback survives, because
+                a user who asked for less motion still needs to see hover. */
+
+/* ═══ Pills — the primary action vocabulary ═══════════════════════════ */
+.hm-pill {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--s-2);
+  height: var(--h-control-md); padding: 0 var(--s-5);
+  border: 1px solid transparent; border-radius: var(--r-pill);
+  font-size: var(--t-body); font-weight: 500; letter-spacing: -0.005em;
+  text-decoration: none; white-space: nowrap; cursor: pointer;
+  transition:
+    background-color var(--m-base) var(--ease),
+    border-color var(--m-base) var(--ease),
+    color var(--m-base) var(--ease),
+    transform var(--m-base) var(--ease),
+    box-shadow var(--m-base) var(--ease);
+}
+.hm-pill--lg { height: var(--h-control-lg); padding: 0 var(--s-6); font-size: var(--t-body-lg); }
+.hm-pill--sm { height: var(--h-control-sm); padding: 0 var(--s-4); font-size: var(--t-body-sm); }
+
+/* Solid — one per screen. Ink-on-white: the loudest thing the page can do. */
+.hm-pill--solid { background: var(--ink); color: var(--paper); box-shadow: var(--shadow-sm); }
+.hm-pill--solid:hover { background: #FFFFFF; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.hm-pill--solid:active { background: var(--ink-2); transform: translateY(0) scale(0.98); box-shadow: var(--shadow-xs); transition-duration: var(--m-fast); transition-timing-function: var(--ease-press); }
+
+/* Ember — the single coloured action. Used for the employer path only, so the
+   two audiences are told apart by colour as well as by copy. */
+.hm-pill--ember { background: var(--ember); color: #FFFFFF; box-shadow: var(--shadow-sm); }
+.hm-pill--ember:hover { background: var(--ember-bright); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.hm-pill--ember:active { background: var(--ember); transform: translateY(0) scale(0.98); box-shadow: var(--shadow-xs); transition-duration: var(--m-fast); transition-timing-function: var(--ease-press); }
+
+/* Ghost — hairline, for the secondary path. */
+.hm-pill--ghost { background: rgba(19, 19, 22, 0.35); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--ink); border-color: var(--border-strong); }
+.hm-pill--ghost:hover { border-color: var(--border-loud); background: rgba(255, 255, 255, 0.05); transform: translateY(-1px); }
+.hm-pill--ghost:active { background: rgba(255, 255, 255, 0.02); transform: translateY(0) scale(0.98); transition-duration: var(--m-fast); transition-timing-function: var(--ease-press); }
+
+.hm-pill:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.hm-pill[aria-disabled="true"], .hm-pill:disabled {
+  opacity: 0.38; cursor: not-allowed; pointer-events: none;
+  transform: none; box-shadow: none;
+}
+
+/* The arrow inside a pill slides on hover — the only motion a link needs. */
+.hm-pill__arrow { transition: transform var(--m-base) var(--ease); }
+.hm-pill:hover .hm-pill__arrow { transform: translateX(3px); }
+.hm-pill:active .hm-pill__arrow { transform: translateX(1px); }
+
+/* ═══ Quiet link with a trailing arrow ════════════════════════════════ */
+.hm-more {
+  display: inline-flex; align-items: center; gap: var(--s-2); flex-shrink: 0;
+  padding: var(--s-1) 0;
+  font-size: var(--t-label); text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--ink-muted); text-decoration: none; cursor: pointer;
+  background: none; border: none;
+  transition: color var(--m-base) var(--ease);
+}
+.hm-more:hover { color: var(--ink); }
+.hm-more:active { color: var(--ink-2); transition-duration: var(--m-fast); }
+.hm-more:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: var(--r-sm); }
+.hm-more .hm-pill__arrow { transition: transform var(--m-base) var(--ease); }
+.hm-more:hover .hm-pill__arrow { transform: translateX(3px); }
+
+/* ═══ Cards — anything clickable that is not a pill ═══════════════════ */
+.hm-card {
+  display: block; position: relative;
+  /* Glass: a translucent pane with a hairline and a lit top edge, so the
+     ink (and the scene) reads faintly through every card. */
+  background: rgba(19, 19, 22, 0.55);
+  backdrop-filter: blur(14px) saturate(130%); -webkit-backdrop-filter: blur(14px) saturate(130%);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--r-lg); box-shadow: var(--highlight-edge);
+  text-decoration: none; cursor: pointer;
+  transition:
+    border-color var(--m-base) var(--ease),
+    background-color var(--m-base) var(--ease),
+    transform var(--m-base) var(--ease),
+    box-shadow var(--m-base) var(--ease);
+}
+.hm-card:hover { border-color: var(--border-strong); background: rgba(26, 26, 30, 0.62); transform: translateY(-2px); box-shadow: var(--shadow-md), var(--highlight-edge); }
+.hm-card:active { transform: translateY(0) scale(0.995); box-shadow: var(--shadow-xs); transition-duration: var(--m-fast); transition-timing-function: var(--ease-press); }
+.hm-card:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.hm-card[aria-disabled="true"] { opacity: 0.38; cursor: not-allowed; pointer-events: none; transform: none; }
+
+/* ═══ Nav links — an underline that grows from the left ═══════════════ */
+.hm-nav__link {
+  position: relative; padding: var(--s-2) 0; text-decoration: none;
+  font-size: var(--t-label); text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--ink-muted);
+  transition: color var(--m-base) var(--ease);
+}
+.hm-nav__link::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+  background: currentColor; transform: scaleX(0); transform-origin: left;
+  transition: transform var(--m-base) var(--ease);
+}
+.hm-nav__link:hover { color: var(--ink); }
+.hm-nav__link:active { color: var(--ink-2); }
+.hm-nav__link:hover::after, .hm-nav__link[aria-current="page"]::after { transform: scaleX(1); }
+.hm-nav__link[aria-current="page"] { color: var(--ink); }
+.hm-nav__link:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; border-radius: var(--r-sm); }
+
+/* ═══ Reduced motion — kill movement, keep the colour feedback ════════ */
+@media (prefers-reduced-motion: reduce) {
+  .hm-pill, .hm-card, .hm-pill__arrow, .hm-nav__link::after { transition-duration: 1ms; }
+  .hm-pill:hover, .hm-pill:active,
+  .hm-card:hover, .hm-card:active { transform: none; }
+  .hm-pill:hover .hm-pill__arrow, .hm-more:hover .hm-pill__arrow { transform: none; }
+}

@@ -17,6 +17,7 @@ export default function CompaniesGrid({ companies }: { companies: ICompany[] }) 
 
   return (
     <section className="hm-section hm-companies" aria-labelledby="companies-heading">
+      <div className="hm-wrap">
       <SectionHeader
         eyebrow={COPY.home.companiesSectionLabel}
         heading={COPY.home.companiesHeading}
@@ -27,7 +28,7 @@ export default function CompaniesGrid({ companies }: { companies: ICompany[] }) 
 
       <div className="hm-companies__grid stagger">
         {shown.map(c => (
-          <Link key={c._id || c.companyName} href="/directory" className="hm-company">
+          <Link key={c._id || c.companyName} href="/directory" className="hm-card hm-company" data-reveal>
             <CompanyLogo
               name={c.companyName}
               domain={c.domain}
@@ -44,6 +45,7 @@ export default function CompaniesGrid({ companies }: { companies: ICompany[] }) 
             </div>
           </Link>
         ))}
+      </div>
       </div>
     </section>
   );
