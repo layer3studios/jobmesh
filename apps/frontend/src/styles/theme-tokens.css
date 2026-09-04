@@ -26,6 +26,10 @@
   --surface-raised: #FBFAF8;
   --surface-sunken: #EDECE8;
   --surface-muted: #E4E3DE;
+  --surface-3: #E4E3DE;
+  --border-hairline: rgba(9, 9, 11, 0.12);
+  --glass-panel: rgba(241, 240, 236, 0.82);
+  --on-indigo: #FFFFFF;
   --accent: #09090B;
   --accent-hover: #26262A;
   --accent-soft: rgba(9, 9, 11, 0.07);
@@ -71,14 +75,12 @@
   --brand-600: #26262A;
   --brand-700: #000000;
   --overlay: rgba(9, 9, 11, 0.45);
-
   --status-success-bg: rgba(31, 122, 77, 0.10);
   --status-danger-bg: rgba(181, 52, 26, 0.10);
   --status-warning-bg: rgba(154, 100, 16, 0.10);
   --status-info-bg: rgba(63, 95, 191, 0.10);
   --status-accent-bg: rgba(9, 9, 11, 0.07);
   --status-purple-bg: rgba(79, 70, 229, 0.10);
-
   /* Categorical palette — "a different thing from that one", never a judgement. */
   --cat-green: #1F7A4D;
   --cat-blue: #3F5FBF;
@@ -93,10 +95,8 @@
   --tag-4-bg: rgba(107, 95, 214, 0.12);
   --tag-5-bg: rgba(79, 70, 229, 0.12);
   --tag-6-bg: rgba(181, 80, 31, 0.12);
-
-  /* Stacking order — mirrors Z in src/theme/tokens.ts. Theme-independent. */
-  --z-base: 0; --z-card: 10; --z-sticky: 40; --z-dropdown: 50; --z-nav: 60;
-  --z-sheet: 70; --z-overlay: 80; --z-modal: 90; --z-toast: 100;
+  /* Stacking order — mirrors Z in src/theme/tokens.ts. */
+  --z-base: 0; --z-card: 10; --z-sticky: 40; --z-dropdown: 50; --z-nav: 60; --z-sheet: 70; --z-overlay: 80; --z-modal: 90; --z-toast: 100;
 }
 
 :root[data-theme="dark"] {
@@ -118,6 +118,10 @@
   --surface-raised: #1C1B1B;
   --surface-sunken: #0E0E0E;
   --surface-muted: #2B2A2A;
+  --surface-3: #2B2A2A;
+  --border-hairline: rgba(255, 255, 255, 0.12);
+  --glass-panel: rgba(32, 31, 31, 0.78);
+  --on-indigo: #FFFFFF;
   --accent: #E5E2E1;
   --accent-hover: #FFFFFF;
   --accent-soft: rgba(255, 255, 255, 0.08);
@@ -185,15 +189,10 @@
 
 /* ── Page shell — one set of page-level spacing for employer + admin. ─── */
 :root {
-  --page-padding-x: 16px;
-  --page-padding-y: 20px;
-  --page-max-width: 1280px;
-  --page-max-width-wide: 1536px;
-  /* Board layout (Functional Sanctuary): sidebar / detail widths + gutter. */
-  --sidebar-width: 280px;
-  --detail-panel-width: 420px;
-  --gutter: 12px;
-  --margin-page: 24px;
+  --page-padding-x: 16px; --page-padding-y: 20px;
+  --page-max-width: 1280px; --page-max-width-wide: 1536px;
+  /* Board layout: sidebar / detail widths + gutter. */
+  --sidebar-width: 280px; --detail-panel-width: 420px; --gutter: 12px; --margin-page: 24px;
 }
 @media (min-width: 768px) {
   :root { --page-padding-x: 24px; --page-padding-y: 24px; }

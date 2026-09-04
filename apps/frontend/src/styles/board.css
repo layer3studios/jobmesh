@@ -29,6 +29,10 @@
 .jb-chip:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 .jb-sort:hover { border-color: var(--border-strong); color: var(--ink); }
 
+/* Filter panels: glass over the canvas; option hover is the next surface up. */
+.jb-panel { backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%); }
+.jb-option:hover, .jb-option:focus-visible { background: var(--surface-3); outline: none; }
+
 /* ── Job cards ─────────────────────────────────────────────────────────── */
 .jb-card { transition: background 120ms ease, border-color 120ms ease; }
 .jb-card + .jb-card { margin-top: var(--gutter); }

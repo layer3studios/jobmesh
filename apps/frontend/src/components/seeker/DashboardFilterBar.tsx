@@ -8,6 +8,7 @@ import type { JobFacets } from './dashboard/useJobFacets';
 interface Option { value: string; label: string; }
 
 import { MultiSelectDropdown } from './DashboardMultiSelect';
+import { FilterDropdown } from './FilterDropdown';
 import { LocationPicker } from './DashboardLocationPicker';
 
 // A select value of 'all' clears that dimension (removed); anything else adds it.
@@ -43,6 +44,14 @@ interface Props {
   setSalaryFilter: (min: string, max: string) => void;
 }
 
+
+const DATE_OPTIONS: Option[] = [
+  { value: 'all', label: 'Any time' },
+  { value: 'today', label: 'Today' },
+  { value: '3d', label: 'Last 3 days' },
+  { value: '7d', label: 'Last week' },
+  { value: '30d', label: 'Last month' },
+];
 
 const numberInputStyle = (base: CSSProperties): CSSProperties => ({
   ...base,
@@ -84,13 +93,13 @@ export default function DashboardFilterBar({
 
   return (
     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-      <select
+      <FilterDropdown
+        label="All roles"
+        options={roleOptions}
         value={roleCategoryFilter}
-        onChange={e => { setRoleCategoryFilter(e.target.value); emitFilter('role', e.target.value); setSp(sp => { sp.set('role', e.target.value); sp.delete('page'); }); }}
-        style={desktopSelectStyle}
-      >
-        {roleOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-      </select>
+        onChange={v => { setRoleCategoryFilter(v); emitFilter('role', v); setSp(sp => { sp.set('role', v); sp.delete('page'); }); }}
+        baseStyle={desktopSelectStyle}
+      />
 
       <MultiSelectDropdown
         label="Experience"
@@ -112,17 +121,14 @@ export default function DashboardFilterBar({
         baseStyle={desktopSelectStyle}
       />
 
-      <select
+      <FilterDropdown
+        label="Any time"
+        options={DATE_OPTIONS}
         value={dateFilter}
-        onChange={e => { setDateFilter(e.target.value); emitFilter('date', e.target.value); setSp(sp => { sp.set('date', e.target.value); sp.delete('page'); }); }}
-        style={desktopSelectStyle}
-      >
-        <option value="all">Any time</option>
-        <option value="today">Today</option>
-        <option value="3d">Last 3 days</option>
-        <option value="7d">Last week</option>
-        <option value="30d">Last month</option>
-      </select>
+        onChange={v => { setDateFilter(v); emitFilter('date', v); setSp(sp => { sp.set('date', v); sp.delete('page'); }); }}
+        baseStyle={desktopSelectStyle}
+        minWidth={160}
+      />
 
       <LocationPicker
         cities={facets.cities}
@@ -132,19 +138,16 @@ export default function DashboardFilterBar({
       />
 
       {facets.techStack.length > 0 && (
-        <select
-          value=""
-          onChange={e => {
-            const tag = e.target.value;
-            if (tag && !techStackFilter.includes(tag)) setTechStackFilter([...techStackFilter, tag]);
-          }}
-          style={desktopSelectStyle}
-        >
-          <option value="">{techStackFilter.length ? `Tech · ${techStackFilter.length}` : 'Tech stack'}</option>
-          {facets.techStack
+        <FilterDropdown
+          label={techStackFilter.length ? `Tech · ${techStackFilter.length}` : 'Tech stack'}
+          options={facets.techStack
             .filter(t => !techStackFilter.includes(t.tag))
-            .map(t => <option key={t.tag} value={t.tag}>{t.tag} ({t.count})</option>)}
-        </select>
+            .map(t => ({ value: t.tag, label: `${t.tag} (${t.count})` }))}
+          value=""
+          onChange={tag => { if (tag && !techStackFilter.includes(tag)) setTechStackFilter([...techStackFilter, tag]); }}
+          baseStyle={desktopSelectStyle}
+          minWidth={220}
+        />
       )}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
