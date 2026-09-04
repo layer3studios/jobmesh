@@ -47,4 +47,3 @@ export type { Step } from './Stepper';
 export { FileUpload } from './FileUpload';
 
 // Logo helpers
-export * from './LogoImg';

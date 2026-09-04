@@ -1,0 +1,48 @@
+/* FILE: src/styles/board.css
+   Interaction states for the app chrome and the job board. Inline styles own
+   every static value; this file owns only what inline cannot — hover, focus,
+   selection and reduced motion. No animation: state changes are instant
+   except a 120ms colour ease so a hover never flickers. */
+
+/* ── App nav ───────────────────────────────────────────────────────────── */
+.an-nav { position: relative; }
+/* The ink thread: the one place colour is allowed in the chrome. */
+.an-nav::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -3px; height: 3px;
+  background: var(--thread-gradient);
+}
+.an-link { position: relative; transition: color 120ms ease; }
+.an-link:hover { color: var(--ink); }
+.an-link[aria-current="page"]::after {
+  content: ''; position: absolute; left: 12px; right: 12px; bottom: -2px; height: 2px;
+  background: var(--ink);
+}
+.an-util { transition: background 120ms ease, color 120ms ease; }
+.an-util:hover { background: var(--paper-2); color: var(--ink); }
+.an-solid:hover { background: var(--accent-hover); }
+
+/* ── Board controls ────────────────────────────────────────────────────── */
+.jb-search:focus { border-color: var(--border-strong); box-shadow: var(--focus-ring); }
+.jb-search::placeholder { color: var(--ink-faint); }
+.jb-chip { transition: border-color 120ms ease, color 120ms ease; }
+.jb-chip:hover { border-color: var(--border-strong); color: var(--ink); }
+.jb-chip:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.jb-sort:hover { border-color: var(--border-strong); color: var(--ink); }
+
+/* ── Job cards ─────────────────────────────────────────────────────────── */
+.jb-card { transition: background 120ms ease, border-color 120ms ease; }
+.jb-card + .jb-card { margin-top: var(--gutter); }
+/* !important: the card's rest colours are inline, so hover must outrank them. */
+.jb-card:not(.jb-card--selected):hover { background: var(--surface-raised) !important; border-color: var(--border-strong) !important; }
+/* Selected state is inline (JobListItem) so it always wins over hover. */
+.jb-card__dismiss { opacity: 0; transition: opacity 120ms ease; }
+.jb-card:hover .jb-card__dismiss, .jb-card__dismiss:focus-visible { opacity: 1; }
+@media (hover: none) { .jb-card__dismiss { opacity: 1; } }
+
+/* ── Detail panel ──────────────────────────────────────────────────────── */
+.jb-icon-btn { transition: background 120ms ease, color 120ms ease; }
+.jb-icon-btn:hover { background: var(--paper-2); color: var(--ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  .an-link, .an-util, .jb-chip, .jb-card, .jb-card__dismiss, .jb-icon-btn { transition: none; }
+}

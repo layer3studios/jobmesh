@@ -7,7 +7,8 @@ import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recha
 interface Slice { name: string; value: number }
 
 // A small, theme-neutral categorical palette (distinct hues, readable in both themes).
-const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#a855f7', '#94a3b8'];
+// Categorical series — the theme's --cat-* palette, so charts follow dark/light.
+const COLORS = ['var(--cat-indigo)', 'var(--cat-green)', 'var(--cat-amber)', 'var(--cat-red)', 'var(--cat-blue)', 'var(--cat-purple)', 'var(--ink-faint)'];
 
 export default function PieDistribution({ title, data }: { title: string; data: Slice[] }) {
   const nonEmpty = data.filter((d) => d.value > 0);

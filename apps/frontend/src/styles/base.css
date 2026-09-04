@@ -84,15 +84,15 @@ a { color: inherit; }
 }
 
 .font-display {
-  font-family: var(--font-serif);
+  font-family: var(--font-instrument-serif), var(--font-source-serif), Georgia, serif;
   font-feature-settings: 'liga', 'kern';
   letter-spacing: -0.025em;
 }
 .font-mono {
-  font-family: var(--font-mono);
+  font-family: var(--font-jetbrains-mono), ui-monospace, Menlo, monospace;
 }
 .font-sketch, .font-sketch-num {
-  font-family: var(--font-serif);
+  font-family: var(--font-instrument-serif), var(--font-source-serif), Georgia, serif;
   letter-spacing: -0.01em;
 }
 

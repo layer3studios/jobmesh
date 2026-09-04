@@ -47,7 +47,7 @@ export const metadata: Metadata = {
 
 // Runs before first paint: resolves the theme from the (unchanged) 'jm-theme' key
 // or the OS preference and stamps data-theme so SSR HTML paints the right palette.
-const THEME_SCRIPT = `(function(){try{var m=localStorage.getItem('jm-theme');if(m!=='dark'&&m!=='light'){m=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',m);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();`;
+const THEME_SCRIPT = `(function(){try{var m=localStorage.getItem('jm-theme');if(m!=='dark'&&m!=='light'){m='dark';}document.documentElement.setAttribute('data-theme',m);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const fontVars = `${inter.variable} ${sourceSerif.variable} ${jetbrainsMono.variable} ${instrumentSerif.variable} ${dmSans.variable}`;
