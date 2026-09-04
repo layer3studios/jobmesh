@@ -66,15 +66,18 @@ export function inferWorkplace(job: IJob): string | null {
 export const BOILERPLATE_REGEX = /\b(equal\s+opportunity|EEO|diversity|inclusion|benefits|perks|why\s+work|about\s+(us|the\s+company)|our\s+mission|our\s+values)/i;
 
 export const metaPill: CSSProperties = {
-  display: 'inline-flex', alignItems: 'center', gap: 4,
-  padding: '3px 9px', borderRadius: 6,
-  background: 'var(--paper-2)', color: 'var(--ink-muted)',
-  fontSize: '0.72rem', fontWeight: 500,
+  display: 'inline-flex', alignItems: 'center', gap: 5,
+  padding: '4px 10px', borderRadius: 999,
+  background: 'transparent', color: 'var(--ink-muted)',
+  border: '1px solid var(--border)',
+  fontSize: '0.75rem', fontWeight: 500,
 };
 
+// Mono label — the board's "TECH STACK" / "COMPENSATION" section heads.
+export const MONO = 'var(--font-jetbrains-mono), ui-monospace, monospace';
 export const sectionLabel: CSSProperties = {
-  fontSize: '0.7rem', fontWeight: 600,
-  color: 'var(--ink-faint)',
-  letterSpacing: '0.05em', textTransform: 'uppercase',
-  marginBottom: 8,
+  fontFamily: MONO,
+  fontSize: 11, fontWeight: 500, color: 'var(--ink-muted)',
+  letterSpacing: '0.08em', textTransform: 'uppercase',
+  marginBottom: 10,
 };

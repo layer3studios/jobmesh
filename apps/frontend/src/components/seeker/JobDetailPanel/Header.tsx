@@ -1,8 +1,10 @@
 // FILE: src/components/seeker/JobDetailPanel/Header.tsx
-import { MapPin, Clock } from 'lucide-react';
+// The detail panel's masthead: a mono "posted" line, the serif display title,
+// company with logo tile, then a row of hairline meta pills.
+import { MapPin } from 'lucide-react';
 import type { IJob } from '../../../types';
 import CompanyLogo from '../CompanyLogo';
-import { getAutoTags, inferWorkplace, relTime, roleBadgeStyle, metaPill } from './job-detail-helpers';
+import { getAutoTags, inferWorkplace, relTime, metaPill, MONO } from './job-detail-helpers';
 
 interface Props {
   job: IJob;
@@ -17,35 +19,29 @@ export default function Header({ job, domain, mobileMode }: Props) {
 
   return (
     <>
-      <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-        <CompanyLogo
-          name={job.Company}
-          url={job.ApplicationURL}
-          domain={domain}
-          size={48}
-          borderRadius={11}
-          style={{ flexShrink: 0 }}
-        />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h2 style={{
-            fontSize: mobileMode ? '1.05rem' : '1.2rem',
-            fontWeight: 600, color: 'var(--ink)',
-            letterSpacing: '-0.018em', lineHeight: 1.25,
-          }}>{job.JobTitle}</h2>
-          <p style={{ fontSize: '0.875rem', color: 'var(--ink-muted)', marginTop: 4 }}>{job.Company}</p>
-        </div>
+      {rt && (
+        <p style={{
+          fontFamily: MONO, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase',
+          color: 'var(--ink-muted)', marginBottom: 10,
+        }}>
+          Posted {rt}
+        </p>
+      )}
+
+      <h2 className="font-display" style={{
+        fontSize: mobileMode ? 26 : 32, fontWeight: 400,
+        color: 'var(--ink)', letterSpacing: '-0.03em', lineHeight: 1.1,
+      }}>{job.JobTitle}</h2>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12 }}>
+        <CompanyLogo name={job.Company} url={job.ApplicationURL} domain={domain} size={32} borderRadius={8} style={{ flexShrink: 0 }} />
+        <p style={{ fontSize: 15, color: 'var(--ink-2)', fontWeight: 500 }}>{job.Company}</p>
       </div>
 
-      <div style={{
-        display: 'flex', flexWrap: 'wrap', gap: 6,
-        fontSize: '0.78rem', color: 'var(--ink-muted)', marginTop: 12,
-      }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 14 }}>
         <span style={metaPill}><MapPin size={11} />{job.Location}</span>
-        {wp && <span style={{ ...metaPill, background: 'var(--info-soft)', color: 'var(--info)' }}>{wp}</span>}
-        {rt && <span style={metaPill}><Clock size={11} />{rt}</span>}
-        {auto.roleCategory && (
-          <span style={{ ...metaPill, ...roleBadgeStyle(auto.roleCategory) }}>{auto.roleCategory}</span>
-        )}
+        {wp && <span style={{ ...metaPill, color: 'var(--ink)', borderColor: 'var(--border-strong)' }}>{wp}</span>}
+        {auto.roleCategory && <span style={metaPill}>{auto.roleCategory}</span>}
         {auto.experienceBand && <span style={metaPill}>{auto.experienceBand}</span>}
       </div>
     </>

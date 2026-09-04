@@ -1,10 +1,13 @@
 'use client';
 // FILE: src/components/seeker/JobListItem.tsx
-import { useState, memo } from 'react';
-import { Clock, CheckCircle2, X } from 'lucide-react';
+// One job card in the board's list column. Flat hairline card on the
+// canvas; hover and selection are CSS states (board.css), not React state.
+// Selected = the indigo thread on the left edge + the highest surface.
+import { memo } from 'react';
+import { CheckCircle2, Clock, X } from 'lucide-react';
 import type { IJob } from '../../types';
 import CompanyLogo from './CompanyLogo';
-import { useViewport } from '@/hooks/shared/useViewport';
+import { MONO } from './JobDetailPanel/job-detail-helpers';
 
 export type CompactBadge = { key: string; label: string; bg: string; color: string };
 
@@ -26,149 +29,103 @@ export interface JobListItemProps {
   onDismiss?: (jobId: string) => void;
 }
 
+const monoTag = {
+  fontFamily: MONO, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase' as const,
+  padding: '3px 8px', borderRadius: 999, border: '1px solid var(--border)',
+  color: 'var(--ink-muted)', whiteSpace: 'nowrap' as const,
+};
+
 const JobListItem = memo(function JobListItem({
   job, domain, isSelected, isApplied, isComeBack, comeBackNote,
   isNew, relativeTime, visibleBadges, showSkillMatch,
   skillMatchText, skillMatchBg, skillMatchColor, onSelect, onDismiss,
 }: JobListItemProps) {
-  const [hovered, setHovered] = useState(false);
-  // 768 is the tablet boundary, so "not desktop" is exactly the old `< 768`.
-  const { isDesktop } = useViewport();
-  const isMobile = !isDesktop;
-
   return (
     <div
+      className={`jb-card${isSelected ? ' jb-card--selected' : ''}`}
       onClick={() => onSelect(job)}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(job); } }}
+      aria-current={isSelected ? 'true' : undefined}
       style={{
         position: 'relative',
-        padding: isMobile ? '13px 14px 13px 14px' : '13px 16px',
-        paddingRight: 40,
-        borderBottom: '1px solid var(--border)',
+        padding: '14px 16px 12px',
+        paddingRight: onDismiss ? 40 : 16,
+        background: isSelected ? 'var(--surface-2)' : 'var(--surface)',
+        border: `1px solid ${isSelected ? 'var(--border-strong)' : 'var(--border)'}`,
+        borderLeft: `4px solid ${isSelected ? 'var(--thread-indigo)' : 'transparent'}`,
+        borderRadius: 12,
         cursor: 'pointer',
-        background: isSelected
-          ? 'var(--accent-soft)'
-          : hovered ? 'var(--paper-2)' : 'transparent',
-        borderLeft: isSelected ? '3px solid var(--accent)' : '3px solid transparent',
-        opacity: isApplied ? 0.55 : 1,
-        transition: 'all 140ms ease',
+        opacity: isApplied ? 0.6 : 1,
       }}
     >
-      {/* Dismiss */}
       {onDismiss && (
         <button
+          className="jb-card__dismiss jb-icon-btn"
           onClick={e => { e.stopPropagation(); onDismiss(job._id); }}
           title="Not interested"
+          aria-label="Not interested"
           style={{
-            position: 'absolute',
-            top: 10, right: 10,
-            background: hovered || isMobile ? 'var(--surface)' : 'transparent',
-            border: hovered || isMobile ? '1px solid var(--border)' : '1px solid transparent',
-            borderRadius: 6,
-            padding: 4,
-            cursor: 'pointer',
-            color: 'var(--ink-faint)',
-            display: 'flex',
-            alignItems: 'center',
-            opacity: hovered || isMobile ? 1 : 0,
-            transition: 'opacity 140ms ease',
-            zIndex: 1,
+            position: 'absolute', top: 10, right: 10,
+            width: 24, height: 24, borderRadius: 6,
+            background: 'transparent', border: '1px solid var(--border)',
+            color: 'var(--ink-faint)', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
         >
           <X size={11} />
         </button>
       )}
 
-      <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-        <CompanyLogo
-          name={job.Company}
-          url={job.ApplicationURL}
-          domain={domain}
-          size={36}
-          borderRadius={9}
-          style={{ flexShrink: 0 }}
-        />
-
-        <div style={{ minWidth: 0, flex: 1 }}>
-          {/* Title */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: 6,
-            fontSize: '0.88rem',
-            fontWeight: 600,
-            color: 'var(--ink)',
-            lineHeight: 1.3,
-            letterSpacing: '-0.012em',
-          }}>
-            <span style={{
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}>
-              {job.JobTitle}
-            </span>
-            {isApplied && <CheckCircle2 size={13} style={{ flexShrink: 0, color: 'var(--success)', marginTop: 2 }} />}
-            {!isApplied && isComeBack && <Clock size={13} style={{ flexShrink: 0, color: 'var(--warning)', marginTop: 2 }} />}
-          </div>
-
-          {/* Company · Location */}
-          <div style={{
-            display: 'flex', gap: 5, alignItems: 'center',
-            marginTop: 3,
-            fontSize: '0.76rem', color: 'var(--ink-muted)',
-            overflow: 'hidden',
-          }}>
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{job.Company}</span>
-            <span style={{ color: 'var(--ink-faint)' }}>·</span>
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{job.Location}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Badges */}
-      <div style={{ display: 'flex', gap: 5, marginTop: 8, flexWrap: 'wrap' }}>
-        {isNew && (
-          <span style={{
-            fontSize: '0.6rem', padding: '1px 7px', borderRadius: 6,
-            background: 'var(--danger-soft)', color: 'var(--danger)', fontWeight: 700,
-            textTransform: 'uppercase', letterSpacing: '0.04em',
-          }}>NEW</span>
-        )}
+      {/* Row 1 — title left, posted time right */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+        <h3 style={{
+          flex: 1, minWidth: 0, margin: 0,
+          fontSize: 15, fontWeight: 600, color: 'var(--ink)',
+          lineHeight: 1.3, letterSpacing: '-0.01em',
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+        }}>
+          {job.JobTitle}
+        </h3>
         {relativeTime && (
-          <span style={{
-            fontSize: '0.62rem', padding: '1px 7px', borderRadius: 6,
-            background: 'var(--accent-soft)', color: 'var(--accent)', fontWeight: 600,
-            display: 'inline-flex', alignItems: 'center', gap: 3,
-          }}>
-            <Clock size={8} />{relativeTime}
-          </span>
-        )}
-        {visibleBadges.map(badge => (
-          <span key={badge.key} style={{
-            fontSize: '0.62rem', padding: '1px 7px', borderRadius: 6,
-            background: badge.bg, color: badge.color, fontWeight: 600,
-          }}>
-            {badge.label}
-          </span>
-        ))}
-        {showSkillMatch && (
-          <span style={{
-            fontSize: '0.62rem', padding: '1px 7px', borderRadius: 6,
-            background: skillMatchBg, color: skillMatchColor, fontWeight: 600,
-          }}>
-            {skillMatchText}
+          <span style={{ fontFamily: MONO, fontSize: 11, color: 'var(--ink-faint)', whiteSpace: 'nowrap', marginTop: 2 }}>
+            {relativeTime}
           </span>
         )}
       </div>
+
+      {/* Row 2 — logo tile, company, location */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, minWidth: 0 }}>
+        <CompanyLogo name={job.Company} url={job.ApplicationURL} domain={domain} size={22} borderRadius={6} style={{ flexShrink: 0 }} />
+        <span style={{ fontSize: 13, color: 'var(--ink-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {job.Company}
+        </span>
+        <span style={{ color: 'var(--ink-faint)' }}>·</span>
+        <span style={{ fontSize: 13, color: 'var(--ink-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {job.Location}
+        </span>
+        {isApplied && <CheckCircle2 size={13} style={{ flexShrink: 0, color: 'var(--success)', marginLeft: 'auto' }} />}
+        {!isApplied && isComeBack && <Clock size={13} style={{ flexShrink: 0, color: 'var(--warning)', marginLeft: 'auto' }} />}
+      </div>
+
+      {/* Row 3 — mono tags: status first, then workplace/role, then match */}
+      {(isNew || visibleBadges.length > 0 || showSkillMatch) && (
+        <div style={{ display: 'flex', gap: 6, marginTop: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+          {isNew && <span style={{ ...monoTag, color: 'var(--ink)', borderColor: 'var(--border-strong)' }}>New</span>}
+          {visibleBadges.map(badge => <span key={badge.key} style={monoTag}>{badge.label}</span>)}
+          {showSkillMatch && (
+            <span style={{ ...monoTag, background: skillMatchBg, color: skillMatchColor, borderColor: 'transparent' }}>
+              {skillMatchText}
+            </span>
+          )}
+        </div>
+      )}
 
       {isComeBack && comeBackNote && (
         <div style={{
-          fontSize: '0.72rem', color: 'var(--warning)', fontStyle: 'italic',
-          marginTop: 6, overflow: 'hidden', textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap', opacity: 0.85,
+          fontSize: 12, color: 'var(--warning)', fontStyle: 'italic', marginTop: 8,
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.85,
         }}>
           {comeBackNote.length > 50 ? comeBackNote.slice(0, 50) + '…' : comeBackNote}
         </div>

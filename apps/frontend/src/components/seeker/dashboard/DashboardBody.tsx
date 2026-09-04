@@ -40,7 +40,7 @@ export default function DashboardBody(p: Props) {
   if (p.loading && p.jobs.length === 0) {
     return (
       <div style={{ display: 'grid', gap: 8 }}>
-        {Array(8).fill(0).map((_, i) => <div key={i} className="skeleton" style={{ height: 76, borderRadius: 11 }} />)}
+        {Array(8).fill(0).map((_, i) => <div key={i} className="skeleton" style={{ height: 96, borderRadius: 12 }} />)}
       </div>
     );
   }
@@ -76,22 +76,19 @@ export default function DashboardBody(p: Props) {
     return (
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'minmax(320px, 420px) minmax(0, 1fr)',
-        gap: 16, alignItems: 'start',
+        gridTemplateColumns: 'minmax(320px, 2fr) minmax(0, 3fr)',
+        gap: 'var(--gutter)', alignItems: 'start',
       }}>
-        <div
-          ref={p.listRef}
-          style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}
-        >
+        <div ref={p.listRef}>
           <JobListColumn {...listProps} selectedJobId={p.selectedJob?._id} />
         </div>
 
         <div
           className="thin-scroll"
           style={{
-            position: 'sticky', top: 80,
-            maxHeight: 'calc(100vh - 96px)', overflowY: 'auto',
-            background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12,
+            position: 'sticky', top: 84,
+            maxHeight: 'calc(100vh - 100px)', overflowY: 'auto',
+            background: 'var(--surface-sunken)', border: '1px solid var(--border)', borderRadius: 12,
           }}
         >
           {p.selectedJob ? (
@@ -118,7 +115,7 @@ export default function DashboardBody(p: Props) {
 
   // Mobile
   return (
-    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
+    <div>
       <JobListColumn {...listProps} compactMatchLabel />
     </div>
   );
