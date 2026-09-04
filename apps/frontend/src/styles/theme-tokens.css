@@ -26,9 +26,9 @@
   --surface-raised: #FBFAF8;
   --surface-sunken: #EDECE8;
   --surface-muted: #E4E3DE;
-  --surface-3: #E4E3DE;
-  --border-hairline: rgba(9, 9, 11, 0.12);
+  --surface-3: #E4E3DE; --border-hairline: rgba(9, 9, 11, 0.12);
   --glass-panel: rgba(241, 240, 236, 0.82);
+  --glass-card: rgba(251, 250, 248, 0.62); --glass-strong: rgba(251, 250, 248, 0.86);
   --on-indigo: #FFFFFF;
   --accent: #09090B;
   --accent-hover: #26262A;
@@ -118,9 +118,9 @@
   --surface-raised: #1C1B1B;
   --surface-sunken: #0E0E0E;
   --surface-muted: #2B2A2A;
-  --surface-3: #2B2A2A;
-  --border-hairline: rgba(255, 255, 255, 0.12);
+  --surface-3: #2B2A2A; --border-hairline: rgba(255, 255, 255, 0.12);
   --glass-panel: rgba(32, 31, 31, 0.78);
+  --glass-card: rgba(20, 19, 19, 0.58); --glass-strong: rgba(20, 19, 19, 0.84);
   --on-indigo: #FFFFFF;
   --accent: #E5E2E1;
   --accent-hover: #FFFFFF;

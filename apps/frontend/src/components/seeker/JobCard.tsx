@@ -1,6 +1,5 @@
 'use client';
 // FILE: src/components/seeker/JobCard.tsx
-import { useState } from 'react';
 import { MapPin, Clock, ArrowUpRight } from 'lucide-react';
 import type { IJob } from '../../types';
 import CompanyLogo from './CompanyLogo';
@@ -49,7 +48,6 @@ function workplaceLabel(job: IJob): string | null {
 
 export default function JobCard({ job, domain }: Props) {
   const { isMobile } = useViewport();
-  const [hovered, setHovered] = useState(false);
 
 
   const effectiveDate = job.PostedDate || job.createdAt || job.scrapedAt || null;
@@ -59,22 +57,20 @@ export default function JobCard({ job, domain }: Props) {
 
   return (
     <a
+      className="jb-link-card"
       href={job.DirectApplyURL || job.ApplicationURL}
       target="_blank"
       rel="noopener noreferrer"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       style={{
         display: 'block',
         textDecoration: 'none',
-        background: hovered ? 'var(--surface)' : 'var(--paper)',
+        background: 'var(--glass-card)',
+        backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)',
         border: '1px solid',
-        borderColor: hovered ? 'var(--border-strong)' : 'var(--border)',
+        borderColor: 'var(--border)',
         borderRadius: 12,
         padding: isMobile ? '14px' : '16px 18px',
         transition: 'all 180ms cubic-bezier(0.2, 0.8, 0.2, 1)',
-        transform: hovered ? 'translateY(-1px)' : 'translateY(0)',
-        boxShadow: hovered ? 'var(--shadow-sm)' : 'none',
         position: 'relative',
       }}
     >
@@ -110,7 +106,7 @@ export default function JobCard({ job, domain }: Props) {
             <ArrowUpRight
               size={14}
               style={{
-                color: hovered ? 'var(--accent)' : 'var(--ink-faint)',
+                color: 'var(--ink-faint)',
                 flexShrink: 0,
                 marginTop: 2,
                 transition: 'color 160ms ease',

@@ -31,7 +31,7 @@ export function Modal({
       onMouseDown={(e) => { if (closeOnOverlayClick && e.target === e.currentTarget) onClose(); }}
       style={{
         position: 'fixed', inset: 0, zIndex: Z.modal,
-        background: 'var(--overlay)', backdropFilter: 'blur(2px)',
+        background: 'var(--overlay)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 16, animation: 'fadeIn 160ms ease',
       }}
@@ -43,8 +43,8 @@ export function Modal({
         aria-labelledby={titleId}
         style={{
           width: '100%', maxWidth: WIDTH[size], maxHeight: '90vh', overflow: 'auto',
-          background: 'var(--surface)', borderRadius: RADIUS.xl, boxShadow: SHADOW.lg,
-          border: '1px solid var(--border)', animation: 'scaleIn 180ms ease',
+          background: 'var(--glass-strong)', backdropFilter: 'blur(20px) saturate(150%)', WebkitBackdropFilter: 'blur(20px) saturate(150%)', borderRadius: RADIUS.xl, boxShadow: SHADOW.lg,
+          border: '1px solid var(--border-hairline)', animation: 'scaleIn 180ms ease',
         }}
       >
         <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>

@@ -3,9 +3,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Flame, Briefcase, Target } from 'lucide-react';
+import { Flame, Briefcase, Target } from 'lucide-react';
 import { useSeeker } from '../../../context/seeker/SeekerContext';
-import { Container, PageHeader, Button, EmptyState } from '../../ui';
+import { Button, EmptyState } from '../../ui';
+import SeekerWorkspace from '../SeekerWorkspace';
 import { COPY } from '../../../theme/brand';
 import ProgressRing from '../ProgressRing';
 import ActivityChart from '../ActivityChart';
@@ -58,22 +59,11 @@ export default function Progress() {
   if (!currentUser) return null;
 
   return (
-    <Container size="xl" style={{ paddingTop: 'clamp(24px, 5vw, 40px)', paddingBottom: 60 }}>
-      <Link
-        href="/jobs"
-        style={{
-          display: 'inline-flex', alignItems: 'center', gap: 5,
-          fontSize: '0.82rem', color: 'var(--ink-muted)',
-          textDecoration: 'none', marginBottom: 14, fontWeight: 500,
-        }}
-      >
-        <ArrowLeft size={13} /> {COPY.progress.backToJobs}
-      </Link>
-
-      <PageHeader
-        label={COPY.progress.pageLabel}
-        title={COPY.progress.pageTitle}
-      />
+    <SeekerWorkspace
+      label={COPY.progress.pageLabel}
+      title={COPY.progress.pageTitle}
+      actions={<Link href="/jobs"><Button variant="ghost">{COPY.progress.backToJobs}</Button></Link>}
+    >
 
       {appliedJobs.length === 0 && !loading ? (
         <EmptyState
@@ -89,9 +79,7 @@ export default function Progress() {
           <div className="progress-grid">
             <div className="progress-col">
               {/* Today's progress: ring + quick stats */}
-              <div style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
+              <div className="glass" style={{
                 borderRadius: 14,
                 padding: 'clamp(14px, 2.5vw, 18px)',
               }}>
@@ -141,22 +129,20 @@ export default function Progress() {
           </Section>
         </div>
       )}
-    </Container>
+    </SeekerWorkspace>
   );
 }
 
 function Section({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <section style={{
-      background: 'var(--surface)',
-      border: '1px solid var(--border)',
+    <section className="glass" style={{
       borderRadius: 14,
       padding: 'clamp(14px, 2.5vw, 18px)',
     }}>
-      <h2 className="font-display" style={{
-        fontSize: '1rem',
-        fontWeight: 600, color: 'var(--ink)',
-        letterSpacing: '-0.02em', marginBottom: subtitle ? 4 : 12,
+      <h2 style={{
+        fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace',
+        fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase',
+        fontWeight: 500, color: 'var(--ink-muted)', marginBottom: subtitle ? 4 : 12,
       }}>{title}</h2>
       {subtitle && <p style={{ fontSize: '0.82rem', color: 'var(--ink-muted)', marginBottom: 14 }}>{subtitle}</p>}
       {children}
@@ -168,14 +154,13 @@ function Stat({ icon, value, label }: { icon: React.ReactNode; value: React.Reac
   return (
     <div style={{
       padding: '10px 12px',
-      background: 'var(--paper-2)',
       borderRadius: 10,
       border: '1px solid var(--border)',
     }}>
       <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
         <span style={{
           width: 22, height: 22, borderRadius: 6,
-          background: 'var(--surface)', color: 'var(--ink-muted)',
+          color: 'var(--ink-muted)',
           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
           border: '1px solid var(--border)',
         }}>{icon}</span>

@@ -57,8 +57,9 @@ export default function SeekerAppShell({ children }: { children: ReactNode }) {
       minHeight: '100dvh',
       display: 'flex',
       flexDirection: 'column',
-      background: 'var(--paper)',
     }}>
+      {/* Ambient washes behind every app page so glass surfaces have depth to blur. */}
+      {!isLanding && <div className="app-ambient" aria-hidden />}
       {!isLanding && <TopNav
         isMobile={isMobile}
         isCompact={isCompact}

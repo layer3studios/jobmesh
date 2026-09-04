@@ -34,7 +34,7 @@ export default function PicksSection({ picks, loading, userSkillsLength, onOpenS
           </span>
           <button onClick={onOpenSkillsEditor} style={{
             padding: '6px 13px', borderRadius: 8,
-            background: 'var(--accent)', color: '#fff',
+            background: 'var(--ink)', color: 'var(--paper)',
             border: 'none', cursor: 'pointer',
             fontFamily: 'inherit', fontSize: '0.82rem', fontWeight: 500,
           }}>Add skills</button>

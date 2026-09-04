@@ -24,10 +24,7 @@ export default function JobDetailStandalone({ job }: { job: IJob }) {
   }, [job._id, job.Company]);
 
   return (
-    <div style={{
-      border: '1px solid var(--border)', borderRadius: 14,
-      overflow: 'hidden', background: 'var(--surface)', minHeight: 480,
-    }}>
+    <div className="glass" style={{ borderRadius: 14, overflow: 'hidden', minHeight: 480 }}>
       <JobDetailPanel
         job={job}
         appliedJobIds={appliedJobIds}

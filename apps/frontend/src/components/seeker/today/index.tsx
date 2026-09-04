@@ -4,7 +4,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useSeeker } from '../../../context/seeker/SeekerContext';
-import { Container } from '../../ui';
+import SeekerWorkspace from '../SeekerWorkspace';
 import type { IJob } from '../../../types';
 import { buildSkillsRegex } from '../JobDetailPanel';
 import { BRAND } from '../../../theme/brand';
@@ -65,7 +65,7 @@ export default function Today() {
   };
 
   return (
-    <Container size="xl" style={{ paddingTop: 'clamp(24px, 5vw, 40px)', paddingBottom: 60 }}>
+    <SeekerWorkspace>
       <Hero
         isDesktop={isDesktop}
         greeting={greeting()}
@@ -83,6 +83,6 @@ export default function Today() {
         />
         <NewsSection />
       </div>
-    </Container>
+    </SeekerWorkspace>
   );
 }

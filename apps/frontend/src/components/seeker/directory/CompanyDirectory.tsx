@@ -10,6 +10,8 @@ import { Search, X, Building2 } from 'lucide-react';
 import { useCompanies, type SortOption } from '../../../hooks/seeker/useCompanies';
 import { Container, PageHeader, EmptyState } from '../../ui';
 import DirectoryCard from '../DirectoryCard';
+import { FilterDropdown } from '../FilterDropdown';
+import { desktopSelectStyle } from '../dashboard/constants';
 import SkeletonCompanyCard from '../SkeletonCompanyCard';
 import Pagination from '../Pagination';
 import { COPY } from '../../../theme/brand';
@@ -63,30 +65,26 @@ export default function CompanyDirectory() {
   return (
     <Container size="xl" style={{ paddingTop: 'clamp(24px, 5vw, 40px)', paddingBottom: 60 }}>
       <PageHeader
-        label={COPY.directory.pageLabel}
-        title={<>{COPY.directory.pageTitle1} <span style={{ color: 'var(--accent)' }}>{COPY.directory.pageTitle2}</span></>}
-        subtitle={loading ? 'Loading…' : `${total.toLocaleString()} companies actively hiring`}
+        label={`${COPY.directory.pageLabel} · ${loading ? 'Loading…' : `${total.toLocaleString()} companies actively hiring`}`}
+        title={<>{COPY.directory.pageTitle1} <em>{COPY.directory.pageTitle2}</em></>}
       />
 
       {/* Search + sort */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
-        <div style={{ position: 'relative', flex: '1 1 240px' }}>
-          <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-faint)' }} />
+      <div style={{ display: 'flex', gap: 'var(--gutter)', flexWrap: 'wrap', alignItems: 'center', marginBottom: 20 }}>
+        <div style={{ position: 'relative', flex: '1 1 260px' }}>
+          <Search size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-faint)', zIndex: 1 }} />
           <input
+            className="jb-search glass"
             type="text"
             value={searchInput}
             onChange={e => setSearchInput(e.target.value)}
             placeholder={COPY.directory.searchPlaceholder}
             aria-label={COPY.directory.searchAriaLabel}
             style={{
-              width: '100%', padding: '10px 12px 10px 34px',
-              fontFamily: 'inherit', fontSize: '0.9rem',
-              background: 'var(--surface)', color: 'var(--ink)',
-              border: '1px solid var(--border-strong)',
-              borderRadius: 10, outline: 'none',
+              width: '100%', height: 44, padding: '0 36px 0 40px',
+              fontFamily: 'inherit', fontSize: 14, color: 'var(--ink)',
+              borderRadius: 12, outline: 'none',
             }}
-            onFocus={e => { e.currentTarget.style.borderColor = 'var(--accent)'; }}
-            onBlur={e => { e.currentTarget.style.borderColor = 'var(--border-strong)'; }}
           />
           {searchInput && (
             <button
@@ -102,25 +100,18 @@ export default function CompanyDirectory() {
             </button>
           )}
         </div>
-        <select
+        <FilterDropdown
+          label={COPY.directory.sortAriaLabel}
+          options={[
+            { value: 'most-hiring', label: COPY.directory.sortMostHiring },
+            { value: 'a-z', label: COPY.directory.sortAZ },
+            { value: 'z-a', label: COPY.directory.sortZA },
+          ]}
           value={sort}
-          onChange={e => setSort(e.target.value as SortOption)}
-          aria-label={COPY.directory.sortAriaLabel}
-          style={{
-            padding: '10px 32px 10px 12px',
-            fontFamily: 'inherit', fontSize: '0.85rem',
-            background: 'var(--surface)', color: 'var(--ink)',
-            border: '1px solid var(--border-strong)',
-            borderRadius: 10, cursor: 'pointer', outline: 'none',
-            appearance: 'none',
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%236F6E69' stroke-width='2'%3E%3Cpath d='M3 5l3 3 3-3'/%3E%3C/svg%3E")`,
-            backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center',
-          }}
-        >
-          <option value="most-hiring">{COPY.directory.sortMostHiring}</option>
-          <option value="a-z">{COPY.directory.sortAZ}</option>
-          <option value="z-a">{COPY.directory.sortZA}</option>
-        </select>
+          onChange={v => setSort(v as SortOption)}
+          baseStyle={{ ...desktopSelectStyle, height: 44, borderRadius: 12 }}
+          minWidth={180}
+        />
       </div>
 
       {/* Grid */}

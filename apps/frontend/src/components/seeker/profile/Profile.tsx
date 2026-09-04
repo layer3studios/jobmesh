@@ -7,7 +7,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Container, Card, Button, Alert, PageHeader, Stack, SkeletonCard, EmptyState } from '../../ui';
+import { Card, Button, Alert, Stack, SkeletonCard, EmptyState } from '../../ui';
+import SeekerWorkspace from '../SeekerWorkspace';
 import { fetchProfile, SeekerApiError } from '../../../api/seeker-api';
 import type { ParsedProfile } from '../../../types/seeker-profile';
 import ProfileContact from './ProfileContact';
@@ -55,46 +56,43 @@ export default function Profile() {
   useEffect(() => { void load(); }, [load]);
 
   if (loadState === 'loading') {
-    return <Container size="md" style={{ paddingTop: 32, paddingBottom: 60 }}><SkeletonCard lines={5} /></Container>;
+    return <SeekerWorkspace label="Seeker" title="Your profile"><SkeletonCard lines={5} /></SeekerWorkspace>;
   }
   if (loadState === 'error') {
     return (
-      <Container size="md" style={{ paddingTop: 32, paddingBottom: 60 }}>
+      <SeekerWorkspace label="Seeker" title="Your profile">
         <Alert type="error">
           <Stack gap={12} dir="row" align="center" justify="space-between" wrap>
             <span>{error}</span>
             <Button variant="ghost" size="sm" onClick={() => void load()}>Retry</Button>
           </Stack>
         </Alert>
-      </Container>
+      </SeekerWorkspace>
     );
   }
   if (loadState === 'empty' || !profile) {
     return (
-      <Container size="md" style={{ paddingTop: 32, paddingBottom: 60 }}>
-        <PageHeader label="SEEKER" title="Your profile" />
+      <SeekerWorkspace label="Seeker" title="Your profile">
         <EmptyState
           title="No profile yet"
           description="Upload your resume and we'll build a structured profile to match you with jobs."
           action={<Link href="/resume"><Button variant="primary">Upload your resume</Button></Link>}
         />
-      </Container>
+      </SeekerWorkspace>
     );
   }
 
   return (
-    <Container size="md" style={{ paddingTop: 32, paddingBottom: 60 }}>
-      <PageHeader
-        label="SEEKER"
-        title="Your profile"
-        subtitle={`Last parsed ${relTime(profile.parsedAt)}`}
-        actions={(
-          <Stack gap={8} dir="row" wrap>
-            <ProfileShareButton />
-            <Link href="/resume"><Button variant="ghost">Re-upload resume</Button></Link>
-          </Stack>
-        )}
-      />
+    <SeekerWorkspace
+      label={`Seeker · parsed ${relTime(profile.parsedAt)}`}
+      title="Your profile"
+      actions={(
+        <Stack gap={8} dir="row" wrap>
+          <ProfileShareButton />
+          <Link href="/resume"><Button variant="ghost">Re-upload resume</Button></Link>
+        </Stack>
+      )}
+    >
       <Stack gap={16}>
         {/* Above the review card: the shareable link is the thing a candidate
             comes here to get, and burying it under the resume critique makes it
@@ -124,6 +122,6 @@ export default function Profile() {
           </Card>
         )}
       </Stack>
-    </Container>
+    </SeekerWorkspace>
   );
 }

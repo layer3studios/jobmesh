@@ -50,8 +50,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 role="status"
                 style={{
                   display: 'flex', alignItems: 'center', gap: 10, minWidth: 240, maxWidth: 380,
-                  padding: '12px 14px', borderRadius: RADIUS.lg, background: 'var(--surface)',
-                  border: '1px solid var(--border)', boxShadow: SHADOW.lg,
+                  padding: '12px 14px', borderRadius: RADIUS.lg, background: 'var(--glass-strong)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+                  border: '1px solid var(--border-hairline)', boxShadow: SHADOW.lg,
                   color: 'var(--ink)', fontSize: TYPE.base, fontWeight: 500,
                   animation: 'toastIn 240ms cubic-bezier(0.16,1,0.3,1)',
                 }}

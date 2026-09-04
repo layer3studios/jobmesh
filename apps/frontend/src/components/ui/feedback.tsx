@@ -15,15 +15,16 @@ export function PageHeader({ label, title, subtitle, actions, compact }: {
     <div style={{ marginBottom: compact ? 8 : 20 }}>
       {label && (
         <p style={{
-          fontSize: '0.75rem', fontWeight: 500, color: 'var(--ink-muted)',
-          marginBottom: compact ? 2 : 6, letterSpacing: '0.04em', textTransform: 'uppercase',
+          fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace',
+          fontSize: 11, fontWeight: 500, color: 'var(--ink-muted)',
+          marginBottom: compact ? 4 : 10, letterSpacing: '0.08em', textTransform: 'uppercase',
         }}>{label}</p>
       )}
       <div style={{ display: 'flex', justifyContent: actions ? 'space-between' : 'flex-start', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12 }}>
         <div style={{ minWidth: 0, flex: '1 1 280px' }}>
           <h1 className="font-display" style={{
-            fontSize: 'clamp(1.6rem, 3.6vw, 2.25rem)', fontWeight: 600,
-            color: 'var(--ink)', lineHeight: 1.1, letterSpacing: '-0.025em',
+            fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 400,
+            color: 'var(--ink)', lineHeight: 1.05, letterSpacing: '-0.04em',
           }}>{title}</h1>
           {subtitle && (
             <div style={{ color: 'var(--ink-muted)', marginTop: 6, fontSize: '0.875rem', lineHeight: 1.55 }}>{subtitle}</div>
@@ -52,12 +53,12 @@ export function EmptyState({ icon, title, heading, body, description, action }: 
   const desc = description ?? body;
   const isActionObject = !!action && typeof action === 'object' && 'label' in (action as object);
   return (
-    <div style={{
+    <div className="glass" style={{
       textAlign: 'center', padding: 'clamp(40px, 8vw, 64px) clamp(20px, 4vw, 32px)',
-      background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14,
+      borderRadius: 14,
     }}>
       {icon && <div style={{ color: 'var(--ink-faint)', marginBottom: 14, display: 'flex', justifyContent: 'center' }}>{icon}</div>}
-      <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--ink)', marginBottom: 6 }}>{head}</h3>
+      <h3 className="font-display" style={{ fontSize: '1.5rem', fontWeight: 400, letterSpacing: '-0.03em', color: 'var(--ink)', marginBottom: 6 }}>{head}</h3>
       {desc && <p style={{ color: 'var(--ink-muted)', fontSize: '0.875rem', maxWidth: 380, margin: '0 auto 18px', lineHeight: 1.55 }}>{desc}</p>}
       {isActionObject
         ? <Button onClick={(action as EmptyStateAction).onClick}>{(action as EmptyStateAction).label}</Button>
@@ -86,8 +87,7 @@ export function StatCard({ icon, value, label, accent }: { icon: ReactNode; valu
   return (
     <Card style={{
       textAlign: 'left',
-      borderColor: accent ? 'var(--accent-mid)' : 'var(--border)',
-      background: accent ? 'linear-gradient(135deg, var(--accent-soft), var(--surface))' : 'var(--surface)',
+      borderColor: accent ? 'var(--border-strong)' : 'var(--border)',
     }}>
       <div style={{
         width: 36, height: 36, borderRadius: 10,
@@ -95,8 +95,8 @@ export function StatCard({ icon, value, label, accent }: { icon: ReactNode; valu
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         color: accent ? 'var(--accent)' : 'var(--ink-muted)', marginBottom: 14,
       }}>{icon}</div>
-      <div className="font-display" style={{ fontSize: '1.75rem', fontWeight: 600, color: 'var(--ink)', lineHeight: 1, letterSpacing: '-0.02em' }}>{value}</div>
-      <p style={{ fontSize: '0.82rem', color: 'var(--ink-muted)', marginTop: 6 }}>{label}</p>
+      <div className="font-display" style={{ fontSize: '2rem', fontWeight: 400, color: 'var(--ink)', lineHeight: 1, letterSpacing: '-0.03em' }}>{value}</div>
+      <p style={{ fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)', marginTop: 8 }}>{label}</p>
     </Card>
   );
 }

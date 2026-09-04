@@ -36,7 +36,7 @@
 }
 
 .pp-name {
-  font-family: var(--font-serif, ui-serif, Georgia, serif);
+  font-family: var(--font-instrument-serif), Georgia, serif;
   font-size: 1.75rem;
   font-weight: 500;
   line-height: 1.2;
@@ -125,9 +125,9 @@
 }
 
 .pp-action--primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
 }
 
 .pp-action--primary:hover {

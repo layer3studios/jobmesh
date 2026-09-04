@@ -53,13 +53,13 @@ export default async function StatusPage() {
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '48px 24px', width: '100%' }}>
-      <h1 className="font-display" style={{ fontSize: '1.5rem', margin: '0 0 24px', letterSpacing: '-0.02em' }}>
+      <p style={{ fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)', marginBottom: 8 }}>JobMesh</p>
+      <h1 className="font-display" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 400, margin: '0 0 24px', letterSpacing: '-0.04em', lineHeight: 1.05 }}>
         System status
       </h1>
 
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 10, padding: '16px 18px',
-        border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface)',
+      <div className="glass glass--strong" style={{
+        display: 'flex', alignItems: 'center', gap: 10, padding: '16px 18px', borderRadius: 12,
       }}>
         <StatusDot tone={headline.tone} />
         <strong style={{ fontSize: '1rem' }}>{headline.label}</strong>
