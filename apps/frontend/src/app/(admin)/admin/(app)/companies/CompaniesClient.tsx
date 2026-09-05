@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { fetchCompanyHealth } from '@/api/admin-company-health-api';
 import type { CompanyHealthRow, CompanyHealthStatus } from '@/types/admin-company-health';
 import CompanyHealthTable, { type SortKey } from './parts/CompanyHealthTable';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 
 /** Worst first: dormant, then quiet, then active. */
 const STATUS_RANK: Record<CompanyHealthStatus, number> = { dormant: 0, quiet: 1, active: 2 };
@@ -89,14 +90,9 @@ export default function CompaniesClient() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div>
-        <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--ink)' }}>Companies</h1>
-        <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: 'var(--ink-muted)' }}>
-          {companies
+      <AdminPageHeader title="Companies" subtitle={companies
             ? `${companies.length} ${companies.length === 1 ? 'company' : 'companies'} · ${dormantCount} dormant`
-            : 'Loading…'}
-        </p>
-      </div>
+            : 'Loading…'} />
 
       {error && !companies && (
         <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>

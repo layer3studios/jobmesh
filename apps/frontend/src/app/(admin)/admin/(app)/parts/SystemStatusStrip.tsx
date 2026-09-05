@@ -10,13 +10,12 @@ import {
 } from './mission-format';
 
 const ITEM = {
-  background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12,
+  background: 'var(--glass-card)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid var(--border)', borderRadius: 12,
   padding: '10px 12px', minWidth: 0, textDecoration: 'none', display: 'block',
 } as const;
 
 const LABEL = {
-  fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.04em',
-  textTransform: 'uppercase', color: 'var(--ink-faint)',
+  fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 10, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)',
 } as const;
 
 function StatusItem({ label, value, bad, href }: {

@@ -17,6 +17,7 @@ import type {
 } from '@/types/admin-job-browser';
 import JobResultsTable from './parts/JobResultsTable';
 import DeleteJobModal from './parts/DeleteJobModal';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 
 const PAGE_SIZE = 25;
 const SEARCH_DEBOUNCE_MS = 300;
@@ -159,12 +160,7 @@ export default function JobsBrowserClient() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div>
-        <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--ink)' }}>Jobs</h1>
-        <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: 'var(--ink-muted)' }}>
-          {jobs ? `${total.toLocaleString()} matching ${total === 1 ? 'job' : 'jobs'}` : 'Loading…'}
-        </p>
-      </div>
+      <AdminPageHeader title="Jobs" subtitle={jobs ? `${total.toLocaleString()} matching ${total === 1 ? 'job' : 'jobs'}` : 'Loading…'} />
 
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
         <input

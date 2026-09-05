@@ -10,6 +10,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { fetchAuditLog } from '@/api/admin-audit-log-api';
 import type { AuditEntry } from '@/types/admin-audit-log';
 import AuditTable, { humanizeEvent } from './parts/AuditTable';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 
 const LIMIT = 100;
 
@@ -51,14 +52,9 @@ export default function AuditLogClient() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--ink)' }}>Audit Log</h1>
-          <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: 'var(--ink-muted)' }}>
-            {entries
+        <AdminPageHeader title="Audit Log" subtitle={entries
               ? `${entries.length} most recent ${entries.length === 1 ? 'entry' : 'entries'} (max ${LIMIT})`
-              : 'Loading…'}
-          </p>
-        </div>
+              : 'Loading…'} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <label htmlFor="audit-event-filter" style={{ fontSize: '0.8rem', color: 'var(--ink-muted)' }}>
             Event

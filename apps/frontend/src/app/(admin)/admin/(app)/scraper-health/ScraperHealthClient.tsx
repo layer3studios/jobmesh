@@ -15,18 +15,19 @@ import type { ScraperHealthOverview, ScrapeRun } from '@/types/admin-scraper-hea
 import { percent } from './parts/scraper-health-format';
 import SiteSummaryCards from './parts/SiteSummaryCards';
 import RunHistoryTable from './parts/RunHistoryTable';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 
 const POLL_INTERVAL_MS = 60_000;
 const RUN_HISTORY_LIMIT = 50;
 
 const SECTION_TITLE = {
-  margin: '0 0 10px', fontSize: '0.95rem', fontWeight: 600, color: 'var(--ink)',
+  margin: '0 0 10px', fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)',
 } as const;
 
 function KpiTile({ label, value }: { label: string; value: string }) {
   return (
     <div data-testid="kpi-tile" style={{
-      background: 'var(--surface)', border: '1px solid var(--border)',
+      background: 'var(--glass-card)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid var(--border)',
       borderRadius: 12, padding: '12px 14px', minWidth: 0,
     }}>
       <div style={{
@@ -109,12 +110,7 @@ export default function ScraperHealthClient() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--ink)' }}>Scraper Health</h1>
-          <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: 'var(--ink-muted)' }}>
-            Per-site scrape outcomes and corpus quality. Refreshes every 60s.
-          </p>
-        </div>
+        <AdminPageHeader title="Scraper Health" subtitle="Per-site scrape outcomes and corpus quality. Refreshes every 60s." />
         <button
           type="button"
           onClick={() => void handleRunNow()}

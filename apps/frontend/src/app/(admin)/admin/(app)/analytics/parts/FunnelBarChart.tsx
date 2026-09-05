@@ -15,7 +15,7 @@ export default function FunnelBarChart({ title, stages }: { title: string; stage
   const data = stages.map((s) => ({ name: label(s.stage), count: s.count }));
   const height = Math.max(120, data.length * 44);
   return (
-    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '16px 18px' }}>
+    <div style={{ background: 'var(--glass-card)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid var(--border)', borderRadius: 12, padding: '16px 18px' }}>
       <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--ink)', marginBottom: 12 }}>{title}</div>
       {data.length === 0 ? (
         <div style={{ fontSize: '0.8rem', color: 'var(--ink-faint)' }}>No data</div>
@@ -26,7 +26,7 @@ export default function FunnelBarChart({ title, stages }: { title: string; stage
             <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 12, fill: 'var(--ink-muted)' }} axisLine={false} tickLine={false} />
             <Tooltip
               cursor={{ fill: 'var(--paper-2)' }}
-              contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, fontSize: '0.78rem' }}
+              contentStyle={{ background: 'var(--glass-card)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid var(--border)', borderRadius: 8, fontSize: '0.78rem' }}
             />
             <Bar dataKey="count" radius={[0, 6, 6, 0]}>
               {data.map((_, index) => (

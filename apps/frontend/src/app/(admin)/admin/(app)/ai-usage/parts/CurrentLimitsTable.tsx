@@ -10,8 +10,7 @@ import type { AiKeyLimits, AiLimitBucket, AiModelLimits } from '@/types/admin-ai
 import { compactNumber } from './ai-usage-format';
 
 const TH = {
-  textAlign: 'left', fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.04em',
-  textTransform: 'uppercase', color: 'var(--ink-faint)', padding: '6px 10px',
+  textAlign: 'left', fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 10, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)', padding: '6px 10px',
 } as const;
 const TD = { padding: '8px 10px', fontSize: '0.85rem', color: 'var(--ink)' } as const;
 
@@ -68,7 +67,7 @@ export default function CurrentLimitsTable({ models }: { models: AiModelLimits[]
   }
   return (
     <div style={{
-      background: 'var(--surface)', border: '1px solid var(--border)',
+      background: 'var(--glass-card)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid var(--border)',
       borderRadius: 12, overflowX: 'auto',
     }}>
       <table data-testid="limits-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 620 }}>

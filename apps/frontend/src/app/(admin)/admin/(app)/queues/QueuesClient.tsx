@@ -14,11 +14,12 @@ import { fetchQueueOverview, fetchFailedJobs, retryFailedJob } from '@/api/admin
 import type { QueueSummary, FailedJob } from '@/types/admin-queue-monitor';
 import QueueCards from './parts/QueueCards';
 import FailedJobsTable from './parts/FailedJobsTable';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 
 const POLL_INTERVAL_MS = 30_000;
 
 const SECTION_TITLE = {
-  margin: '0 0 10px', fontSize: '0.95rem', fontWeight: 600, color: 'var(--ink)',
+  margin: '0 0 10px', fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)',
 } as const;
 
 const RETRY_REASON_COPY: Record<string, string> = {
@@ -112,12 +113,7 @@ export default function QueuesClient() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div>
-        <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--ink)' }}>Queues</h1>
-        <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: 'var(--ink-muted)' }}>
-          Background worker queues. Refreshes every 30s.
-        </p>
-      </div>
+      <AdminPageHeader title="Queues" subtitle="Background worker queues. Refreshes every 30s." />
 
       {error && !queues && (
         <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>

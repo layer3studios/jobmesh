@@ -12,6 +12,7 @@ import { Card, Switch, Button, Modal, useToast } from '@/components/ui';
 import { fetchFeatureFlags, setFeatureFlag } from '@/api/admin-feature-flags-api';
 import type { FeatureFlagMap, FeatureFlagName } from '@/types/admin-feature-flags';
 import { FLAG_COPY, FLAG_ORDER } from './parts/flag-copy';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 
 function Skeletons() {
   return (
@@ -68,12 +69,7 @@ export default function FlagsClient() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div>
-        <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--ink)' }}>Feature Flags</h1>
-        <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: 'var(--ink-muted)' }}>
-          Runtime switches. Every change is recorded in the audit log.
-        </p>
-      </div>
+      <AdminPageHeader title="Feature Flags" subtitle="Runtime switches. Every change is recorded in the audit log." />
 
       {error && !flags && (
         <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>

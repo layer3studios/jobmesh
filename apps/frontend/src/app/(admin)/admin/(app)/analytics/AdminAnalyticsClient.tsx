@@ -19,6 +19,7 @@ import RetentionSection from './parts/RetentionSection';
 import TimeRangeSelector from './parts/TimeRangeSelector';
 import EmptyStateNotice from './parts/EmptyStateNotice';
 import { PageShell } from '@/components/ui';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 
 // Map a bundle-level error to a user-facing message + whether a Retry makes sense.
 function describeError(error: AdminAnalyticsApiError): { title: string; body: string; canRetry: boolean } {
@@ -100,7 +101,7 @@ export default function AdminAnalyticsClient({
   return (
     <PageShell width="wide" style={{ paddingBottom: 60 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--ink)', margin: 0 }}>Analytics</h1>
+        <AdminPageHeader title="Analytics" />
         <TimeRangeSelector value={currentSince} onSelect={onSelect} isChanging={isChanging} />
       </div>
 

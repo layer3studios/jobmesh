@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { fetchEmailLog } from '@/api/admin-email-log-api';
 import type { EmailEvent } from '@/types/admin-email-log';
 import { relativeTime } from '../parts/mission-format';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 
 const LIMIT = 100;
 
@@ -94,12 +95,7 @@ export default function EmailLogClient() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--ink)' }}>Email Log</h1>
-          <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: 'var(--ink-muted)' }}>
-            {events ? `${events.length} most recent ${events.length === 1 ? 'event' : 'events'} (max ${LIMIT})` : 'Loading…'}
-          </p>
-        </div>
+        <AdminPageHeader title="Email Log" subtitle={events ? `${events.length} most recent ${events.length === 1 ? 'event' : 'events'} (max ${LIMIT})` : 'Loading…'} />
         <button
           type="button"
           onClick={() => void load(typeFilter, debouncedRecipient)}
