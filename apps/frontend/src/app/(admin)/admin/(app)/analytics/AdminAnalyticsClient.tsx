@@ -18,7 +18,6 @@ import AssignmentAnalyticsSection from './parts/AssignmentAnalyticsSection';
 import RetentionSection from './parts/RetentionSection';
 import TimeRangeSelector from './parts/TimeRangeSelector';
 import EmptyStateNotice from './parts/EmptyStateNotice';
-import { PageShell } from '@/components/ui';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 
 // Map a bundle-level error to a user-facing message + whether a Retry makes sense.
@@ -99,7 +98,7 @@ export default function AdminAnalyticsClient({
   const isChanging = loadingRanges.has(currentSince);
 
   return (
-    <PageShell width="wide" style={{ paddingBottom: 60 }}>
+    <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <AdminPageHeader title="Analytics" />
         <TimeRangeSelector value={currentSince} onSelect={onSelect} isChanging={isChanging} />
@@ -138,6 +137,6 @@ export default function AdminAnalyticsClient({
       {/* Also outside the bundle branch: it fetches its own endpoint and degrades
           to the same notice on its own when the analytics key is missing. */}
       <RetentionSection since={currentSince} />
-    </PageShell>
+    </div>
   );
 }

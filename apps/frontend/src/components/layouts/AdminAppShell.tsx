@@ -44,7 +44,13 @@ export default function AdminAppShell({ children }: { children: ReactNode }) {
       />
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
         {/* key by path forces a clean unmount/remount per route (mirror seeker). */}
-        <div key={pathname} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* The one page frame for every admin panel — the same width and padding
+            the employer PageShell uses, so the nav and the content align. */}
+        <div key={pathname} style={{
+          flex: 1, display: 'flex', flexDirection: 'column', width: '100%',
+          maxWidth: 'var(--page-max-width-wide)', margin: '0 auto',
+          padding: 'var(--page-padding-y) var(--page-padding-x)', boxSizing: 'border-box',
+        }}>
           {children}
         </div>
       </main>
