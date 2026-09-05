@@ -18,7 +18,7 @@ export default function InterviewCalendarCell({
 }) {
   const dots = [
     ...Array.from({ length: cell.availableCount }, () => AVAILABLE_GREEN),
-    ...Array.from({ length: cell.bookedCount }, () => 'var(--accent)'),
+    ...Array.from({ length: cell.bookedCount }, () => 'var(--thread-indigo)'),
   ].slice(0, MAX_DOTS);
 
   return (
@@ -28,18 +28,19 @@ export default function InterviewCalendarCell({
       disabled={!cell.isCurrentMonth}
       aria-pressed={isSelected}
       aria-label={`Select ${cell.dateIso}`}
+      className="cal-cell"
       onClick={() => { if (!isSelected) onSelect(cell.dateIso); }}
       style={{
         // FIXED height, not min-height: as a grid item the cell would otherwise
         // stretch with the row on tall/zoomed viewports.
         height: 32, fontSize: 12, textAlign: 'center', cursor: cell.isCurrentMonth ? 'pointer' : 'default',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3,
-        border: 0, borderRight: '0.5px solid var(--border)', borderBottom: '0.5px solid var(--border)',
+        border: 0, borderRight: '1px solid var(--border)', borderBottom: '1px solid var(--border)', fontFamily: 'inherit',
         background: isSelected ? 'var(--accent-soft)' : 'transparent',
         opacity: cell.isCurrentMonth ? 1 : 0.4,
         color: cell.isPast ? 'var(--ink-faint)' : 'var(--ink)',
         fontWeight: isSelected || cell.isToday ? 500 : 400,
-        boxShadow: cell.isToday ? 'inset 0 -2px 0 var(--accent)' : 'none',
+        boxShadow: cell.isToday ? 'inset 0 -2px 0 var(--thread-indigo)' : 'none',
       }}
     >
       {cell.dayOfMonth}

@@ -91,3 +91,15 @@
 .eb-crumb:hover { color: var(--ink); }
 .tbl-row { transition: background 120ms ease; }
 .tbl-row:hover { background: var(--accent-soft); }
+
+/* ── Posting workspace (pipeline, ranked, applicant, calendar) ─────────── */
+.eb-row { transition: background 120ms ease; }
+.eb-row:hover { background: var(--accent-soft); }
+.pipeline-card { transition: border-color 120ms ease, background 120ms ease; }
+.pipeline-card:hover { border-color: var(--border-strong) !important; background: var(--glass-strong) !important; }
+.cal-cell { transition: background 120ms ease; }
+.cal-cell:not(:disabled):hover { background: var(--accent-soft); }
+.eb-pill { transition: border-color 120ms ease, color 120ms ease; }
+.eb-pill[aria-pressed="false"]:hover { border-color: var(--border-strong); color: var(--ink); }
+.eb-search:focus { border-color: var(--border-strong); box-shadow: var(--focus-ring); outline: none; }
+.eb-search::placeholder { color: var(--ink-faint); }

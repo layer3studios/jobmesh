@@ -8,7 +8,9 @@ import { Button } from '@/components/ui';
 import type { Applicant, Stage, ArchiveReason } from '@/types/employer-applicants';
 import RankedCandidateRow from './RankedCandidateRow';
 
-const HEADER_CELL = { fontSize: 12, fontWeight: 500, color: 'var(--ink-2)' } as const;
+const HEADER_CELL = {
+  fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)',
+} as const;
 
 export default function RankedCandidateTable({
   applicants, postingId, stages, showSelect, showAssignment = false, selectedIds, onToggleSelect, onClearFilters,
@@ -45,10 +47,10 @@ export default function RankedCandidateTable({
   }
 
   return (
-    <div style={{ background: 'var(--surface-sunken)', border: '0.5px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
+    <div className="glass" style={{ borderRadius: 14, overflow: 'hidden' }}>
       <div role="row" style={{
-        display: 'flex', alignItems: 'center', gap: 12, padding: '8px 14px',
-        background: 'var(--surface-raised)', borderBottom: '0.5px solid var(--border)',
+        display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
+        borderBottom: '1px solid var(--border)',
       }}>
         {showSelect && <span style={{ width: 15, flexShrink: 0 }} />}
         <span style={{ flex: 1, ...HEADER_CELL }}>Applicant</span>
@@ -59,7 +61,7 @@ export default function RankedCandidateTable({
         <span style={{ width: 92, flexShrink: 0 }} />
       </div>
       {applicants.map((applicant, index) => (
-        <div key={applicant.application.id} style={{ borderBottom: index < applicants.length - 1 ? '0.5px solid var(--border)' : 'none' }}>
+        <div key={applicant.application.id} style={{ borderBottom: index < applicants.length - 1 ? '1px solid var(--border)' : 'none' }}>
           <RankedCandidateRow
             applicant={applicant}
             postingId={postingId}

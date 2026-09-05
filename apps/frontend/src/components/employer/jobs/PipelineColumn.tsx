@@ -39,9 +39,9 @@ export default function PipelineColumn({
   return (
     <div
       data-testid={`pipeline-column-${stage.id}`}
+      className="glass"
       style={{
-        background: 'var(--surface-raised)', border: '0.5px solid var(--border)',
-        borderRadius: 12, overflow: 'hidden',
+        borderRadius: 14, overflow: 'hidden',
         ...(scrollMode ? { minWidth: 260, flexShrink: 0 } : { minWidth: 0 }),
       }}
     >
@@ -49,10 +49,10 @@ export default function PipelineColumn({
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '10px 14px', borderBottom: `2px solid ${color}`,
       }}>
-        <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{stage.text}</span>
+        <span style={{ fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink)' }}>{stage.text}</span>
         <span style={{
-          fontSize: 12, color: 'var(--ink-faint)', background: 'var(--surface)',
-          borderRadius: 999, padding: '1px 8px',
+          fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, color: 'var(--ink-muted)',
+          border: '1px solid var(--border)', borderRadius: 999, padding: '1px 8px',
         }}>
           {applicants.length}
         </span>
@@ -61,7 +61,7 @@ export default function PipelineColumn({
         ref={setNodeRef}
         style={{
           padding: 8, display: 'flex', flexDirection: 'column', gap: 8, minHeight: 200,
-          outline: isOver ? '2px dashed var(--accent)' : 'none', outlineOffset: -4,
+          outline: isOver ? '1px dashed var(--thread-indigo)' : 'none', outlineOffset: -4,
           background: isOver ? 'var(--accent-soft)' : 'transparent',
         }}
       >

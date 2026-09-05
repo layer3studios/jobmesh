@@ -26,8 +26,8 @@ export default function RankedFilterSection({
         style={{ display: 'flex', width: '100%', alignItems: 'center', gap: 6, background: 'none', border: 0, padding: '4px 0', cursor: 'pointer' }}
       >
         <span style={{
-          flex: 1, textAlign: 'left', fontSize: 12, fontWeight: 500,
-          letterSpacing: '0.5px', textTransform: 'uppercase', color: 'var(--ink-2)',
+          flex: 1, textAlign: 'left', fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, fontWeight: 500,
+          letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)',
         }}>
           {label}{suffix && <span style={{ marginLeft: 6, textTransform: 'none', letterSpacing: 0, color: 'var(--ink-faint)' }}>{suffix}</span>}
         </span>

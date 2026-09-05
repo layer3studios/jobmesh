@@ -103,13 +103,13 @@ export default function ApplicantReviewPanel({
   const changeCount = stageChanges.length;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, background: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: 16, boxShadow: 'var(--shadow-sm)', padding: 16, boxSizing: 'border-box' }}>
+    <div className="glass" style={{ display: 'flex', flexDirection: 'column', gap: 12, borderRadius: 14, padding: 18, boxSizing: 'border-box' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {hasScore && score ? (
-          <div style={{ background: 'var(--surface-sunken)', borderRadius: 14, padding: '14px 16px' }}>
+          <div style={{ border: '1px solid var(--border)', borderRadius: 12, padding: '14px 16px' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
-              <span className="font-display" style={{ fontSize: '2.6rem', fontWeight: 700, color: 'var(--ink)', lineHeight: 1 }}>{score.score}</span>
-              <span style={{ fontSize: '0.9rem', color: 'var(--ink-muted)' }}>/ 100</span>
+              <span className="font-display" style={{ fontSize: '3rem', fontWeight: 400, letterSpacing: '-0.04em', color: 'var(--ink)', lineHeight: 1 }}>{score.score}</span>
+              <span style={{ fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>/ 100 · AI score</span>
               <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
                 {isRescoring && <Badge variant="neutral">Rescoring…</Badge>}
                 <Badge variant="neutral" style={{ background: tint, color: 'var(--text-on-accent)' }}>{score.tier}</Badge>
@@ -121,7 +121,7 @@ export default function ApplicantReviewPanel({
             </div>
           </div>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--surface-sunken)', borderRadius: 14, padding: '14px 16px', color: 'var(--ink-muted)', fontWeight: 600 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1px solid var(--border)', borderRadius: 12, padding: '14px 16px', color: 'var(--ink-muted)', fontWeight: 500 }}>
             <span>{isRescoring ? 'Scoring in progress' : 'Not scored yet'}</span>
             {allowRescore && <span style={{ marginLeft: 'auto' }}><RescoreButton isRescoring={isRescoring} disabled={isRescoring || busy} onClick={handleRescore} /></span>}
           </div>

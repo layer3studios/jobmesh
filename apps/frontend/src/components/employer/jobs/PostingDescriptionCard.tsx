@@ -14,9 +14,9 @@ export default function PostingDescriptionCard({
   allowEdit: boolean;
 }) {
   return (
-    <div style={{ background: 'var(--surface-raised)', border: '0.5px solid var(--border)', borderRadius: 12, padding: 16 }}>
+    <div className="glass" style={{ borderRadius: 14, padding: 18 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-        <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>Description</p>
+        <p style={{ margin: 0, fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>Description</p>
         {allowEdit && (
           <Button variant="ghost" size="sm" aria-label="Edit description" onClick={onEdit}>
             <Pencil size={14} />
@@ -24,7 +24,7 @@ export default function PostingDescriptionCard({
         )}
       </div>
       <div data-testid="description-scroll" style={{ maxHeight: 380, overflowY: 'auto' }}>
-        <p style={{ margin: 0, fontSize: 13, lineHeight: 1.6, color: 'var(--ink-2)', whiteSpace: 'pre-wrap' }}>
+        <p style={{ margin: 0, fontSize: 14, lineHeight: 1.65, color: 'var(--ink-2)', whiteSpace: 'pre-wrap' }}>
           {description}
         </p>
       </div>

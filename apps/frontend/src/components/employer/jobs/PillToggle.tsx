@@ -15,7 +15,7 @@ export function PillToggleGroup({
 }) {
   return (
     <div>
-      <p style={{ margin: '0 0 6px', fontSize: 12, fontWeight: 500, color: 'var(--ink-muted)' }}>{label}</p>
+      <p style={{ margin: '0 0 6px', fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>{label}</p>
       <div role="group" aria-label={label} style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         {options.map((option) => {
           const selected = value === option.value;
@@ -24,13 +24,14 @@ export function PillToggleGroup({
               key={option.value}
               type="button"
               aria-pressed={selected}
+              className="eb-pill"
               onClick={() => onChange(option.value)}
               style={{
-                padding: '4px 12px', borderRadius: 999, fontSize: 12, cursor: 'pointer',
-                border: selected ? '0.5px solid var(--accent)' : '0.5px solid var(--border)',
-                background: selected ? 'var(--accent)' : 'transparent',
-                color: selected ? 'var(--text-on-accent)' : 'var(--ink)',
-                fontWeight: selected ? 600 : 400,
+                padding: '5px 12px', borderRadius: 8, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit',
+                border: selected ? '1px solid var(--ink)' : '1px solid var(--border)',
+                background: selected ? 'var(--ink)' : 'transparent',
+                color: selected ? 'var(--paper)' : 'var(--ink-muted)',
+                fontWeight: 500,
               }}
             >
               {option.label}

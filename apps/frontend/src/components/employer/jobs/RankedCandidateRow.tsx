@@ -4,7 +4,6 @@
 // stops propagation so selecting never navigates. Score renders as a compact
 // pill ("98 · strong") coloured by tier; unscored shows a muted "—".
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui';
 import type { Applicant, ArchiveReason } from '@/types/employer-applicants';
@@ -43,7 +42,7 @@ function CrossApplicationPill({ count }: { count: number }) {
       style={{
         flexShrink: 0, padding: '1px 6px', borderRadius: 999,
         fontSize: 11, fontWeight: 600, whiteSpace: 'nowrap',
-        background: 'var(--surface-sunken)', color: 'var(--ink-muted)',
+        border: '1px solid var(--border)', color: 'var(--ink-muted)',
       }}
     >
       {COPY.employer.applicants.rolesPill.replace('{count}', String(count))}
@@ -111,7 +110,6 @@ export default function RankedCandidateRow({
   isActive?: boolean;
 }) {
   const router = useRouter();
-  const [hovered, setHovered] = useState(false);
   const id = applicant.application.id;
   const detailHref = `/employer/jobs/${postingId}/applicants/${id}?from=ranked`;
   const candidateName = applicant.contact?.fullName ?? 'this candidate';
@@ -119,18 +117,16 @@ export default function RankedCandidateRow({
   return (
     <div
       role="row"
-      className="ranked-row"
+      className="ranked-row eb-row"
       // The keyboard layer finds rows and their controls through this id.
       data-application-id={id}
       onClick={() => router.push(detailHref)}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       style={{
         display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', cursor: 'pointer',
-        background: isActive || hovered ? 'var(--surface-raised)' : 'transparent',
+        background: isActive ? 'var(--accent-soft)' : 'transparent',
         // An inset marker rather than an outline: it marks the row without shifting
-        // any of its content by a pixel.
-        boxShadow: isActive ? 'inset 3px 0 0 var(--accent)' : 'none',
+        // any of its content by a pixel. The indigo thread, as on the job board.
+        boxShadow: isActive ? 'inset 2px 0 0 var(--thread-indigo)' : 'none',
       }}
     >
       {showSelect && (

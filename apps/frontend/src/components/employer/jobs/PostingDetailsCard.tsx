@@ -8,7 +8,7 @@ import type { Posting } from '@/types/employer-jobs';
 import type { Stage } from '@/types/employer-applicants';
 import { stageColor } from './PipelineColumn';
 
-const ROW_LABEL = { fontSize: 12, color: 'var(--ink-2)', width: 90, flexShrink: 0 } as const;
+const ROW_LABEL = { fontSize: 12, color: 'var(--ink-muted)', width: 90, flexShrink: 0 } as const;
 const ROW_VALUE = { fontSize: 13, color: 'var(--ink)' } as const;
 
 export default function PostingDetailsCard({
@@ -28,8 +28,8 @@ export default function PostingDetailsCard({
   const snapshotTotal = snapshot.reduce((sum, entry) => sum + entry.count, 0);
 
   return (
-    <div style={{ background: 'var(--surface-raised)', border: '0.5px solid var(--border)', borderRadius: 12, padding: 16 }}>
-      <p style={{ margin: '0 0 12px', fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>Job details</p>
+    <div className="glass" style={{ borderRadius: 14, padding: 18 }}>
+      <p style={{ margin: '0 0 12px', fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>Job details</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <div style={{ display: 'flex', gap: 8 }}><span style={ROW_LABEL}>Location</span><span style={ROW_VALUE}>{posting.location}</span></div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -45,8 +45,8 @@ export default function PostingDetailsCard({
       </div>
 
       {snapshotTotal > 0 && (
-        <div style={{ borderTop: '0.5px solid var(--border)', marginTop: 14, paddingTop: 12 }}>
-          <p style={{ margin: '0 0 8px', fontSize: 12, fontWeight: 600, color: 'var(--ink-2)' }}>Pipeline snapshot</p>
+        <div style={{ borderTop: '1px solid var(--border)', marginTop: 14, paddingTop: 12 }}>
+          <p style={{ margin: '0 0 8px', fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>Pipeline snapshot</p>
           <div data-testid="pipeline-snapshot-bar" style={{ display: 'flex', height: 8, borderRadius: 999, overflow: 'hidden' }}>
             {snapshot.map(({ stage, count }) => (
               <span key={stage.id} style={{ width: `${(count / snapshotTotal) * 100}%`, background: stageColor(stage.text) }} />

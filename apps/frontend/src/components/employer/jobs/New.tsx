@@ -53,10 +53,10 @@ export default function EmployerJobsNew() {
   };
 
   return (
-    <div style={{ background: 'var(--surface-sunken)', padding: '16px 0' }}>
+    <div>
       <PageShell width="wide">
         <Breadcrumbs items={[{ label: 'Jobs', href: '/employer/jobs' }, { label: 'New posting' }]} />
-        <PageHeader title="New posting" compact />
+        <PageHeader label="Employer" title="New posting" compact />
         {duplicate.sourceTitle && (
           <div style={{ marginBottom: 12 }}>
             <Alert type="info">
