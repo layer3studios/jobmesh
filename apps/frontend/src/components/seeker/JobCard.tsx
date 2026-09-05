@@ -65,7 +65,7 @@ export default function JobCard({ job, domain }: Props) {
         display: 'block',
         textDecoration: 'none',
         background: 'var(--glass-card)',
-        backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)',
+        backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', boxShadow: 'inset 0 1px 0 var(--glass-sheen), var(--shadow-sm)',
         border: '1px solid',
         borderColor: 'var(--border)',
         borderRadius: 12,

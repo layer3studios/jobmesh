@@ -67,7 +67,7 @@ export default function CurrentLimitsTable({ models }: { models: AiModelLimits[]
   }
   return (
     <div style={{
-      background: 'var(--glass-card)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid var(--border)',
+      background: 'var(--glass-card)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', boxShadow: 'inset 0 1px 0 var(--glass-sheen), var(--shadow-sm)', border: '1px solid var(--border)',
       borderRadius: 12, overflowX: 'auto',
     }}>
       <table data-testid="limits-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 620 }}>

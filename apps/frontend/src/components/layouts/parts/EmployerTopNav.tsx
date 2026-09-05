@@ -98,8 +98,8 @@ export default function EmployerTopNav({
     <header className="an-nav" style={{
       position: 'sticky', top: 0, zIndex: Z.nav,
       background: 'var(--glass-bg)',
-      backdropFilter: 'saturate(180%) blur(20px)',
-      WebkitBackdropFilter: 'saturate(180%) blur(20px)',
+      backdropFilter: 'saturate(190%) blur(26px)',
+      WebkitBackdropFilter: 'saturate(190%) blur(26px)',
       borderBottom: '1px solid var(--border)',
       paddingTop: 'env(safe-area-inset-top)',
     }}>

@@ -7,7 +7,7 @@ import type { QueueSummary } from '@/types/admin-queue-monitor';
 import { formatAge, isStalled, formatTimestamp } from './queue-format';
 
 const CARD = {
-  background: 'var(--glass-card)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid var(--border)',
+  background: 'var(--glass-card)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', boxShadow: 'inset 0 1px 0 var(--glass-sheen), var(--shadow-sm)', border: '1px solid var(--border)',
   borderRadius: 12, padding: '14px 16px', minWidth: 0,
 } as const;
 

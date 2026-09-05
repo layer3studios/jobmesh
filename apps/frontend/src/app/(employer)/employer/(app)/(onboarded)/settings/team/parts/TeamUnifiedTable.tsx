@@ -42,7 +42,7 @@ export default function TeamUnifiedTable({
   const onlyMe = members.length === 1 && invites.length === 0;
 
   return (
-    <div style={{ background: 'var(--glass-card)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
+    <div style={{ background: 'var(--glass-card)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', boxShadow: 'inset 0 1px 0 var(--glass-sheen), var(--shadow-sm)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
       <div style={{
         display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
         background: 'var(--glass-strong)', borderBottom: '1px solid var(--border)',

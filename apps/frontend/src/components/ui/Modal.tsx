@@ -43,7 +43,7 @@ export function Modal({
         aria-labelledby={titleId}
         style={{
           width: '100%', maxWidth: WIDTH[size], maxHeight: '90vh', overflow: 'auto',
-          background: 'var(--glass-strong)', backdropFilter: 'blur(20px) saturate(150%)', WebkitBackdropFilter: 'blur(20px) saturate(150%)', borderRadius: RADIUS.xl, boxShadow: SHADOW.lg,
+          background: 'var(--glass-strong)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', borderRadius: RADIUS.xl, boxShadow: SHADOW.lg,
           border: '1px solid var(--border-hairline)', animation: 'scaleIn 180ms ease',
         }}
       >

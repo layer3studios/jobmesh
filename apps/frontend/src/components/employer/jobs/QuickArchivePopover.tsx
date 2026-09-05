@@ -94,7 +94,7 @@ export default function QuickArchivePopover({
         top: position?.top ?? 0, left: position?.left ?? 0,
         visibility: position ? 'visible' : 'hidden',
         minWidth: 240, maxWidth: 280, padding: 12, borderRadius: 10,
-        background: 'var(--glass-strong)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid var(--border)',
+        background: 'var(--glass-strong)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', border: '1px solid var(--border)',
         boxShadow: 'var(--shadow-lg)', cursor: 'default',
       }}
     >

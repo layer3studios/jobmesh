@@ -46,7 +46,7 @@ export default function AdminAppShell({ children }: { children: ReactNode }) {
         {/* key by path forces a clean unmount/remount per route (mirror seeker). */}
         {/* The one page frame for every admin panel — the same width and padding
             the employer PageShell uses, so the nav and the content align. */}
-        <div key={pathname} style={{
+        <div key={pathname} className="page-enter" style={{
           flex: 1, display: 'flex', flexDirection: 'column', width: '100%',
           maxWidth: 'var(--page-max-width-wide)', margin: '0 auto',
           padding: 'var(--page-padding-y) var(--page-padding-x)', boxSizing: 'border-box',

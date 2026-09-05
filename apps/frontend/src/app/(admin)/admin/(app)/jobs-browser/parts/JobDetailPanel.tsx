@@ -80,7 +80,7 @@ export default function JobDetailPanel({ job, isBusy, onToggleHidden, onRequestD
           <div style={{
             fontSize: '0.84rem', color: 'var(--ink-2)', lineHeight: 1.6,
             maxHeight: 260, overflowY: 'auto', whiteSpace: 'pre-wrap',
-            background: 'var(--glass-card)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid var(--border)',
+            background: 'var(--glass-card)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', boxShadow: 'inset 0 1px 0 var(--glass-sheen), var(--shadow-sm)', border: '1px solid var(--border)',
             borderRadius: 8, padding: '10px 12px',
           }}>
             {job.description.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()}

@@ -149,7 +149,7 @@ export default function BrandingClient() {
             Careers page preview
           </p>
           <div style={{
-            background: 'var(--glass-card)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid var(--border)',
+            background: 'var(--glass-card)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', boxShadow: 'inset 0 1px 0 var(--glass-sheen), var(--shadow-sm)', border: '1px solid var(--border)',
             borderRadius: 12, padding: 20, display: 'flex', alignItems: 'center', gap: 14,
           }}>
             <CompanyLogoMark name={company?.name} logoUrl={company?.logoUrl} size={48} testId="branding-initials" />

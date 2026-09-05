@@ -59,7 +59,7 @@ export default function ApplicantActionBar({
   return (
     <div style={{
       position: 'sticky', top: 0, zIndex: STICKY_Z_INDEX,
-      background: 'var(--glass-strong)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid var(--border)',
+      background: 'var(--glass-strong)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', border: '1px solid var(--border)',
       borderRadius: 12, padding: 10, boxShadow: 'var(--shadow-sm)',
       display: 'flex', flexDirection: 'column', gap: 8,
     }}>

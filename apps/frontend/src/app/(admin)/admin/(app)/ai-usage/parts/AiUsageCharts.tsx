@@ -8,7 +8,7 @@ import type { AiDayUsage, AiModelUsage, AiTier, AiTierUsage } from '@/types/admi
 import { TIER_COLOR, TIERS, compactNumber, tierForModel, shortDate } from './ai-usage-format';
 
 const CARD = {
-  background: 'var(--glass-card)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid var(--border)', borderRadius: 12, padding: 14,
+  background: 'var(--glass-card)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', boxShadow: 'inset 0 1px 0 var(--glass-sheen), var(--shadow-sm)', border: '1px solid var(--border)', borderRadius: 12, padding: 14,
 } as const;
 const TH = {
   textAlign: 'left', fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 10, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)', padding: '6px 10px',

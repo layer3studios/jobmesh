@@ -33,7 +33,7 @@ export default function ApplyLayout({ children }: { children: React.ReactNode })
         </span>
       </header>
 
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
+      <main className="page-enter" style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
         {children}
       </main>
 

@@ -58,7 +58,7 @@ export default function EmployerAppShell({ children }: { children: ReactNode }) 
       />
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
         {/* key by path forces a clean unmount/remount per route (mirror seeker). */}
-        <div key={pathname} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div key={pathname} className="page-enter" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           {children}
         </div>
       </main>
