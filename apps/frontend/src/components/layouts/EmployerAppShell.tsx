@@ -3,8 +3,8 @@
 // Client shell for the employer audience. The (employer)/(app) server layout
 // runs the auth guard and seeds EmployerProvider; this shell reads that session
 // and renders the persistent EmployerTopNav over the same ambient ground the
-// seeker app uses, so glass surfaces have depth to blur. Desktop-first: no
-// footer, no mobile bottom nav (D1).
+// seeker app uses, so glass surfaces have depth to blur, and the shared footer
+// in its employer voice. Desktop-first: no mobile bottom nav (D1).
 import { useEffect, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { displayPictureFor } from '@/context/employer/employer-context-types';
@@ -12,6 +12,7 @@ import { useEmployer } from '../../context/employer/EmployerContext';
 import { useTheme } from '../../context/theme/ThemeProvider';
 import { useViewport } from '../../hooks/shared/useViewport';
 import EmployerTopNav from './parts/EmployerTopNav';
+import Footer from './Footer';
 
 const COMPACT_BREAKPOINT_WIDTH = 1024;
 
@@ -61,6 +62,7 @@ export default function EmployerAppShell({ children }: { children: ReactNode }) 
           {children}
         </div>
       </main>
+      <Footer audience="employer" />
     </div>
   );
 }
