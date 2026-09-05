@@ -85,3 +85,9 @@
 @media (prefers-reduced-motion: reduce) {
   .an-link, .an-util, .jb-chip, .jb-card, .jb-card__dismiss, .jb-icon-btn { transition: none; }
 }
+
+/* ── Employer chrome ───────────────────────────────────────────────────── */
+.eb-crumb { transition: color 120ms ease; }
+.eb-crumb:hover { color: var(--ink); }
+.tbl-row { transition: background 120ms ease; }
+.tbl-row:hover { background: var(--accent-soft); }

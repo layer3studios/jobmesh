@@ -60,13 +60,14 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <AuthLayout>
+    <AuthLayout eyebrow="Internal" statement="The mesh, from the inside." homeHref={getSeekerUrl('/')}>
       <Stack gap={16}>
         <div>
-          <h1 style={{ fontSize: TYPE.xl, fontWeight: 600, color: 'var(--ink)', letterSpacing: '-0.02em' }}>
+          <p style={{ fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)', marginBottom: 10 }}>Sign in · Admin</p>
+          <h1 className="font-display" style={{ fontSize: 'clamp(1.9rem, 4vw, 2.4rem)', fontWeight: 400, color: 'var(--ink)', letterSpacing: '-0.04em', lineHeight: 1.05 }}>
             JobMesh Admin
           </h1>
-          <p style={{ fontSize: TYPE.sm, color: 'var(--ink-muted)', marginTop: 4, lineHeight: 1.55 }}>
+          <p style={{ fontSize: TYPE.sm, color: 'var(--ink-muted)', marginTop: 10, lineHeight: 1.55 }}>
             Sign in with your admin Google account.
           </p>
         </div>

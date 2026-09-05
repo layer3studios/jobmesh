@@ -1,30 +1,55 @@
 // FILE: src/components/layouts/AuthLayout.tsx
-// Centered card layout for login / signup pages.
+// The sign-in frame for the employer and admin audiences — the same split the
+// seeker LoginScreen uses: the landing's ink photograph with a serif statement
+// on the left, a glass card on the right. On narrow windows the photograph
+// becomes a dim ground behind one centred card. Server-renderable: the split
+// is a CSS grid with a media query (auth.css), not a viewport hook.
 import type { ReactNode } from 'react';
-import { Card } from '@/components/ui';
-import { BRAND, BRAND_SPLIT } from '@/theme/brand';
-import { TYPE } from '@/theme/tokens';
+import Link from 'next/link';
+import BrandLogo from '../BrandLogo';
+import { BRAND } from '@/theme/brand';
 
-export default function AuthLayout({ children }: { children?: ReactNode }) {
+const MONO = 'var(--font-jetbrains-mono), ui-monospace, monospace';
+
+export default function AuthLayout({
+  children,
+  eyebrow = 'For companies that hire',
+  statement = 'Post once. Rank every applicant. Hire from one list.',
+  homeHref = '/',
+}: {
+  children?: ReactNode;
+  /** Mono label above the statement on the photograph pane. */
+  eyebrow?: string;
+  /** The serif statement on the photograph pane. */
+  statement?: string;
+  /** Where the brand mark links. */
+  homeHref?: string;
+}) {
   return (
-    <div
-      style={{
-        minHeight: '100dvh', display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center', gap: 24,
-        background: 'var(--surface-sunken)', padding: 24,
-      }}
-    >
-      <div style={{ textAlign: 'center' }}>
-        <span className="font-display" style={{ fontSize: TYPE['2xl'], fontWeight: 700, color: 'var(--ink)', letterSpacing: '-0.02em' }}>
-          {BRAND_SPLIT.first}
-          <span style={{ color: 'var(--accent)' }}>{BRAND_SPLIT.accent}</span>
-        </span>
-        <p style={{ fontSize: TYPE.sm, color: 'var(--ink-muted)', marginTop: 4 }}>{BRAND.tagline}</p>
+    <div className="auth-root">
+      <div className="auth-pane">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/landing/ink-companies.jpg" alt="" aria-hidden className="auth-ink" />
+        <div className="auth-scrim" />
+        <div className="auth-pane__copy">
+          <Link href={homeHref} aria-label={BRAND.appName} style={{ textDecoration: 'none' }}>
+            <BrandLogo size="md" />
+          </Link>
+          <div>
+            <p style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.7, marginBottom: 14 }}>{eyebrow}</p>
+            <h2 className="font-display" style={{ fontSize: 'clamp(2.2rem, 4vw, 3.4rem)', fontWeight: 400, letterSpacing: '-0.04em', lineHeight: 1.02, maxWidth: 520 }}>
+              {statement}
+            </h2>
+          </div>
+        </div>
       </div>
 
-      <Card variant="raised" style={{ width: '100%', maxWidth: 420 }}>
-        {children}
-      </Card>
+      <div className="auth-card-wrap">
+        <div className="glass glass--strong auth-card">
+          <div className="auth-card__brand"><BrandLogo size="md" /></div>
+          {children}
+        </div>
+      </div>
     </div>
   );
 }

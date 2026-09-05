@@ -16,6 +16,7 @@ import { resolveSafeNextPath } from '@/lib/safe-next-path';
 import { trackEvent } from '@/lib/analytics-events';
 import { getFromRoute } from '@/lib/from-route';
 
+const MONO = 'var(--font-jetbrains-mono), ui-monospace, monospace';
 const GOOGLE_ERROR_MESSAGE = 'Google sign-in failed. Please try again.';
 const NO_CREDENTIAL_MESSAGE = 'No sign-in credential was returned. Please try again.';
 
@@ -57,11 +58,12 @@ export default function EmployerLogin() {
     <AuthLayout>
       <Stack gap={16}>
         <div>
-          <h1 style={{ fontSize: TYPE.xl, fontWeight: 600, color: 'var(--ink)', letterSpacing: '-0.02em' }}>
-            Sign in to JobMesh Hire
+          <p style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)', marginBottom: 10 }}>Sign in · Hire</p>
+          <h1 className="font-display" style={{ fontSize: 'clamp(1.9rem, 4vw, 2.4rem)', fontWeight: 400, color: 'var(--ink)', letterSpacing: '-0.04em', lineHeight: 1.05 }}>
+            Welcome back.
           </h1>
-          <p style={{ fontSize: TYPE.sm, color: 'var(--ink-muted)', marginTop: 4, lineHeight: 1.55 }}>
-            Manage your hiring with AI-powered scoring.
+          <p style={{ fontSize: TYPE.sm, color: 'var(--ink-muted)', marginTop: 10, lineHeight: 1.55 }}>
+            Manage postings, rank applicants and run interviews from one place.
           </p>
         </div>
 

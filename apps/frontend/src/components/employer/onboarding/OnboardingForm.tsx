@@ -31,11 +31,12 @@ export default function OnboardingForm({
   return (
     <Stack gap={16}>
       <div>
-        <h1 style={{ fontSize: TYPE.xl, fontWeight: 600, color: 'var(--ink)', letterSpacing: '-0.02em' }}>
-          Welcome to JobMesh Hire
+        <p style={{ fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)', marginBottom: 10 }}>Step 1 of 1 · Company</p>
+        <h1 className="font-display" style={{ fontSize: 'clamp(1.9rem, 4vw, 2.4rem)', fontWeight: 400, color: 'var(--ink)', letterSpacing: '-0.04em', lineHeight: 1.05 }}>
+          Set up your company.
         </h1>
-        <p style={{ fontSize: TYPE.sm, color: 'var(--ink-muted)', marginTop: 4, lineHeight: 1.55 }}>
-          Let&apos;s set up your company.
+        <p style={{ fontSize: TYPE.sm, color: 'var(--ink-muted)', marginTop: 10, lineHeight: 1.55 }}>
+          Applicants see this name on every posting and on your careers page.
         </p>
       </div>
 

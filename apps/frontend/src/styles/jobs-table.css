@@ -82,9 +82,11 @@
   justify-content: space-between;
   gap: 12px;
   padding: 14px;
-  border: 0.5px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--glass-card);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
 }
 
 .jobs-card-title {
