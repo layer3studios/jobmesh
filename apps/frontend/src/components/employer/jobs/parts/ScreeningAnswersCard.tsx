@@ -30,7 +30,7 @@ function AnswerRow({ answer }: { answer: ScreeningAnswer }) {
         // A flagged answer is tinted and outlined, never coloured text alone:
         // the icon and the label carry the meaning for anyone who cannot see hue.
         background: isFlagged ? 'var(--warning-soft)' : 'transparent',
-        border: isFlagged ? '0.5px solid var(--warning)' : 'none',
+        border: isFlagged ? '1px solid var(--warning)' : 'none',
       }}
     >
       <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: 'var(--ink)' }}>

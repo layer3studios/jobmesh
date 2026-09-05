@@ -127,7 +127,7 @@ export function ActionsMenu({
             top: position?.top ?? 0, left: position?.left ?? 0,
             visibility: position ? 'visible' : 'hidden',
             minWidth: MENU_WIDTH, padding: 4, borderRadius: 10,
-            background: 'var(--surface-raised)', border: '0.5px solid var(--border)',
+            background: 'var(--glass-strong)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid var(--border)',
             boxShadow: 'var(--shadow-lg)',
           }}
         >

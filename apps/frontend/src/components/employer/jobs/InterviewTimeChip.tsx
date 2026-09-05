@@ -27,7 +27,7 @@ export default function InterviewTimeChip({ time, onRemove, readOnly = false }: 
         display: 'inline-flex', alignItems: 'center', gap: 5,
         padding: '3px 7px', borderRadius: 999, fontSize: 11, whiteSpace: 'nowrap',
         background: isBooked ? 'var(--accent-soft)' : AVAILABLE.bg,
-        border: `0.5px solid ${isBooked ? 'var(--accent)' : AVAILABLE.border}`,
+        border: `1px solid ${isBooked ? 'var(--accent)' : AVAILABLE.border}`,
         color: isBooked ? 'var(--accent)' : 'var(--ink)',
       }}
     >

@@ -51,7 +51,7 @@ const GROUP_LABEL_STYLE = {
 };
 const ROW_STYLE = {
   display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
-  gap: 16, padding: '10px 0', borderBottom: '0.5px solid var(--border)',
+  gap: 16, padding: '10px 0', borderBottom: '1px solid var(--border)',
 };
 
 export default function NotificationSettings({

@@ -79,7 +79,7 @@ describe('Nav highlight follows the origin', () => {
     <EmployerTopNav isCompact={false} currentUser={null} companyName="Acme" role={null} onLogout={vi.fn()} />,
   );
   const isHighlighted = (label: string) =>
-    (screen.getByRole('link', { name: label }) as HTMLElement).style.fontWeight === '600';
+    (screen.getByRole('link', { name: label }) as HTMLElement).getAttribute('aria-current') === 'page';
 
   it('highlights Dashboard on /employer/jobs/new?from=dashboard', () => {
     fromParam = 'dashboard';

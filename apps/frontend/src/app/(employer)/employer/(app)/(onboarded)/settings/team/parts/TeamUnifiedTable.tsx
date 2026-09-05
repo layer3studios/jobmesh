@@ -42,10 +42,10 @@ export default function TeamUnifiedTable({
   const onlyMe = members.length === 1 && invites.length === 0;
 
   return (
-    <div style={{ background: 'var(--surface-sunken)', border: '0.5px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
+    <div style={{ background: 'var(--glass-card)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
       <div style={{
         display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
-        background: 'var(--surface-raised)', borderBottom: '0.5px solid var(--border)',
+        background: 'var(--glass-strong)', borderBottom: '1px solid var(--border)',
       }}>
         <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
           Members <span style={{ color: 'var(--ink-faint)', fontWeight: 400 }}>{members.length + invites.length}</span>
@@ -59,7 +59,7 @@ export default function TeamUnifiedTable({
           onChange={(event) => setSearch(event.target.value)}
           style={{
             width: 200, maxWidth: '50%', fontSize: 12, padding: '5px 9px',
-            border: '0.5px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--ink)',
+            border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--ink)',
           }}
         />
       </div>
@@ -67,7 +67,7 @@ export default function TeamUnifiedTable({
       {!narrow && (
         <div role="row" style={{
           display: 'grid', gridTemplateColumns: '1fr 110px 90px 80px',
-          padding: '8px 16px', borderBottom: '0.5px solid var(--border)',
+          padding: '8px 16px', borderBottom: '1px solid var(--border)',
         }}>
           <span style={HEAD_CELL}>Member</span>
           <span style={HEAD_CELL}>Role</span>

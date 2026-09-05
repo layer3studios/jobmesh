@@ -47,7 +47,7 @@ export default function EmailTemplatePreviews({ companyName, sampleRole = DEFAUL
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {previews.map((preview) => (
           <div key={preview.name} style={{
-            background: 'var(--surface-raised)', border: '0.5px solid var(--border)',
+            background: 'var(--glass-card)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid var(--border)',
             borderRadius: 12, padding: 16,
           }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>

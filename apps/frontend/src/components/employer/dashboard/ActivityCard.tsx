@@ -73,7 +73,7 @@ export function ActivityCard({ events, fill }: {
             const text = eventText(event);
             return (
               <div key={`${event.type}-${event.timestamp}-${index}`} data-testid={`activity-${event.type}`}
-                style={{ display: 'flex', gap: 8, padding: '9px 16px', borderBottom: '0.5px solid var(--border)' }}>
+                style={{ display: 'flex', gap: 8, padding: '9px 16px', borderBottom: '1px solid var(--border)' }}>
                 <span data-testid="activity-dot" aria-hidden style={{
                   width: 6, height: 6, borderRadius: '50%', marginTop: 5, flexShrink: 0,
                   background: DOT_COLOR[event.type],

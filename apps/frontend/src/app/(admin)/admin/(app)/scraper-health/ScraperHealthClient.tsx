@@ -36,7 +36,7 @@ function KpiTile({ label, value }: { label: string; value: string }) {
       }}>
         {label}
       </div>
-      <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--ink)', marginTop: 4, lineHeight: 1.1 }}>
+      <div style={{ fontFamily: 'var(--font-instrument-serif), var(--font-source-serif), Georgia, serif', fontSize: 28, fontWeight: 400, letterSpacing: '-0.03em', color: 'var(--ink)', marginTop: 6, lineHeight: 1 }}>
         {value}
       </div>
     </div>

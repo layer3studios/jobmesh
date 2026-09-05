@@ -42,7 +42,7 @@ export default function ActiveJobsCard({ jobs }: { jobs: DashboardActiveJob[] })
         </p>
       ) : (
         <div>
-          <div style={{ ...GRID, padding: '8px 16px', background: 'var(--surface-raised)', borderBottom: '0.5px solid var(--border)' }}>
+          <div style={{ ...GRID, padding: '8px 16px', background: 'var(--glass-strong)', borderBottom: '1px solid var(--border)' }}>
             <span style={HEAD_CELL}>Job</span>
             <span style={HEAD_CELL}>Applicants</span>
             <span style={HEAD_CELL}>Pipeline</span>
@@ -54,7 +54,7 @@ export default function ActiveJobsCard({ jobs }: { jobs: DashboardActiveJob[] })
               key={job.id}
               data-testid={`active-job-row-${job.id}`}
               onClick={() => open(job.id)}
-              style={{ ...GRID, padding: '10px 16px', borderBottom: '0.5px solid var(--border)', cursor: 'pointer' }}
+              style={{ ...GRID, padding: '10px 16px', borderBottom: '1px solid var(--border)', cursor: 'pointer' }}
             >
               <span style={{ minWidth: 0 }}>
                 <span style={{ display: 'block', fontSize: 14, fontWeight: 500, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{job.title}</span>

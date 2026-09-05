@@ -88,7 +88,7 @@ export default function DashboardBody(p: Props) {
           style={{
             position: 'sticky', top: 84,
             maxHeight: 'calc(100vh - 100px)', overflowY: 'auto',
-            background: 'var(--surface-sunken)', border: '1px solid var(--border)', borderRadius: 12,
+            background: 'var(--glass-card)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid var(--border)', borderRadius: 12,
           }}
         >
           {p.selectedJob ? (

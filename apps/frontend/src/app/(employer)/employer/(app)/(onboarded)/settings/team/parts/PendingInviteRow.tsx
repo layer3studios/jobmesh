@@ -30,7 +30,7 @@ export default function PendingInviteRow({
       opacity: 0.7,
       display: narrow ? 'flex' : 'grid',
       ...(narrow ? { flexDirection: 'column' as const, gap: 8 } : { gridTemplateColumns: '1fr 110px 90px 80px', alignItems: 'center' }),
-      padding: '10px 16px', borderBottom: '0.5px solid var(--border)',
+      padding: '10px 16px', borderBottom: '1px solid var(--border)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
         <span aria-hidden style={{
@@ -50,7 +50,7 @@ export default function PendingInviteRow({
       <div>
         <span style={{
           display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, padding: '2px 8px',
-          borderRadius: 999, border: '0.5px solid var(--border)', color: 'var(--ink-2)',
+          borderRadius: 999, border: '1px solid var(--border)', color: 'var(--ink-2)',
         }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: ROLE_DOT_COLOR[invite.role] }} />
           {roleLabel(invite.role)}

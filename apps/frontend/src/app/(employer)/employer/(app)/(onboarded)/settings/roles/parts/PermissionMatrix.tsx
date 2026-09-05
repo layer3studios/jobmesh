@@ -77,19 +77,19 @@ export default function PermissionMatrix() {
         Permission matrix
       </p>
       <div style={{
-        border: '0.5px solid var(--border)', borderRadius: 12,
+        border: '1px solid var(--border)', borderRadius: 12,
         overflowX: 'auto', background: 'var(--surface-raised)',
       }}>
         <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: 480 }}>
           <thead>
             <tr>
-              <th style={{ ...STICKY_LABEL, fontWeight: 600, borderBottom: '0.5px solid var(--border)' }}>
+              <th style={{ ...STICKY_LABEL, fontWeight: 600, borderBottom: '1px solid var(--border)' }}>
                 Permission
               </th>
               {ROLES.map((role) => (
                 <th key={role.key} style={{
                   ...CELL, fontWeight: 600, color: 'var(--ink)',
-                  borderBottom: '0.5px solid var(--border)',
+                  borderBottom: '1px solid var(--border)',
                 }}>
                   {role.label}
                 </th>

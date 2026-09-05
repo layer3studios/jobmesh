@@ -38,7 +38,7 @@ export default function RejectionTemplateCard({
 
   return (
     <div style={{
-      background: 'var(--surface-raised)', border: '0.5px solid var(--border)',
+      background: 'var(--glass-card)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid var(--border)',
       borderRadius: 12, padding: 16,
     }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
@@ -60,7 +60,7 @@ export default function RejectionTemplateCard({
         {tab === 'preview' ? (
           <div style={{
             whiteSpace: 'pre-wrap', fontSize: 13, lineHeight: 1.6, color: 'var(--ink-2)',
-            background: 'var(--surface-sunken)', border: '0.5px solid var(--border)',
+            background: 'var(--glass-card)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid var(--border)',
             borderRadius: 8, padding: 12, minHeight: 120,
           }}>
             {preview}

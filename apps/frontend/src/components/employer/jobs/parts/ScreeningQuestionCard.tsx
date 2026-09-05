@@ -94,7 +94,7 @@ export default function ScreeningQuestionCard({
 
   return (
     <div style={{
-      border: '0.5px solid var(--border)', borderRadius: 8, background: 'var(--surface-raised)',
+      border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface-raised)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px' }}>
         <button
@@ -121,7 +121,7 @@ export default function ScreeningQuestionCard({
       </div>
 
       {isOpen && (
-        <div style={{ padding: '12px 10px', borderTop: '0.5px solid var(--border)' }}>
+        <div style={{ padding: '12px 10px', borderTop: '1px solid var(--border)' }}>
           <Stack gap={12}>
             <Input
               label={TEXT.questionLabel}

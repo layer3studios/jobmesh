@@ -20,7 +20,7 @@ import SuggestedTimesPanel from './SuggestedTimesPanel';
 import { requiredFieldFilled, type AddTimesForm } from './useAddTimesForm';
 
 const INPUT_STYLE = {
-  padding: '6px 9px', border: '0.5px solid var(--border)', borderRadius: 8,
+  padding: '6px 9px', border: '1px solid var(--border)', borderRadius: 8,
   fontSize: 12, background: 'var(--surface-raised)', color: 'var(--ink)',
 } as const;
 

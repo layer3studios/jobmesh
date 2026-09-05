@@ -30,13 +30,13 @@ export default function RolesSettingsPage() {
       />
       <RoleTiles />
       <div style={{
-        background: 'var(--surface-sunken)', border: '0.5px solid var(--border)',
+        background: 'var(--glass-card)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid var(--border)',
         borderRadius: 12, overflow: 'hidden',
       }}>
         {DETAIL_ROWS.map(([role, description]) => (
           <div key={role} style={{
             display: 'flex', gap: 12, padding: '12px 16px',
-            borderBottom: '0.5px solid var(--border)', flexWrap: 'wrap',
+            borderBottom: '1px solid var(--border)', flexWrap: 'wrap',
           }}>
             <span style={{ width: 96, flexShrink: 0, fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{role}</span>
             <span style={{ flex: 1, minWidth: 220, fontSize: 13, color: 'var(--ink-2)' }}>{description}</span>

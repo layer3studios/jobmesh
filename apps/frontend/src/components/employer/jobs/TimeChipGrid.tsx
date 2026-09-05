@@ -9,7 +9,7 @@ import type { TimeChip } from './time-chip-helpers';
 
 const CHIP_BASE_STYLE = {
   minWidth: 70, padding: '5px 12px', borderRadius: 6, fontSize: 12,
-  cursor: 'pointer', border: '0.5px solid var(--border)',
+  cursor: 'pointer', border: '1px solid var(--border)',
 } as const;
 
 export default function TimeChipGrid({
@@ -37,7 +37,7 @@ export default function TimeChipGrid({
               ...CHIP_BASE_STYLE,
               background: selected ? 'var(--accent)' : chip.alreadyAdded ? 'var(--surface-sunken)' : 'var(--surface-sunken)',
               color: selected ? 'var(--text-on-accent)' : chip.alreadyAdded ? 'var(--ink-faint)' : 'var(--ink)',
-              border: chip.alreadyAdded ? 'none' : `0.5px solid ${selected ? 'var(--accent)' : 'var(--border)'}`,
+              border: chip.alreadyAdded ? 'none' : `1px solid ${selected ? 'var(--accent)' : 'var(--border)'}`,
               cursor: chip.alreadyAdded ? 'not-allowed' : 'pointer',
               fontWeight: selected ? 700 : 500,
             }}

@@ -53,7 +53,7 @@ export default function TopCandidatesCard({ candidates, jobs }: {
             onClick={() => openCandidate(candidate)}
             style={{
               display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
-              borderBottom: '0.5px solid var(--border)', cursor: 'pointer',
+              borderBottom: '1px solid var(--border)', cursor: 'pointer',
             }}
           >
             <span aria-hidden style={{

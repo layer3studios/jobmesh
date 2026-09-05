@@ -20,7 +20,7 @@ interface Props {
 }
 
 const cell: React.CSSProperties = { padding: '12px 14px', textAlign: 'left', verticalAlign: 'middle', fontSize: '0.875rem', color: 'var(--ink)' };
-const headCell: React.CSSProperties = { ...cell, fontSize: '0.75rem', fontWeight: 600, color: 'var(--ink-muted)', background: 'var(--surface-sunken)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' };
+const headCell: React.CSSProperties = { ...cell, fontSize: '0.75rem', fontWeight: 600, color: 'var(--ink-muted)', background: 'var(--glass-strong)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' };
 
 function invitedByLabel(invite: CompanyInvite, membersById: Map<string, TeamMember>): string {
   if (!invite.invitedByEmployerUserId) return '—';

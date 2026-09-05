@@ -94,7 +94,7 @@ export default function CompanyActivityCard() {
             const Icon = ICON[item.type] ?? FileText;
             return (
               <div key={`${item.type}-${item.timestamp}-${index}`}
-                style={{ display: 'flex', gap: 9, padding: '8px 16px', borderBottom: '0.5px solid var(--border)' }}>
+                style={{ display: 'flex', gap: 9, padding: '8px 16px', borderBottom: '1px solid var(--border)' }}>
                 <Icon size={14} aria-hidden="true"
                   style={{ marginTop: 2, flexShrink: 0, color: ICON_COLOR[item.type] ?? 'var(--ink-faint)' }} />
                 <span style={{ minWidth: 0, flex: 1 }}>

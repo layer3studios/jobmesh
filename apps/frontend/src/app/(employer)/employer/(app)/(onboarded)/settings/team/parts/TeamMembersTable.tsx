@@ -29,7 +29,7 @@ function interviewerPermsLabel(member: TeamMember): string | null {
 }
 
 const cell: React.CSSProperties = { padding: '12px 14px', textAlign: 'left', verticalAlign: 'middle', fontSize: '0.875rem', color: 'var(--ink)' };
-const headCell: React.CSSProperties = { ...cell, fontSize: '0.75rem', fontWeight: 600, color: 'var(--ink-muted)', background: 'var(--surface-sunken)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' };
+const headCell: React.CSSProperties = { ...cell, fontSize: '0.75rem', fontWeight: 600, color: 'var(--ink-muted)', background: 'var(--glass-strong)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' };
 
 export default function TeamMembersTable({
   members, currentRole, currentEmployerUserId, onChangeRole, onRemove, onTransfer,

@@ -152,7 +152,7 @@ export default function ApplyFormFields({
             onChange={(e) => set('source', e.target.value)}
             style={{
               width: '100%', fontSize: '0.875rem', padding: '8px 10px', borderRadius: 8,
-              border: '0.5px solid var(--border)', background: 'var(--surface-raised)', color: 'var(--ink)',
+              border: '1px solid var(--border)', background: 'var(--surface-raised)', color: 'var(--ink)',
             }}
           >
             <option value="">Prefer not to say</option>

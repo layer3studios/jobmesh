@@ -81,7 +81,7 @@ export default function CulturePhotoGrid({ photoUrls, disabled, onChange, onErro
                 alt=""
                 style={{
                   width: '100%', aspectRatio: '4 / 3', objectFit: 'cover',
-                  borderRadius: 8, border: '0.5px solid var(--border)', display: 'block',
+                  borderRadius: 8, border: '1px solid var(--border)', display: 'block',
                   background: 'var(--surface-sunken)',
                 }}
               />
@@ -94,7 +94,7 @@ export default function CulturePhotoGrid({ photoUrls, disabled, onChange, onErro
                 style={{
                   position: 'absolute', top: 5, right: 5, width: 22, height: 22,
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  borderRadius: 999, border: '0.5px solid var(--border)',
+                  borderRadius: 999, border: '1px solid var(--border)',
                   background: 'var(--surface)', color: 'var(--ink)', cursor: 'pointer', padding: 0,
                 }}
               >

@@ -154,7 +154,7 @@ export default function CompanySettingsClient() {
           onSaved={refreshEmployerSession}
         />
 
-        <div style={{ borderTop: '0.5px solid var(--border)', paddingTop: 16 }}>
+        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
           <p style={{ margin: 0, fontSize: 13, color: 'var(--ink-2)' }}>
             Applicant data retained for {company.retentionDays} days per DPDP compliance.
           </p>
