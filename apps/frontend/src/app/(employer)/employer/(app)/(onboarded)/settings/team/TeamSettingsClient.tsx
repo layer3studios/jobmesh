@@ -15,6 +15,7 @@ import { resendInvite, revokeInvite, EmployerTeamApiError, type MemberPatchResul
 import { canInvite } from '@/lib/team-permissions';
 import type { TeamMember, CompanyInvite, TeamPageData } from '@/types/employer-team';
 import Breadcrumbs from '@/components/employer/Breadcrumbs';
+import SettingsPageHeader from '../parts/SettingsPageHeader';
 import RoleTiles from './parts/RoleTiles';
 import TeamUnifiedTable from './parts/TeamUnifiedTable';
 import InviteTeammateModal from './parts/InviteTeammateModal';
@@ -87,19 +88,15 @@ export default function TeamSettingsClient({ members: initialMembers, invites: i
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       {/* "Settings" has no landing page yet, so it renders as plain text. */}
       <Breadcrumbs items={[{ label: 'Settings' }, { label: 'Team' }]} />
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 20 }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 500, color: 'var(--ink)' }}>Team</h1>
-          <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--ink-2)' }}>
-            Manage who has access to your company and what they can do.
-          </p>
-        </div>
-        {canManage && (
-          <Button iconLeft={<UserPlus size={15} />} onClick={() => setModal({ kind: 'invite' })} style={{ fontSize: 13 }}>
+      <SettingsPageHeader
+        title="Team"
+        subtitle="Manage who has access to your company and what they can do."
+        actions={canManage ? (
+          <Button iconLeft={<UserPlus size={15} />} onClick={() => setModal({ kind: 'invite' })}>
             Invite
           </Button>
-        )}
-      </div>
+        ) : undefined}
+      />
 
       <RoleTiles />
 
