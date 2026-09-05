@@ -19,8 +19,8 @@ export default function ReferralBanner({ referrerName }: { referrerName: string 
         // Accent-tinted rather than success-green: nothing has succeeded yet, the
         // candidate has only arrived. --accent-soft is the same tint the seeker
         // nav uses for "you are here" states.
-        background: 'var(--accent-soft)',
-        border: '0.5px solid var(--border)',
+        background: 'transparent',
+        border: '1px solid var(--border)', borderLeft: '2px solid var(--thread-amber)',
       }}
     >
       <UserRoundCheck size={15} aria-hidden="true" style={{ color: 'var(--accent)', flexShrink: 0 }} />

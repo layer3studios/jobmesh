@@ -47,9 +47,10 @@ export default async function ApplySuccessPage({
       <ApplySuccessTracker companySlug={companySlug} jobId={jobId} />
       <Card variant="raised">
         <Stack gap={14} align="center">
-          <CheckCircle2 size={44} color="var(--success)" aria-hidden />
-          <h1 className="font-display" style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--ink)', textAlign: 'center' }}>
-            Application submitted
+          <CheckCircle2 size={40} color="var(--success)" aria-hidden />
+          <p style={{ margin: 0, fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>Done</p>
+          <h1 className="font-display" style={{ fontSize: 'clamp(1.9rem, 4vw, 2.4rem)', fontWeight: 400, letterSpacing: '-0.04em', lineHeight: 1.05, color: 'var(--ink)', textAlign: 'center' }}>
+            Application submitted.
           </h1>
           <p style={{ fontSize: '0.95rem', color: 'var(--ink)', textAlign: 'center', lineHeight: 1.55 }}>
             {jobTitle && companyName
@@ -58,9 +59,9 @@ export default async function ApplySuccessPage({
           </p>
 
           <div style={{
-            width: '100%', borderTop: '0.5px solid var(--border)', paddingTop: 14, marginTop: 2,
+            width: '100%', borderTop: '1px solid var(--border)', paddingTop: 14, marginTop: 2,
           }}>
-            <p style={{ margin: '0 0 4px', fontSize: '0.875rem', fontWeight: 600, color: 'var(--ink)', textAlign: 'center' }}>
+            <p style={{ margin: '0 0 6px', fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)', textAlign: 'center' }}>
               What happens next
             </p>
             {/* States the outcome plainly, including the one candidates most often
@@ -86,7 +87,7 @@ export default async function ApplySuccessPage({
               </Button>
             </Link>
             {/* Cross-audience: apply.jobmesh.in → jobmesh.in in production. */}
-            <a href={getSeekerUrl('/')} style={{ fontSize: '0.825rem', color: 'var(--link)' }}>
+            <a href={getSeekerUrl('/')} className="eb-crumb" style={{ fontSize: '0.825rem', color: 'var(--ink-muted)' }}>
               Back to JobMesh
             </a>
           </Stack>

@@ -19,8 +19,8 @@ export default function ApplyClosedNotice({
     <Container size="sm" style={{ paddingTop: 48, paddingBottom: 64 }}>
       <Card variant="raised">
         <Stack gap={12} align="center">
-          <h1 className="font-display" style={{ fontSize: '1.35rem', fontWeight: 600, color: 'var(--ink)', textAlign: 'center' }}>
-            Applications for this position have closed
+          <h1 className="font-display" style={{ fontSize: 'clamp(1.7rem, 4vw, 2.2rem)', fontWeight: 400, letterSpacing: '-0.04em', lineHeight: 1.05, color: 'var(--ink)', textAlign: 'center' }}>
+            Applications for this role have closed.
           </h1>
           <p style={{ fontSize: '0.9rem', color: 'var(--ink-muted)', textAlign: 'center', lineHeight: 1.6 }}>
             {companyName} is no longer accepting applications for {jobTitle}.

@@ -43,7 +43,7 @@ describe('AssignmentBadge', () => {
 
   it('uses theme variables, never hardcoded colours', () => {
     const { container } = render(<AssignmentBadge estimatedHours={2} />);
-    expect(container.innerHTML).toContain('var(--accent-soft)');
-    expect(container.innerHTML).toContain('var(--accent)');
+    expect(container.innerHTML).toContain('var(--border)');
+    expect(container.innerHTML).not.toMatch(/#[0-9a-f]{3,6}/i);
   });
 });

@@ -26,7 +26,7 @@ export default function AssignmentPreview({ assignment }: Props) {
           size="md"
         />
 
-        <h2 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--ink)' }}>
+        <h2 className="font-display" style={{ fontSize: '1.5rem', fontWeight: 400, letterSpacing: '-0.03em', lineHeight: 1.1, color: 'var(--ink)' }}>
           {assignment.title}
         </h2>
 
@@ -50,7 +50,7 @@ export default function AssignmentPreview({ assignment }: Props) {
           <summary
             style={{
               cursor: 'pointer', fontSize: '0.86rem', fontWeight: 500,
-              color: 'var(--link)', padding: '2px 0',
+              color: 'var(--ink)', textDecoration: 'underline', textUnderlineOffset: 3, padding: '2px 0',
             }}
           >
             Preview the full task

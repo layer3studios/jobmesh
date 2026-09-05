@@ -20,7 +20,7 @@ export default function InterviewSlotPicker({
 }) {
   return (
     <fieldset style={{ border: 0, margin: 0, padding: 0 }}>
-      <legend style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--ink)', marginBottom: 12, padding: 0 }}>
+      <legend style={{ fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)', marginBottom: 12, padding: 0 }}>
         {GROUP_LABEL}
       </legend>
       <div role="none" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -33,8 +33,9 @@ export default function InterviewSlotPicker({
                 style={{
                   display: 'flex', alignItems: 'center', gap: 12, minHeight: 56,
                   padding: '12px 16px', borderRadius: 12, cursor: 'pointer',
-                  border: selected ? '2px solid var(--accent)' : '1px solid var(--border)',
-                  background: selected ? 'var(--surface-sunken)' : 'var(--surface-raised)',
+                  border: selected ? '1px solid var(--border-strong)' : '1px solid var(--border)',
+                  borderLeft: selected ? '2px solid var(--thread-indigo)' : '1px solid var(--border)',
+                  background: selected ? 'var(--accent-soft)' : 'var(--glass-card)',
                 }}
               >
                 <input
@@ -46,7 +47,7 @@ export default function InterviewSlotPicker({
                   aria-describedby={hasError ? `slot-error-${index}` : undefined}
                   style={{ width: 18, height: 18, margin: 0, flexShrink: 0, accentColor: 'var(--accent)' }}
                 />
-                <span style={{ flex: 1, fontSize: '0.95rem', fontWeight: selected ? 700 : 500, color: 'var(--ink)' }}>
+                <span style={{ flex: 1, fontSize: '0.95rem', fontWeight: selected ? 600 : 500, color: 'var(--ink)' }}>
                   {formatInterviewTime(slot.startAtUtc)}
                 </span>
                 {selected && <span aria-hidden="true" style={{ fontWeight: 700, color: 'var(--accent)' }}>✓</span>}

@@ -123,7 +123,7 @@ export default function InterviewBookingClient({
       <BookingPageHeader companyName={page.companyName} companyLogoUrl={page.companyLogoUrl} postingTitle={page.postingTitle} />
       <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--ink-2)' }}>{describeInterview(page.mode, page.durationMinutes)}</p>
       {page.mode === 'in_person' && page.locationText && (
-        <p style={{ margin: 0, padding: '10px 14px', background: 'var(--surface-sunken)', borderRadius: 10, fontSize: '0.92rem', color: 'var(--ink)' }}>
+        <p style={{ margin: 0, padding: '10px 14px', border: '1px solid var(--border)', borderRadius: 10, fontSize: '0.92rem', color: 'var(--ink)' }}>
           <strong>Location:</strong> {page.locationText}
         </p>
       )}

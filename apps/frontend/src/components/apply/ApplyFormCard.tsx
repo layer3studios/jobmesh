@@ -63,7 +63,7 @@ export default function ApplyFormCard(p: ApplyFormCardProps) {
   const submitting = submit.submitting;
 
   return (
-    <Card className="apply-card" style={{ padding: 20, borderRadius: 10 }}>
+    <Card className="apply-card" style={{ padding: 22, borderRadius: 14 }}>
       <Stack gap={16}>
         {/* Pinned at the top of the card, above every notice — it describes the
             form as a whole, so it should not move as banners come and go. */}

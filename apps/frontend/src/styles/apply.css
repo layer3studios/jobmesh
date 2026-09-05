@@ -108,12 +108,13 @@
 
 .apply-legend {
   padding: 0;
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-muted);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 /* 14px between fields inside a group, 24px between groups. */
@@ -133,8 +134,9 @@
    The highest-value block on an assignment posting, so it is the one thing in
    the form card that carries a surface of its own. */
 .apply-submission-card {
-  background: var(--accent-soft);
-  border: 1px solid var(--accent-mid);
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-left: 2px solid var(--thread-indigo);
   border-radius: 10px;
   padding: 20px;
 }
@@ -150,7 +152,7 @@
 .apply-progress-fill {
   height: 100%;
   border-radius: 999px;
-  background: var(--accent);
+  background: var(--thread-gradient);
   transition: width 240ms ease;
 }
 
@@ -161,12 +163,13 @@
 }
 
 .apply-progress-label {
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-muted);
-  margin-top: 6px;
+  margin-top: 8px;
 }
 
 /* ── Sticky apply bar ──────────────────────────────────────────────────────
@@ -183,7 +186,9 @@
   gap: 16px;
   padding: 12px 20px;
   padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-  background: var(--paper);
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
   border-top: 1px solid var(--border);
   box-shadow: var(--shadow-md);
 }
@@ -192,8 +197,9 @@
   display: none; /* mobile: the title is already on screen; the button is what matters */
   flex: 1 1 auto;
   min-width: 0;
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-family: var(--font-instrument-serif), var(--font-source-serif), Georgia, serif;
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
   color: var(--ink);
   overflow: hidden;
   text-overflow: ellipsis;
