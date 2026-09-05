@@ -15,7 +15,8 @@ const pillStyle = (size: 'sm' | 'md'): React.CSSProperties => ({
   fontSize: size === 'sm' ? '0.75rem' : '0.78rem',
   padding: size === 'sm' ? '2px 8px' : '3px 9px',
   borderRadius: 6,
-  background: 'var(--accent-soft)',
+  border: '1px solid var(--border)',
+  background: 'transparent',
   color: 'var(--accent)',
   fontWeight: 500,
 });

@@ -5,7 +5,7 @@
 // mutation waits for the API row and replaces it in local state. The invite modal
 // stays open after success so the copy-link URL is never lost (D3).
 import { useState } from 'react';
-import { Button, PageShell } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { useAdmin } from '@/context/admin/AdminContext';
 import {
   deactivateAdmin, reactivateAdmin, updateAdminRole,
@@ -14,6 +14,7 @@ import {
 import type { TeamAdmin, AdminInvite, AdminRole } from '@/api/admin-team-api';
 import TeamAdminsTable from './parts/TeamAdminsTable';
 import InviteAdminModal from './parts/InviteAdminModal';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 
 const ACTION_MESSAGES: Record<string, string> = {
   CANNOT_DEACTIVATE_SELF: 'You cannot deactivate yourself.',
@@ -110,10 +111,10 @@ export default function TeamManagementClient({ initialAdmins }: { initialAdmins:
   }
 
   return (
-    <PageShell width="wide" style={{ paddingBottom: 60 }}>
+    <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--ink)', margin: 0 }}>Team</h1>
+          <AdminPageHeader title="Team" />
           {!isSuper && (
             <p style={{ fontSize: '0.82rem', color: 'var(--ink-muted)', margin: '4px 0 0' }}>
               Only super admins can manage the team.
@@ -143,6 +144,6 @@ export default function TeamManagementClient({ initialAdmins }: { initialAdmins:
           lastResult={lastInviteResult}
         />
       )}
-    </PageShell>
+    </div>
   );
 }

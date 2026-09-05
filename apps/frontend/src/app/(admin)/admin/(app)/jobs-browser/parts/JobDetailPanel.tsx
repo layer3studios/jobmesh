@@ -6,8 +6,7 @@ import { Button } from '@/components/ui';
 import type { JobDetail } from '@/types/admin-job-browser';
 
 const LABEL = {
-  fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.04em',
-  textTransform: 'uppercase', color: 'var(--ink-faint)',
+  fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 10, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)',
 } as const;
 
 function Field({ label, value }: { label: string; value: string | null }) {
@@ -81,7 +80,7 @@ export default function JobDetailPanel({ job, isBusy, onToggleHidden, onRequestD
           <div style={{
             fontSize: '0.84rem', color: 'var(--ink-2)', lineHeight: 1.6,
             maxHeight: 260, overflowY: 'auto', whiteSpace: 'pre-wrap',
-            background: 'var(--surface)', border: '1px solid var(--border)',
+            background: 'var(--glass-card)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', boxShadow: 'inset 0 1px 0 var(--glass-sheen), var(--shadow-sm)', border: '1px solid var(--border)',
             borderRadius: 8, padding: '10px 12px',
           }}>
             {job.description.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()}

@@ -3,6 +3,14 @@
 @import "../styles/base.css";
 @import "../styles/primitives.css";
 @import "../styles/home.css";
+@import "../styles/home-controls.css";
+@import "../styles/home-nav.css";
+@import "../styles/home-hero.css";
+@import "../styles/home-spine.css";
+@import "../styles/home-sections.css";
+@import "../styles/home-motion.css";
+@import "../styles/hire.css";
+@import "../styles/landing-pages.css";
 @import "../styles/apply.css";
 @import "../styles/careers.css";
 @import "../styles/quick-archive.css";
@@ -11,14 +19,16 @@
 @import "../styles/github.css";
 @import "../styles/discover.css";
 @import "../styles/public-profile.css";
+@import "../styles/board.css";
+@import "../styles/auth.css";
 
 /* Tailwind v4 CSS-first tokens (R7). Mapped from frontend/src/theme/tokens.ts +
    themes.ts. Colors reference the runtime CSS vars in theme-tokens.css so both
    light and dark resolve automatically. Fonts are provided by next/font as CSS
    variables (--font-sans / --font-serif / --font-mono) in the root layout. */
 @theme {
-  --font-sans: var(--font-inter), ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-serif: var(--font-source-serif), 'Iowan Old Style', Georgia, ui-serif, serif;
+  --font-sans: var(--font-dm-sans), var(--font-inter), ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: var(--font-instrument-serif), var(--font-source-serif), 'Iowan Old Style', Georgia, ui-serif, serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --color-paper: var(--paper);

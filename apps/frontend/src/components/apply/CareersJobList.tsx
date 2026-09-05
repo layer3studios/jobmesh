@@ -59,8 +59,8 @@ export default function CareersJobList({
   return (
     <div>
       <div className="careers-filter-row" style={{ marginBottom: 12 }}>
-        <h2 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--ink)', margin: 0 }}>
-          Open roles ({jobs.length})
+        <h2 style={{ fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)', margin: 0 }}>
+          Open roles <span style={{ color: 'var(--ink)' }}>· {jobs.length}</span>
         </h2>
         <input
           type="search"
@@ -68,9 +68,10 @@ export default function CareersJobList({
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search roles"
           aria-label="Search roles by title"
+          className="eb-search"
           style={{
-            fontSize: 13, padding: '7px 11px', borderRadius: 8, minWidth: 200,
-            border: '0.5px solid var(--border)', background: 'var(--surface-raised)', color: 'var(--ink)',
+            fontSize: 13, padding: '7px 11px', borderRadius: 8, minWidth: 200, fontFamily: 'inherit',
+            border: '1px solid var(--border)', background: 'transparent', color: 'var(--ink)',
           }}
         />
       </div>

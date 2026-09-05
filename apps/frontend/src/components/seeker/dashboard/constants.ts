@@ -41,11 +41,12 @@ export const SALARY_MAX_LPA = 100;
 export const MAX_LOCATIONS = 5;
 
 export const desktopSelectStyle: CSSProperties = {
-  padding: '8px 28px 8px 12px',
-  fontFamily: 'inherit', fontSize: '0.82rem',
-  background: 'var(--surface)', color: 'var(--ink)',
-  border: '1px solid var(--border-strong)', borderRadius: 9,
+  // A hairline chip, not a form control: transparent, 8px radius, zinc chevron.
+  padding: '7px 28px 7px 12px',
+  fontFamily: 'inherit', fontSize: '0.82rem', fontWeight: 500,
+  background: 'transparent', color: 'var(--ink-muted)',
+  border: '1px solid var(--border)', borderRadius: 8,
   cursor: 'pointer', outline: 'none', appearance: 'none',
-  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%236F6E69' stroke-width='2'%3E%3Cpath d='M3 5l3 3 3-3'/%3E%3C/svg%3E")`,
+  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23A1A1AA' stroke-width='2'%3E%3Cpath d='M3 5l3 3 3-3'/%3E%3C/svg%3E")`,
   backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center',
 };

@@ -53,7 +53,7 @@ export default function AutoArchiveSettings({ value, canEdit, onSaved }: {
 
   if (!canEdit) {
     return (
-      <div style={{ borderTop: '0.5px solid var(--border)', paddingTop: 16 }}>
+      <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
         <p style={LABEL_STYLE}>Auto-archive</p>
         <p style={{ margin: 0, fontSize: 13, color: 'var(--ink-2)' }}>
           {value == null
@@ -66,7 +66,7 @@ export default function AutoArchiveSettings({ value, canEdit, onSaved }: {
   }
 
   return (
-    <div style={{ borderTop: '0.5px solid var(--border)', paddingTop: 16 }}>
+    <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
       <p style={LABEL_STYLE}>Auto-archive</p>
       <Switch
         checked={isEnabled}

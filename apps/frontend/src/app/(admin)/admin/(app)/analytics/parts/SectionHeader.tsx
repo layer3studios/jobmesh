@@ -21,8 +21,8 @@ export default function SectionHeader({ title, cachedAt }: { title: string; cach
       display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
       gap: 12, flexWrap: 'wrap', marginBottom: 10, marginTop: 24,
     }}>
-      <h2 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--ink)', margin: 0 }}>{title}</h2>
-      <span style={{ fontSize: '0.75rem', color: 'var(--ink-faint)' }}>
+      <h2 className="font-display" style={{ fontSize: 22, fontWeight: 400, letterSpacing: '-0.03em', color: 'var(--ink)', margin: 0 }}>{title}</h2>
+      <span style={{ fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-faint)' }}>
         Refreshed {relativeFromNow(cachedAt)}
       </span>
     </div>

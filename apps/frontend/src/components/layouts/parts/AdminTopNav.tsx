@@ -64,28 +64,25 @@ export default function AdminTopNav({ isCompact, currentUser, onLogout }: Props)
   const renderNavLink = (path: string, label: string, icon?: React.ReactNode) => (
     <Link
       href={path}
+      className="an-link"
+      aria-current={isActive(path) ? 'page' : undefined}
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 5,
-        padding: '7px 12px', borderRadius: 8,
-        textDecoration: 'none', fontSize: '0.875rem',
-        fontWeight: isActive(path) ? 600 : 500,
+        padding: '8px 10px',
+        textDecoration: 'none', fontSize: 13, fontWeight: 500,
         color: isActive(path) ? 'var(--ink)' : 'var(--ink-muted)',
-        background: isActive(path) ? 'var(--paper-2)' : 'transparent',
-        transition: 'all 160ms ease',
       }}
-      onMouseEnter={e => { if (!isActive(path)) (e.currentTarget as HTMLElement).style.background = 'var(--paper-2)'; }}
-      onMouseLeave={e => { if (!isActive(path)) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
     >
       {icon}{label}
     </Link>
   );
 
   return (
-    <header style={{
+    <header className="an-nav" style={{
       position: 'sticky', top: 0, zIndex: Z.nav,
       background: 'var(--glass-bg)',
-      backdropFilter: 'saturate(180%) blur(20px)',
-      WebkitBackdropFilter: 'saturate(180%) blur(20px)',
+      backdropFilter: 'saturate(190%) blur(26px)',
+      WebkitBackdropFilter: 'saturate(190%) blur(26px)',
       borderBottom: '1px solid var(--border)',
     }}>
       {/* Width matches the admin content container (max-w-[1536px]) so nav and page align. */}
@@ -98,11 +95,10 @@ export default function AdminTopNav({ isCompact, currentUser, onLogout }: Props)
         </Link>
         {/* Mode badge — shown even when compact (D2): the point is the cue. */}
         <span style={{
-          flexShrink: 0,
-          padding: '2px 8px', borderRadius: 999,
-          fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.02em',
-          background: 'var(--paper-2)', color: 'var(--ink-2)',
-          border: '1px solid var(--border)', whiteSpace: 'nowrap',
+          flexShrink: 0, paddingLeft: 12, borderLeft: '1px solid var(--border)',
+          fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace',
+          fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase',
+          color: 'var(--ink-muted)', whiteSpace: 'nowrap',
         }}>
           Admin
         </span>
@@ -156,10 +152,9 @@ export default function AdminTopNav({ isCompact, currentUser, onLogout }: Props)
             {isMenuOpen && (
               <div
                 role="menu"
-                className="anim-scale"
+                className="glass glass--strong"
                 style={{
                   position: 'absolute', top: 'calc(100% + 8px)', right: 0, minWidth: 220,
-                  background: 'var(--surface)', border: '1px solid var(--border)',
                   borderRadius: 12, boxShadow: 'var(--shadow-lg)', padding: 6, zIndex: Z.dropdown,
                 }}
               >
@@ -167,7 +162,7 @@ export default function AdminTopNav({ isCompact, currentUser, onLogout }: Props)
                   <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.name}</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--ink-muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.email}</div>
                 </div>
-                <button role="menuitem" onClick={() => { setIsMenuOpen(false); onLogout(); }} style={menuItem}>
+                <button role="menuitem" className="jb-option" onClick={() => { setIsMenuOpen(false); onLogout(); }} style={menuItem}>
                   <LogOut size={14} /> Sign out
                 </button>
               </div>

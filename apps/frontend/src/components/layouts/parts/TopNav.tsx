@@ -1,6 +1,10 @@
 'use client';
 // FILE: src/components/layouts/parts/TopNav.tsx
-import { useState } from 'react';
+// The app's header: wordmark, text links with an ink underline for the
+// current page, the day's count, theme toggle, and the user menu or Sign in.
+// The 3px amber→indigo thread beneath it (board.css) is the chrome's only
+// colour. Hover states are CSS classes — no hover-as-state.
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Sun, Moon, Menu, X } from 'lucide-react';
@@ -13,17 +17,19 @@ import { Z } from '@/theme/tokens';
 interface User { name: string; email: string; picture?: string; }
 
 interface Props {
-  isMobile: boolean;
-  isCompact: boolean;
   navItems: NavItem[];
   currentUser: User | null;
   todayCount: number;
   streak: number;
   themeMode: 'light' | 'dark';
+  isMobile: boolean;
+  isCompact: boolean;
   onToggleTheme: () => void;
   onOpenSkillsEditor: () => void;
   onLogout: () => void;
 }
+
+const MONO = 'var(--font-jetbrains-mono), ui-monospace, monospace';
 
 export default function TopNav(p: Props) {
   const pathname = usePathname();
@@ -31,10 +37,10 @@ export default function TopNav(p: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Close menus on route change
-  useState(() => {
+  useEffect(() => {
     setUserMenuOpen(false);
     setMobileMenuOpen(false);
-  });
+  }, [pathname]);
 
   const active = (path: string) => {
     if (path === '/') return pathname === '/';
@@ -45,85 +51,78 @@ export default function TopNav(p: Props) {
     <Link
       key={item.to}
       href={item.to}
+      className="an-link"
+      aria-current={active(item.to) ? 'page' : undefined}
       style={{
-        display: 'inline-flex', alignItems: 'center', gap: 7,
-        padding: '7px 12px', borderRadius: 8,
-        textDecoration: 'none', fontSize: '0.875rem',
-        fontWeight: active(item.to) ? 600 : 500,
+        display: 'inline-flex', alignItems: 'center',
+        padding: '8px 12px',
+        textDecoration: 'none', fontSize: 14,
+        fontWeight: 500,
         color: active(item.to) ? 'var(--ink)' : 'var(--ink-muted)',
-        background: active(item.to) ? 'var(--paper-2)' : 'transparent',
-        transition: 'all 160ms ease',
       }}
-      onMouseEnter={e => { if (!active(item.to)) (e.currentTarget as HTMLElement).style.background = 'var(--paper-2)'; }}
-      onMouseLeave={e => { if (!active(item.to)) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
     >
-      <span style={{ color: active(item.to) ? 'var(--accent)' : 'var(--ink-faint)', display: 'flex' }}>{item.icon}</span>
-      <span style={{ display: p.isCompact ? 'none' : 'inline' }}>{item.label}</span>
+      {p.isCompact ? <span style={{ display: 'flex' }} title={item.label}>{item.icon}</span> : item.label}
     </Link>
   );
 
   return (
-    <header style={{
+    <header className="an-nav" style={{
       position: 'sticky', top: 0, zIndex: Z.nav,
       background: 'var(--glass-bg)',
-      backdropFilter: 'saturate(180%) blur(20px)',
-      WebkitBackdropFilter: 'saturate(180%) blur(20px)',
+      backdropFilter: 'saturate(190%) blur(26px)',
+      WebkitBackdropFilter: 'saturate(190%) blur(26px)',
       borderBottom: '1px solid var(--border)',
+      paddingTop: 'env(safe-area-inset-top)',
     }}>
       <div style={{
-        maxWidth: 1280, margin: '0 auto',
-        padding: p.isMobile ? '10px 16px' : '12px 24px',
-        display: 'flex', alignItems: 'center', gap: 16,
-        minHeight: p.isMobile ? 56 : 60,
+        maxWidth: 1440, margin: '0 auto',
+        padding: p.isMobile ? '8px 16px' : '10px var(--margin-page)',
+        display: 'flex', alignItems: 'center', gap: 12,
+        minHeight: p.isMobile ? 56 : 64,
       }}>
         <Link href="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
           <BrandLogo size={p.isMobile ? 'sm' : 'md'} />
         </Link>
 
         {!p.isMobile && (
-          <nav style={{ display: 'flex', alignItems: 'center', gap: 2, marginLeft: 16 }}>
+          <nav aria-label="Primary" style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 20 }}>
             {p.navItems.map(renderNavLink)}
           </nav>
         )}
 
         <div style={{ flex: 1 }} />
 
-        {/* Quick stat — desktop only, logged in */}
+        {/* Quick stat — desktop only, logged in. A mono figure, not a badge. */}
         {!p.isMobile && p.currentUser && (
           <Link
             href="/progress"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              padding: '6px 12px', borderRadius: 8, textDecoration: 'none',
-              background: 'var(--paper-2)', border: '1px solid var(--border)',
-            }}
+            className="an-util"
             title="View progress"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 10,
+              height: 36, padding: '0 12px', borderRadius: 8, textDecoration: 'none',
+              border: '1px solid var(--border)', color: 'var(--ink-muted)',
+              fontFamily: MONO, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase',
+            }}
           >
-            <span style={{
-              width: 22, height: 22, borderRadius: 6,
-              background: p.todayCount > 0 ? 'var(--accent)' : 'var(--paper-3)',
-              color: p.todayCount > 0 ? 'var(--text-on-accent)' : 'var(--ink-muted)',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '0.72rem', fontWeight: 700,
-            }}>{p.todayCount}</span>
-            <span style={{ fontSize: '0.78rem', color: 'var(--ink-muted)' }}>today</span>
+            <span style={{ color: p.todayCount > 0 ? 'var(--ink)' : 'var(--ink-muted)', fontWeight: 600 }}>{p.todayCount}</span>
+            <span>today</span>
             {p.streak > 0 && (
               <>
                 <span style={{ width: 1, height: 14, background: 'var(--border)' }} />
-                <span style={{ fontSize: '0.78rem', color: 'var(--warning)', fontWeight: 600 }}>{p.streak}d streak</span>
+                <span style={{ color: 'var(--warning)' }}>{p.streak}d streak</span>
               </>
             )}
           </Link>
         )}
 
         <button
+          className="an-util"
           onClick={p.onToggleTheme}
           aria-label={p.themeMode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          style={utilityBtn}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--paper-2)'; (e.currentTarget as HTMLElement).style.color = 'var(--ink)'; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--ink-muted)'; }}
+          style={{ ...utilityBtn, width: 36, height: 36, borderRadius: 8 }}
         >
-          {p.themeMode === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+          {p.themeMode === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
         </button>
 
         {p.currentUser ? (
@@ -136,20 +135,30 @@ export default function TopNav(p: Props) {
             onLogout={p.onLogout}
           />
         ) : (
-          <Link href="/login" style={{
-            display: 'inline-flex', alignItems: 'center',
-            padding: '8px 16px', borderRadius: 10,
-            fontSize: '0.875rem', fontWeight: 500,
-            background: 'var(--ink)', color: 'var(--paper)',
-            textDecoration: 'none', whiteSpace: 'nowrap',
-          }}>Sign in</Link>
+          <>
+            {!p.isMobile && (
+              <Link href="/hire" className="an-link" style={{
+                display: 'inline-flex', alignItems: 'center', padding: '8px 12px',
+                fontSize: 14, fontWeight: 500, color: 'var(--ink-muted)', textDecoration: 'none', whiteSpace: 'nowrap',
+              }}>Post a job</Link>
+            )}
+            <Link href="/login" className="an-solid" style={{
+              display: 'inline-flex', alignItems: 'center',
+              height: 36, padding: '0 16px', borderRadius: 8,
+              fontSize: 14, fontWeight: 500,
+              background: 'var(--ink)', color: 'var(--paper)',
+              textDecoration: 'none', whiteSpace: 'nowrap',
+            }}>Sign in</Link>
+          </>
         )}
 
         {p.isMobile && p.currentUser && (
           <button
+            className="an-util"
             onClick={() => setMobileMenuOpen(v => !v)}
             aria-label="Open menu"
-            style={utilityBtn}
+            aria-expanded={mobileMenuOpen}
+            style={{ ...utilityBtn, width: 36, height: 36, borderRadius: 8 }}
           >
             {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
           </button>

@@ -13,11 +13,12 @@ import KpiTile from './analytics/parts/KpiTile';
 import SparklineCard from './analytics/parts/SparklineCard';
 import SystemStatusStrip from './parts/SystemStatusStrip';
 import { deltaWording } from './parts/mission-format';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 
 const POLL_INTERVAL_MS = 60_000;
 
 const SECTION_TITLE = {
-  margin: '0 0 10px', fontSize: '0.95rem', fontWeight: 600, color: 'var(--ink)',
+  margin: '0 0 10px', fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)',
 } as const;
 
 /** Movement stated as arrow + word, never colour alone. */
@@ -71,12 +72,7 @@ export default function MissionControlClient() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div>
-        <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--ink)' }}>Mission Control</h1>
-        <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: 'var(--ink-muted)' }}>
-          Platform health at a glance. Refreshes every 60s.
-        </p>
-      </div>
+      <AdminPageHeader title="Mission Control" subtitle="Platform health at a glance. Refreshes every 60s." />
 
       {error && !payload && (
         <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
@@ -98,16 +94,15 @@ export default function MissionControlClient() {
       {payload && overview && totals && (
         <>
           <section style={{
-            background: 'var(--surface)', border: '1px solid var(--border)',
+            background: 'var(--glass-card)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', boxShadow: 'inset 0 1px 0 var(--glass-sheen), var(--shadow-sm)', border: '1px solid var(--border)',
             borderRadius: 12, padding: '18px 20px',
           }}>
             <div style={{
-              fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.04em',
-              textTransform: 'uppercase', color: 'var(--ink-faint)',
+              fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 10, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)',
             }}>
               Applications this week
             </div>
-            <div style={{ fontSize: '2.6rem', fontWeight: 700, color: 'var(--ink)', lineHeight: 1.05, marginTop: 4 }}>
+            <div style={{ fontFamily: 'var(--font-instrument-serif), var(--font-source-serif), Georgia, serif', fontSize: 'clamp(2.4rem, 5vw, 3.4rem)', fontWeight: 400, letterSpacing: '-0.04em', color: 'var(--ink)', lineHeight: 1, marginTop: 8 }}>
               {overview.newApplications.thisWeek.toLocaleString()}
             </div>
             <div style={{ marginTop: 6 }}>

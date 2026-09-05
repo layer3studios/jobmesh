@@ -9,7 +9,7 @@ import type { InterviewMode, PhoneCallDirection } from '@/types/employer-intervi
 import type { AddTimesForm } from './useAddTimesForm';
 
 const INPUT_STYLE = {
-  width: '100%', padding: '5px 8px', border: '0.5px solid var(--border)', borderRadius: 8,
+  width: '100%', padding: '5px 8px', border: '1px solid var(--border)', borderRadius: 8,
   fontSize: 12, background: 'var(--surface-raised)', color: 'var(--ink)', boxSizing: 'border-box' as const,
 };
 const LABEL_STYLE = { display: 'block', fontSize: 11, color: 'var(--ink-2)', marginBottom: 3 } as const;
@@ -32,7 +32,7 @@ function Pill({ label, selected, onSelect, children }: {
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 999,
         fontSize: 11, cursor: 'pointer', fontFamily: 'inherit',
-        border: `0.5px solid ${selected ? 'var(--accent)' : 'var(--border)'}`,
+        border: `1px solid ${selected ? 'var(--accent)' : 'var(--border)'}`,
         background: selected ? 'var(--accent)' : 'transparent',
         color: selected ? 'var(--text-on-accent)' : 'var(--ink-2)',
         fontWeight: selected ? 600 : 400,

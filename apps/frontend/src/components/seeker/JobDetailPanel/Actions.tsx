@@ -1,5 +1,7 @@
 'use client';
 // FILE: src/components/seeker/JobDetailPanel/Actions.tsx
+// Apply (solid) · Mark applied (ghost) · Save (ghost). The bookmark note
+// editor and the saved-note strip live below on hairline surfaces.
 import { useState, useEffect } from 'react';
 import { CheckCircle2, ExternalLink, X as XIcon, Bookmark, BookmarkCheck } from 'lucide-react';
 import type { IJob } from '../../../types';
@@ -27,7 +29,7 @@ export default function Actions({
 
   return (
     <>
-      <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 8, marginTop: 18, flexWrap: 'wrap' }}>
         <Button
           as="a"
           href={job.DirectApplyURL || job.ApplicationURL}
@@ -35,9 +37,9 @@ export default function Actions({
           rel="noopener noreferrer"
           variant="primary"
           size="md"
-          style={{ flex: mobileMode ? 1 : undefined, minWidth: 130 }}
+          style={{ flex: mobileMode ? 1 : undefined, minWidth: 150 }}
         >
-          <ExternalLink size={14} /> Apply now
+          Apply at {job.Company} <ExternalLink size={13} />
         </Button>
         <Button
           variant={isApplied ? 'success' : 'ghost'}
@@ -51,20 +53,18 @@ export default function Actions({
           size="md"
           onClick={() => { if (isComeBack && onRemoveComeBack) onRemoveComeBack(job._id); else setComeBackInput(true); }}
           title={isComeBack ? 'Remove bookmark' : 'Save for later'}
+          aria-label={isComeBack ? 'Remove bookmark' : 'Save for later'}
         >
           {isComeBack ? <BookmarkCheck size={14} /> : <Bookmark size={14} />}
-          {isComeBack ? 'Saved' : 'Save'}
         </Button>
       </div>
 
       {comeBackInput && (
         <div style={{
-          marginTop: 12, padding: '10px 12px',
-          background: 'var(--paper-2)',
-          border: '1px solid var(--border)',
-          borderRadius: 10,
+          marginTop: 12, padding: '12px 14px',
+          background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12,
         }}>
-          <label style={{ fontSize: '0.78rem', color: 'var(--ink-muted)', marginBottom: 6, display: 'block' }}>
+          <label style={{ fontSize: 13, color: 'var(--ink-muted)', marginBottom: 6, display: 'block' }}>
             Add a note (optional)
           </label>
           <textarea
@@ -75,10 +75,10 @@ export default function Actions({
             rows={2}
             style={{
               width: '100%', padding: '8px 10px',
-              fontSize: '0.85rem', fontFamily: 'inherit',
+              fontSize: 14, fontFamily: 'inherit',
               border: '1px solid var(--border-strong)',
               borderRadius: 8, resize: 'vertical', minHeight: 50,
-              background: 'var(--surface)', color: 'var(--ink)',
+              background: 'var(--paper)', color: 'var(--ink)',
             }}
           />
           <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
@@ -95,17 +95,19 @@ export default function Actions({
 
       {isComeBack && note && !comeBackInput && (
         <div style={{
-          marginTop: 12, padding: '8px 12px',
-          background: 'var(--warning-soft)', color: 'var(--warning)',
-          borderRadius: 8, fontSize: '0.85rem',
+          marginTop: 12, padding: '10px 12px',
+          border: '1px solid var(--border)', borderLeft: '3px solid var(--warning)',
+          borderRadius: 8, fontSize: 14, color: 'var(--ink-2)',
           display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8,
         }}>
-          <span style={{ flex: 1 }}>📝 {note}</span>
+          <span style={{ flex: 1 }}>{note}</span>
           {onRemoveComeBack && (
             <button
+              className="jb-icon-btn"
               onClick={() => onRemoveComeBack(job._id)}
-              style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: 2 }}
+              style={{ background: 'none', border: 'none', color: 'var(--ink-muted)', cursor: 'pointer', padding: 2, borderRadius: 4 }}
               title="Remove"
+              aria-label="Remove note"
             ><XIcon size={12} /></button>
           )}
         </div>

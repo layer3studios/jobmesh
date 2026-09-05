@@ -1,5 +1,8 @@
 // FILE: src/components/BrandLogo.tsx
-// Minimal monogram + wordmark. Notion-style: small icon, refined typography.
+// Monogram + wordmark for the app chrome. The mark is the landing's BrandMark
+// (inline SVG in currentColor), so it sits in ink on both themes; the wordmark
+// is the body face, set tight, as on the landing nav.
+import BrandMark from './BrandMark';
 
 interface BrandLogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -12,18 +15,6 @@ const SIZES = {
   lg: { svg: 36, text: '1.5rem', gap: 10 },
 } as const;
 
-function Mark({ size }: { size: number }) {
-  return (
-    <img
-      src="/logo.jpg"
-      alt="Jobmesh"
-      width={size}
-      height={size}
-      style={{ flexShrink: 0, display: 'block', borderRadius: 7, objectFit: 'contain' }}
-    />
-  );
-}
-
 export default function BrandLogo({ size = 'md', compact = false }: BrandLogoProps) {
   const s = SIZES[size];
   return (
@@ -34,15 +25,15 @@ export default function BrandLogo({ size = 'md', compact = false }: BrandLogoPro
       lineHeight: 1,
       userSelect: 'none',
     }}>
-      <Mark size={s.svg} />
+      <span style={{ color: 'var(--ink)', display: 'flex' }}><BrandMark size={s.svg} /></span>
       <span style={{
-        fontFamily: 'var(--font-serif)',
+        fontFamily: 'inherit',
         fontSize: s.text,
         fontWeight: 600,
         letterSpacing: '-0.02em',
         color: 'var(--ink)',
       }}>
-        {compact ? 'Job' : (<>Job<span style={{ color: 'var(--accent)' }}>mesh</span></>)}
+        {compact ? 'Job' : 'JobMesh'}
       </span>
     </span>
   );

@@ -28,7 +28,7 @@ export default function AvailabilityDayRow({ row, disabled, onChange }: {
   const span = spanPercent(row);
 
   return (
-    <div style={{ padding: '10px 0', borderBottom: '0.5px solid var(--border)' }}>
+    <div style={{ padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         {/* Fixed width so all seven switches and labels line up into a column
             rather than stepping in and out with the length of the day name. */}

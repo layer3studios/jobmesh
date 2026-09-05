@@ -19,7 +19,7 @@ function PillToggle({ label, selected, onSelect }: { label: string; selected: bo
       type="button" aria-pressed={selected} onClick={onSelect}
       style={{
         padding: '4px 12px', borderRadius: 999, fontSize: 12, cursor: 'pointer',
-        border: selected ? '0.5px solid var(--accent)' : '0.5px solid var(--border)',
+        border: selected ? '1px solid var(--accent)' : '1px solid var(--border)',
         background: selected ? 'var(--accent)' : 'transparent',
         color: selected ? 'var(--text-on-accent)' : 'var(--ink)',
         fontWeight: selected ? 600 : 400,

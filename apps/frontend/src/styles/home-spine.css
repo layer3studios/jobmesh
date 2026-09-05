@@ -1,0 +1,104 @@
+/* FILE: src/styles/home-spine.css
+   "What happens inside the mesh" — one continuous hairline down the centre of
+   the page with six beats alternating left and right of it. Copy on one side,
+   a hairline-only data illustration on the other. All illustrations are
+   monochrome: 1px tracks, 2px white fills, greyscale cells. No chart library. */
+
+/* Sits on the third ink photograph (InkImage inside), so it isolates and
+   lifts its title and rail above the image + veil. */
+.hm-spine { position: relative; overflow: hidden; isolation: isolate; padding-top: var(--s-9); padding-bottom: var(--s-8); }
+.hm-spine__title {
+  position: relative; z-index: 2;
+  margin: 0 0 var(--s-8); text-align: center;
+  font-size: var(--t-title); letter-spacing: -0.01em; color: var(--ink);
+}
+
+/* The spine itself: a hairline that fades in at the top and out at the bottom. */
+.hm-spine__rail { position: relative; z-index: 2; max-width: 1100px; margin: 0 auto; }
+.hm-spine__rail::before {
+  content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px;
+  background: linear-gradient(to bottom, transparent, var(--border-strong) 8%, var(--border-strong) 92%, transparent);
+}
+
+/* Each beat is a two-column grid; `--flip` swaps which side carries the copy. */
+.hm-beat {
+  position: relative; display: grid; grid-template-columns: 1fr 1fr; align-items: center;
+  min-height: 300px; padding: 40px 0;
+}
+.hm-beat__copy { padding: 0 64px 0 40px; }
+.hm-beat__visual { padding: 0 40px 0 64px; }
+.hm-beat--flip .hm-beat__copy { grid-column: 2; grid-row: 1; padding: 0 40px 0 64px; }
+.hm-beat--flip .hm-beat__visual { grid-column: 1; grid-row: 1; padding: 0 64px 0 40px; }
+
+/* A tick on the rail marks where each beat sits. */
+.hm-beat::before {
+  content: ''; position: absolute; left: 50%; top: 50%; width: 7px; height: 7px;
+  margin: -3.5px 0 0 -3.5px; border-radius: 50%;
+  background: var(--paper); border: 1px solid var(--ink-2);
+}
+
+.hm-beat__eyebrow { margin-bottom: 14px; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--ink-muted); }
+.hm-beat__title { margin-bottom: 12px; font-size: 21px; font-weight: 500; letter-spacing: -0.02em; color: var(--ink); }
+.hm-beat__body { font-size: 15px; line-height: 1.6; color: var(--ink-muted); max-width: 40ch; }
+
+/* ── Illustrations ──────────────────────────────────────────────────── */
+.hm-viz { width: 100%; max-width: 420px; }
+.hm-beat--flip .hm-viz { margin-left: auto; }
+.hm-viz__head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; }
+.hm-viz__label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--ink-2); }
+.hm-viz__big { font-size: 40px; font-weight: 400; line-height: 1; letter-spacing: -0.03em; color: var(--ink); }
+
+/* Score bars: label left, value right, 1px track, 2px fill. */
+.hm-bar { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.hm-bar:last-child { border-bottom: none; }
+.hm-bar__label { font-size: 11.5px; color: var(--ink-2); }
+.hm-bar__value { font-size: 11.5px; color: var(--ink); }
+.hm-bar__track { grid-column: 1 / -1; height: 2px; background: var(--border); position: relative; overflow: hidden; }
+.hm-bar__fill { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; background: var(--ink); transform-origin: left; transform: scaleX(var(--v)); }
+
+/* Salary bands: P25 / P50 / P75 with the value in rupees. */
+.hm-band { display: grid; grid-template-columns: 36px 1fr auto; align-items: center; gap: 14px; padding: 10px 0; }
+.hm-band__p { font-size: 11px; color: var(--ink-muted); }
+.hm-band__track { height: 2px; background: var(--border); position: relative; }
+.hm-band__fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink); width: var(--v); }
+.hm-band__v { font-size: 12.5px; color: var(--ink); }
+.hm-band--mid .hm-band__v { font-weight: 600; }
+
+/* Commit grid: greyscale cells, one white. */
+.hm-cells { display: grid; grid-template-columns: repeat(12, 1fr); gap: 5px; }
+.hm-cell { aspect-ratio: 1; border-radius: 3px; border: 1px solid var(--border); background: rgba(255, 255, 255, var(--a, 0)); }
+
+/* Ranked list: initials disc, name, hairline bar, score. */
+.hm-rank { display: grid; grid-template-columns: 36px 1fr auto; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+.hm-rank:last-child { border-bottom: none; }
+.hm-rank__avatar { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border-strong); display: grid; place-items: center; font-size: 10.5px; color: var(--ink-2); }
+.hm-rank__name { font-size: 13.5px; color: var(--ink); margin-bottom: 7px; }
+.hm-rank__track { height: 2px; background: var(--border); position: relative; }
+.hm-rank__fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink); width: var(--v); }
+.hm-rank__score { font-size: 14px; font-weight: 600; color: var(--ink); align-self: start; }
+
+/* Pipeline: stage header in mono, candidate chips. */
+.hm-stage { padding: 14px 0; border-bottom: 1px solid var(--border); }
+.hm-stage:last-child { border-bottom: none; }
+.hm-stage__head { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-2); }
+.hm-stage__chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.hm-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid var(--border-strong); border-radius: 999px; font-size: 11px; color: var(--ink); }
+.hm-chip::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--ink); }
+.hm-chip--white { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.hm-chip--white::before { background: var(--paper); }
+
+/* Availability: M–F columns, 4 rows, one cell chosen. */
+.hm-days { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.hm-days__h { text-align: center; font-size: 10.5px; letter-spacing: 0.1em; color: var(--ink-muted); padding-bottom: 6px; }
+.hm-slot { aspect-ratio: 1.15; border-radius: 6px; border: 1px solid var(--border); background: rgba(255, 255, 255, var(--a, 0)); }
+.hm-slot--on { background: var(--ink); border-color: var(--ink); }
+
+@media (max-width: 899px) {
+  .hm-spine { padding-top: 72px; }
+  .hm-spine__rail::before { left: 0; }
+  .hm-beat, .hm-beat--flip { grid-template-columns: 1fr; min-height: 0; padding: 28px 0 28px 28px; }
+  .hm-beat__copy, .hm-beat__visual, .hm-beat--flip .hm-beat__copy, .hm-beat--flip .hm-beat__visual { grid-column: 1; grid-row: auto; padding: 0; }
+  .hm-beat__visual { margin-top: 24px; }
+  .hm-beat--flip .hm-viz { margin-left: 0; }
+  .hm-beat::before { left: 0; top: 34px; }
+}

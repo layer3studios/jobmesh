@@ -1,0 +1,59 @@
+/* FILE: src/styles/home-nav.css
+   The landing pages' chrome: the sticky glass nav and the footer links.
+   Interaction states for .hm-nav__link live in home-controls.css.
+
+   iPHONE: the nav pads itself by env(safe-area-inset-top), so under the
+   dynamic island / notch (viewport-fit=cover, standalone or landscape) the
+   brand and links start below the sensor housing rather than under it. On a
+   normal browser tab the inset is 0 and nothing changes. */
+
+.hm-nav {
+  position: sticky; top: 0; z-index: var(--z-nav);
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px);
+  background: rgba(9, 9, 11, 0.55);
+  backdrop-filter: saturate(160%) blur(22px); -webkit-backdrop-filter: saturate(160%) blur(22px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.03);
+}
+.hm-nav__inner {
+  display: flex; align-items: center; gap: var(--s-6); height: 68px;
+  max-width: var(--measure); margin: 0 auto; padding: 0 var(--s-5);
+}
+.hm-nav__brand { display: inline-flex; align-items: center; gap: var(--s-3); text-decoration: none; color: var(--ink); flex-shrink: 0; }
+.hm-nav__word { font-size: 13px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; }
+.hm-nav__links { display: flex; align-items: center; gap: var(--s-6); margin-left: var(--s-5); }
+.hm-nav__spacer { flex: 1; }
+.hm-nav__signin {
+  font-size: var(--t-label); text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--ink-muted); text-decoration: none;
+  transition: color var(--m-base) var(--ease);
+}
+.hm-nav__signin:hover { color: var(--ink); }
+.hm-nav__signin:active { color: var(--ink-2); }
+.hm-nav__signin:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; border-radius: var(--r-sm); }
+
+/* Phones: the links stay — they are the way between the four landing pages —
+   in a tighter row that scrolls sideways if it must; "Sign in" folds into
+   the Get started pill's neighbourhood by hiding, as the pill covers it. */
+@media (max-width: 767px) {
+  .hm-nav__inner { height: 58px; gap: var(--s-3); padding: 0 var(--s-4); }
+  .hm-nav__word { display: none; }
+  .hm-nav__links { gap: var(--s-4); margin-left: var(--s-1); overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .hm-nav__links::-webkit-scrollbar { display: none; }
+  .hm-nav__link { white-space: nowrap; font-size: 10.5px; }
+  .hm-nav__signin { display: none; }
+  .hm-nav .hm-pill--sm { height: 34px; padding: 0 14px; font-size: 12.5px; }
+}
+
+/* Footer links: same five states as every other quiet link. */
+.hm-footer__link {
+  font-size: var(--t-label-sm); text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--ink-muted); text-decoration: none;
+  background: none; border: none; padding: 0; cursor: pointer;
+  transition: color var(--m-base) var(--ease);
+}
+.hm-footer__link:hover { color: var(--ink); }
+.hm-footer__link:active { color: var(--ink-2); }
+.hm-footer__link:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: var(--r-sm); }
+.hm-footer__link[aria-disabled="true"] { opacity: 0.38; cursor: not-allowed; pointer-events: none; }

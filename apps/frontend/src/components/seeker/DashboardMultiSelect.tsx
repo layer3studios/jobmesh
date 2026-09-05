@@ -1,14 +1,14 @@
 'use client';
 // FILE: src/components/seeker/DashboardMultiSelect.tsx
-// A checkbox dropdown for one filter facet (role, experience, workplace). Split out
-// of DashboardFilterBar.tsx (naming conventions section 2).
-
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import { Z } from '@/theme/tokens';
+// Multi-select filter (Experience, Work mode): chip trigger + portalled panel
+// of Checkbox primitives. Native checkboxes are never rendered visibly — the
+// primitive owns the box, so both themes read from tokens.
+import { useCallback, useRef, useState, type CSSProperties } from 'react';
+import { Checkbox } from '../ui/Checkbox';
+import { FilterPanel, FilterTrigger } from './FilterPanel';
 
 interface Option { value: string; label: string; }
 
-/** Dense LinkedIn-style multi-select: trigger button + checkbox popover. */
 export function MultiSelectDropdown({ label, options, selected, onChange, baseStyle }: {
   label: string;
   options: Option[];
@@ -17,73 +17,44 @@ export function MultiSelectDropdown({ label, options, selected, onChange, baseSt
   baseStyle: CSSProperties;
 }) {
   const [open, setOpen] = useState(false);
-  const wrapRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onDocClick = (e: MouseEvent) => {
-      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener('mousedown', onDocClick);
-    return () => document.removeEventListener('mousedown', onDocClick);
-  }, [open]);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const close = useCallback(() => setOpen(false), []);
 
   const toggle = (value: string) =>
     onChange(selected.includes(value) ? selected.filter(v => v !== value) : [...selected, value]);
   const active = selected.length > 0;
 
   return (
-    <div ref={wrapRef} style={{ position: 'relative' }}>
-      <button
+    <>
+      <FilterTrigger
+        label={active ? `${label} · ${selected.length}` : label}
+        active={active}
+        open={open}
         onClick={() => setOpen(o => !o)}
-        aria-expanded={open}
-        style={{
-          ...baseStyle,
-          fontWeight: active ? 600 : 400,
-          borderColor: active ? 'var(--accent)' : 'var(--border-strong)',
-          color: active ? 'var(--accent)' : 'var(--ink)',
-        }}
-      >
-        {label}{active ? ` · ${selected.length}` : ''}
-      </button>
-      {open && (
-        <div style={{
-          position: 'absolute', top: 'calc(100% + 4px)', left: 0, zIndex: Z.dropdown,
-          minWidth: 190, background: 'var(--surface)',
-          border: '1px solid var(--border-strong)', borderRadius: 10,
-          boxShadow: 'var(--shadow-md)', padding: 6,
-        }}>
+        baseStyle={baseStyle}
+        triggerRef={triggerRef}
+      />
+      <FilterPanel open={open} onClose={close} anchorRef={triggerRef} minWidth={200}>
+        <div role="group" aria-label={label}>
           {options.map(o => (
-            <label
-              key={o.value}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                padding: '6px 8px', borderRadius: 7, cursor: 'pointer',
-                fontSize: '0.82rem', color: 'var(--ink)',
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={selected.includes(o.value)}
-                onChange={() => toggle(o.value)}
-                style={{ accentColor: 'var(--accent)', cursor: 'pointer' }}
-              />
-              {o.label}
-            </label>
+            <div key={o.value} className="jb-option" style={{ padding: '6px 10px', borderRadius: 7, fontSize: '0.82rem' }}>
+              <Checkbox label={o.label} checked={selected.includes(o.value)} onChange={() => toggle(o.value)} compact />
+            </div>
           ))}
-          {active && (
-            <button
-              onClick={() => onChange([])}
-              style={{
-                width: '100%', marginTop: 4, padding: '6px 8px',
-                background: 'transparent', border: 'none', borderTop: '1px solid var(--border)',
-                color: 'var(--ink-muted)', fontSize: '0.78rem', cursor: 'pointer',
-                fontFamily: 'inherit', textAlign: 'left',
-              }}
-            >Clear</button>
-          )}
         </div>
-      )}
-    </div>
+        {active && (
+          <button
+            type="button"
+            onClick={() => onChange([])}
+            style={{
+              width: '100%', marginTop: 4, padding: '7px 10px',
+              background: 'transparent', border: 'none', borderTop: '1px solid var(--border-hairline)',
+              color: 'var(--ink-muted)', fontSize: '0.78rem', cursor: 'pointer',
+              fontFamily: 'inherit', textAlign: 'left',
+            }}
+          >Clear</button>
+        )}
+      </FilterPanel>
+    </>
   );
 }

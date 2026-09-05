@@ -22,7 +22,7 @@ import type { EmployerAssignment, AssignmentUsage } from '@/types/employer-assig
 const C = COPY.employer.assignments;
 
 const cell: React.CSSProperties = { padding: '10px 12px', textAlign: 'left', verticalAlign: 'middle', fontSize: '0.875rem', color: 'var(--ink)' };
-const headCell: React.CSSProperties = { ...cell, fontSize: '0.75rem', fontWeight: 600, color: 'var(--ink-muted)', background: 'var(--surface-sunken)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' };
+const headCell: React.CSSProperties = { ...cell, fontSize: '0.75rem', fontWeight: 600, color: 'var(--ink-muted)', background: 'var(--glass-strong)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' };
 
 interface Props {
   assignments: EmployerAssignment[];

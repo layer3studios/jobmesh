@@ -36,8 +36,12 @@ export interface TimezoneGroup { label: string; zones: string[] }
  * otherwise a <select> whose value is unknown renders blank, and the user's saved
  * timezone would look like it had been lost.
  */
-export function buildTimezoneGroups(current: string): TimezoneGroup[] {
-  const zones = allZones();
+export function buildTimezoneGroups(current: string, { full = true }: { full?: boolean } = {}): TimezoneGroup[] {
+  // `full: false` is the server / pre-hydration render. Node's ICU and the
+  // browser's disagree on the long tail of zone ids (e.g. America/Coyhaique),
+  // so listing them during SSR guarantees a hydration mismatch; the pinned
+  // group is identical everywhere.
+  const zones = full ? allZones() : [];
   const pinned = PINNED_ZONES.filter((zone) => zones.length === 0 || zones.includes(zone));
   if (current && !pinned.includes(current) && !zones.includes(current)) pinned.push(current);
 

@@ -14,11 +14,12 @@ import { useToast } from '@/components/ui';
 import { fetchSeo, retryIndexingJob, submitPosting } from '@/api/admin-seo-api';
 import type { SeoPayload } from '@/types/admin-seo';
 import { SchemaHealthPanel, QuotaBar, FailuresTable, StaleUrlsTable } from './parts/SeoPanels';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 
 const POLL_INTERVAL_MS = 60_000;
 
 const SECTION_TITLE = {
-  margin: '0 0 10px', fontSize: '0.95rem', fontWeight: 600, color: 'var(--ink)',
+  margin: '0 0 10px', fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)',
 } as const;
 
 function Skeletons() {
@@ -86,12 +87,7 @@ export default function SeoClient() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div>
-        <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--ink)' }}>SEO &amp; Indexing</h1>
-        <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: 'var(--ink-muted)' }}>
-          Job-page schema health and Google Indexing API submissions. Refreshes every 60s.
-        </p>
-      </div>
+      <AdminPageHeader title={<>SEO &amp; Indexing</>} subtitle="Job-page schema health and Google Indexing API submissions. Refreshes every 60s." />
 
       {data && !data.configured && (
         <div role="status" style={{

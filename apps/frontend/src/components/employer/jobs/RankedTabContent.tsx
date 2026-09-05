@@ -60,7 +60,7 @@ export default function RankedTabContent(p: RankedTabContentProps) {
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', width: '100%' }}>
       {!p.isNarrow && (
-        <aside className="panel-scroll" style={{ width: 240, flexShrink: 0, paddingRight: 16, borderRight: '0.5px solid var(--border)', position: 'sticky', top: 8, maxHeight: 'calc(100vh - 140px)', overflowY: 'auto' }}>
+        <aside className="panel-scroll" style={{ width: 240, flexShrink: 0, paddingRight: 16, borderRight: '1px solid var(--border)', position: 'sticky', top: 8, maxHeight: 'calc(100vh - 140px)', overflowY: 'auto' }}>
           {p.sidebar}
         </aside>
       )}

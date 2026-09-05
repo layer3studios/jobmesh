@@ -14,9 +14,13 @@ import {
 import { absoluteUrl } from '../../lib/site-url';
 import { BRAND } from '../../theme/brand';
 import HomeClient from '../../components/seeker/home/HomeClient';
+import { LANDING_VIEWPORT } from '../../components/seeker/home/landing-viewport';
 import type { IJob, ICompany } from '../../types';
 
-export const revalidate = 300; // D_impl_3
+export const revalidate = 300;
+
+// Ink status bar on iOS — see landing-viewport.ts.
+export const viewport = LANDING_VIEWPORT; // D_impl_3
 
 const TITLE = `${BRAND.appName} — ${BRAND.tagline}`;
 const JOBS_SHOWN = 12;
@@ -75,6 +79,8 @@ export default async function HomePage() {
     .slice(0, 3)
     .map(c => c.companyName);
 
+  // Still fetched, still in the JSON-LD ItemList — the crawler wants the
+  // listings even though the landing deliberately does not render a feed.
   const displayJobs = jobs.slice(0, JOBS_SHOWN);
   const displayCompanies = companies.slice(0, COMPANIES_SHOWN);
 
@@ -88,7 +94,6 @@ export default async function HomePage() {
       <JsonLd schema={buildWebSiteSchema()} />
       <JsonLd schema={itemListSchema} />
       <HomeClient
-        jobs={displayJobs}
         companies={displayCompanies}
         jobCount={jobCount}
         companyCount={companyCount}

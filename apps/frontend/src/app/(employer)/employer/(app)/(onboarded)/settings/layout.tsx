@@ -24,9 +24,9 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
   // max-width applies to the combined layout rather than to the content alone —
   // otherwise the sidebar would push the content off-centre on a wide monitor.
   return (
-    <PageShell style={{ display: 'flex', alignItems: 'flex-start' }}>
+    <PageShell style={{ display: 'flex', alignItems: 'flex-start', gap: 32 }}>
       <SettingsSidebar />
-      <div style={{ flex: 1, minWidth: 0, paddingLeft: 24 }}>{children}</div>
+      <div style={{ flex: 1, minWidth: 0 }}>{children}</div>
     </PageShell>
   );
 }

@@ -18,7 +18,7 @@ const ICON_LINK_STYLE = {
 
 /** One prev/next control (PP2/D3): a Link when navigable, a disabled Button at the end. */
 function NavIcon({ href, label, children }: { href: string | null; label: string; children: ReactNode }) {
-  if (href) return <Link href={href} aria-label={label} style={ICON_LINK_STYLE}>{children}</Link>;
+  if (href) return <Link href={href} aria-label={label} className="jb-icon-btn" style={ICON_LINK_STYLE}>{children}</Link>;
   return <Button variant="ghost" size="sm" disabled aria-label={label}>{children}</Button>;
 }
 
@@ -44,10 +44,9 @@ export default function ApplicantStickyHeader({
     <div
       style={{
         flexShrink: 0,
-        background: 'var(--paper)',
         borderBottom: '1px solid var(--border)',
-        padding: '8px 4px',
-        marginBottom: 10,
+        padding: '8px 4px 12px',
+        marginBottom: 12,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -67,7 +66,7 @@ export default function ApplicantStickyHeader({
         {backLabel}
       </Link>
       <div style={{ minWidth: 0, textAlign: 'right', flex: 1 }}>
-        <div style={{ fontWeight: 600, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div className="font-display" style={{ fontSize: 22, fontWeight: 400, letterSpacing: '-0.03em', lineHeight: 1.1, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {candidateName}
         </div>
         {candidateEmail && (

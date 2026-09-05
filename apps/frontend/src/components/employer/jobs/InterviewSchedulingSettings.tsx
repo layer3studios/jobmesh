@@ -119,7 +119,7 @@ export default function InterviewSchedulingSettings({ posting }: { posting: Post
               initialDefaults={defaults}
               onSaved={handleSaved}
             />
-            <div style={{ borderTop: '0.5px solid var(--border)', paddingTop: 14 }}>
+            <div style={{ borderTop: '1px solid var(--border)', paddingTop: 14 }}>
               <InterviewPoolSummary times={times} />
             </div>
           </div>

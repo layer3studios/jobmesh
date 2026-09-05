@@ -1,8 +1,9 @@
 'use client';
 // FILE: settings/SettingsSidebar.tsx
-// Shared settings navigation (all /employer/settings/* pages). Every item is a
-// real page now — nothing is muted or inert. Below 768px the layout swaps this
-// for horizontal tabs.
+// Shared settings navigation (all /employer/settings/* pages): a glass panel
+// with the amber→indigo seam on its right edge, the same frame the seeker
+// workspace sidebar uses. Every item is a real page — nothing is muted or
+// inert. Below 768px the layout swaps this for a chip row.
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -13,6 +14,7 @@ import { COPY } from '@/theme/brand';
 interface SettingsNavItem { label: string; href: string; icon: ReactNode; danger?: boolean }
 
 const SETTINGS_ROOT = '/employer/settings';
+const MONO = 'var(--font-jetbrains-mono), ui-monospace, monospace';
 
 export const SETTINGS_NAV_ITEMS: SettingsNavItem[] = [
   // Personal sits FIRST and above Company: it is the only page here every role can
@@ -33,11 +35,6 @@ export const DANGER_NAV_ITEM: SettingsNavItem = {
   label: COPY.employer.settings.dangerZone, href: `${SETTINGS_ROOT}/danger`, icon: <Trash2 size={14} />, danger: true,
 };
 
-const ITEM_STYLE = {
-  display: 'flex', alignItems: 'center', gap: 8, fontSize: 13,
-  padding: '7px 10px', borderRadius: 8, textDecoration: 'none',
-} as const;
-
 /** Company owns the settings root, so it matches exactly; the rest by prefix. */
 export function isSettingsItemActive(href: string, pathname: string): boolean {
   const path = pathname.length > 1 ? pathname.replace(/\/$/, '') : pathname;
@@ -49,16 +46,19 @@ function NavItem({ item, active, horizontal }: { item: SettingsNavItem; active: 
   return (
     <Link
       href={item.href}
+      className="ws-link"
       aria-current={active ? 'page' : undefined}
       style={{
-        ...ITEM_STYLE,
-        ...(horizontal ? { flexShrink: 0 } : {}),
+        display: 'inline-flex', alignItems: 'center', gap: 9,
+        padding: horizontal ? '7px 12px' : '8px 10px', borderRadius: 8,
+        fontSize: 14, fontWeight: 500, textDecoration: 'none',
+        flexShrink: horizontal ? 0 : undefined,
         background: active ? 'var(--accent-soft)' : 'transparent',
-        color: active ? 'var(--ink)' : item.danger ? 'var(--danger)' : 'var(--ink-2)',
-        fontWeight: active ? 500 : 400,
+        border: horizontal ? '1px solid var(--border)' : '1px solid transparent',
+        color: active ? 'var(--ink)' : item.danger ? 'var(--danger)' : 'var(--ink-muted)',
       }}
     >
-      <span style={{ color: active ? 'var(--accent)' : 'inherit', display: 'inline-flex' }}>{item.icon}</span>
+      <span style={{ display: 'inline-flex', color: active ? 'var(--ink)' : 'inherit' }}>{item.icon}</span>
       {item.label}
     </Link>
   );
@@ -70,7 +70,7 @@ export default function SettingsSidebar({ horizontal = false }: { horizontal?: b
 
   if (horizontal) {
     return (
-      <nav aria-label="Settings" style={{ display: 'flex', gap: 4, overflowX: 'auto', paddingBottom: 8 }}>
+      <nav aria-label="Settings" style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 12, flexWrap: 'wrap' }}>
         {[...SETTINGS_NAV_ITEMS, DANGER_NAV_ITEM].map((item) => (
           <NavItem key={item.label} item={item} active={isActive(item.href)} horizontal />
         ))}
@@ -78,16 +78,19 @@ export default function SettingsSidebar({ horizontal = false }: { horizontal?: b
     );
   }
   return (
-    <nav aria-label="Settings" style={{ width: 200, flexShrink: 0, borderRight: '0.5px solid var(--border)', paddingRight: 12 }}>
-      <p style={{ margin: '0 0 8px', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--ink-faint)' }}>
+    <nav aria-label="Settings" className="glass ws-side" style={{
+      width: 'var(--sidebar-width)', flexShrink: 0, position: 'sticky', top: 88,
+      borderRadius: 14, padding: 16,
+    }}>
+      <p style={{ margin: '4px 0 12px 10px', fontFamily: MONO, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>
         Settings
       </p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {SETTINGS_NAV_ITEMS.map((item) => (
           <NavItem key={item.label} item={item} active={isActive(item.href)} />
         ))}
       </div>
-      <div style={{ borderTop: '0.5px solid var(--border)', margin: '12px 0' }} />
+      <div style={{ borderTop: '1px solid var(--border)', margin: '12px 0' }} />
       <NavItem item={DANGER_NAV_ITEM} active={isActive(DANGER_NAV_ITEM.href)} />
     </nav>
   );

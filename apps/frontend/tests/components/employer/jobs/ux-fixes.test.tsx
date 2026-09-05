@@ -111,7 +111,7 @@ describe('Edit posting layout', () => {
 
   it('shows the live preview beside the form', () => {
     openEdit();
-    expect(screen.getByText('Live preview')).toBeTruthy();
+    expect(screen.getByText(/Live preview/)).toBeTruthy();
     expect(screen.getByText('Save changes')).toBeTruthy();
   });
 

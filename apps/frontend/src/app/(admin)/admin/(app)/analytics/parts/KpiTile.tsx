@@ -11,13 +11,13 @@ export default function KpiTile({ label, value, hint }: Props) {
   const display = typeof value === 'number' ? value.toLocaleString() : value;
   return (
     <div style={{
-      background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12,
+      background: 'var(--glass-card)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', boxShadow: 'inset 0 1px 0 var(--glass-sheen), var(--shadow-sm)', border: '1px solid var(--border)', borderRadius: 12,
       padding: '12px 14px', minWidth: 0,
     }}>
-      <div style={{ fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--ink-faint)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+      <div style={{ fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 10, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
         {label}
       </div>
-      <div style={{ fontSize: '1.7rem', fontWeight: 700, color: 'var(--ink)', marginTop: 4, lineHeight: 1.1 }}>
+      <div style={{ fontFamily: 'var(--font-instrument-serif), var(--font-source-serif), Georgia, serif', fontSize: 30, fontWeight: 400, letterSpacing: '-0.03em', color: 'var(--ink)', marginTop: 6, lineHeight: 1 }}>
         {display}
       </div>
       {hint && <div style={{ fontSize: '0.78rem', color: 'var(--ink-muted)', marginTop: 4 }}>{hint}</div>}

@@ -5,7 +5,6 @@
 // stageId data, canMove gating, transform/opacity) is UNCHANGED from the old
 // card — this is a reskin. Clicking (no drag movement) opens the applicant.
 
-import { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Clock } from 'lucide-react';
@@ -35,7 +34,6 @@ export default function PipelineCard({
     data: { stageId: applicant.application.stageId },
     disabled: !canMove,
   });
-  const [hovered, setHovered] = useState(false);
 
   const { contact } = applicant;
   const score = usableScore(applicant.score);
@@ -53,16 +51,14 @@ export default function PipelineCard({
       className="pipeline-card"
       title={canMove ? undefined : NO_MOVE_TOOLTIP}
       onClick={() => onOpen?.(applicant.application.id)}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       style={{
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: dragging ? 0.5 : 1,
         touchAction: 'none',
-        background: 'var(--surface-sunken)',
-        border: `0.5px solid ${hovered ? 'var(--border-strong)' : 'var(--border)'}`,
-        borderRadius: 8,
+        background: 'var(--glass-card)',
+        border: '1px solid var(--border)',
+        borderRadius: 10,
         padding: '10px 12px',
         cursor: canMove ? (dragging ? 'grabbing' : 'grab') : 'default',
       }}

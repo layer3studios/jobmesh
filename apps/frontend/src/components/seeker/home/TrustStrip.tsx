@@ -1,15 +1,14 @@
 // FILE: src/components/seeker/home/TrustStrip.tsx
-// Section 3 — the credibility strip, aimed as much at employers who land here
-// as at seekers. Deliberately NOT a card: two full-bleed hairlines plus hairline
-// dividers, so it reads as page structure rather than as a widget. The contrast
-// between the weighty number and the tiny wide-tracked label is the whole design.
+// Section 3 — the fast beat after the hero. Not a card: two full-bleed
+// hairlines and hairline dividers, so it reads as page structure. Serif number
+// against a tiny wide-tracked mono label is the whole design.
 import { COPY } from '../../../theme/brand';
 import type { HomeCounts } from './shared';
 
 function Metric({ value, label }: { value: string; label: string }) {
   return (
-    <div className="hm-metric">
-      <div className="font-display hm-metric__value">{value}</div>
+    <div className="hm-metric" data-reveal>
+      <div className="hm-serif hm-metric__value">{value}</div>
       <div className="hm-metric__label hm-mono">{label}</div>
     </div>
   );

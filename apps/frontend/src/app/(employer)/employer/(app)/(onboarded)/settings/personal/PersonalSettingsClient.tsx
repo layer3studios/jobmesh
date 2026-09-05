@@ -101,10 +101,10 @@ export default function PersonalSettingsClient() {
 
         {/* Directly below the timezone it depends on: the hours mean nothing until
             you know which zone they are in, and the warning inside points back up. */}
-        <div style={{ borderTop: '0.5px solid var(--border)' }} />
+        <div style={{ borderTop: '1px solid var(--border)' }} />
         <AvailabilitySection />
 
-        <div style={{ borderTop: '0.5px solid var(--border)' }} />
+        <div style={{ borderTop: '1px solid var(--border)' }} />
         <NotificationSettings
           preferences={employerUser.notificationPreferences}
           onChanged={refreshEmployerSession}

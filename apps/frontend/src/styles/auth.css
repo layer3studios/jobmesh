@@ -1,0 +1,39 @@
+/* FILE: src/styles/auth.css
+   The employer / admin sign-in frame (components/layouts/AuthLayout). A CSS
+   grid so the server can render the split without a viewport hook: two panes
+   from 900px, one centred card over a dim photograph below that. */
+
+.auth-root {
+  min-height: 100dvh; background: var(--paper); position: relative;
+  display: grid; grid-template-columns: 1fr;
+}
+.auth-pane { position: absolute; inset: 0; overflow: hidden; }
+.auth-ink {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  opacity: 0.25; filter: grayscale(1);
+}
+.auth-scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(9,9,11,0.2), rgba(9,9,11,0.75)); }
+.auth-pane__copy { display: none; }
+.auth-card-wrap {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  min-height: 100dvh;
+  padding: max(24px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+}
+.auth-card { width: 100%; max-width: 440px; border-radius: 18px; padding: 28px 22px 24px; box-shadow: var(--shadow-lg); }
+.auth-card__brand { margin-bottom: 22px; }
+
+@media (min-width: 900px) {
+  .auth-root { grid-template-columns: 1.1fr 1fr; }
+  .auth-pane { position: relative; inset: auto; min-height: 100dvh; }
+  .auth-ink { opacity: 0.55; }
+  .auth-pane__copy {
+    position: relative; height: 100%; display: flex; flex-direction: column;
+    justify-content: space-between; padding: 40px; color: #E5E2E1;
+  }
+  /* The pane is always ink, whatever the theme: the wordmark must read on it. */
+  .auth-pane__copy .font-display { color: #E5E2E1; }
+  .auth-pane__copy span { color: #E5E2E1 !important; }
+  .auth-card-wrap { min-height: auto; padding: 40px; }
+  .auth-card { padding: 36px 32px 30px; }
+  .auth-card__brand { display: none; }
+}

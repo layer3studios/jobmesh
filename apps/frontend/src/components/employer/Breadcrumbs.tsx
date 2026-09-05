@@ -1,7 +1,7 @@
 'use client';
 // FILE: src/components/employer/Breadcrumbs.tsx
-// Navigation path shown above page titles (replaces the old "EMPLOYER" label).
-// Every item but the last links to its level; the last is the current page.
+// Navigation path shown above page titles, set as a mono eyebrow. Every item
+// but the last links to its level; the last is the current page.
 //
 // The trail reflects the actual navigation PATH, not just the route hierarchy:
 // when the caller arrived via `?from=dashboard` the root segment becomes
@@ -14,6 +14,8 @@ import { parseNavOrigin, originCrumb } from '@/lib/nav-origin';
 
 export interface BreadcrumbItem { label: string; href?: string }
 
+const MONO = 'var(--font-jetbrains-mono), ui-monospace, monospace';
+
 export default function Breadcrumbs({ items: routeItems }: { items: BreadcrumbItem[] }) {
   const searchParams = useSearchParams();
   const origin = parseNavOrigin(searchParams?.get('from'));
@@ -25,25 +27,22 @@ export default function Breadcrumbs({ items: routeItems }: { items: BreadcrumbIt
 
   if (items.length === 0) return null;
   return (
-    <nav aria-label="Breadcrumb" style={{ marginBottom: 6 }}>
-      <ol style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap', listStyle: 'none', margin: 0, padding: 0, fontSize: 13 }}>
+    <nav aria-label="Breadcrumb" style={{ marginBottom: 8 }}>
+      <ol style={{
+        display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', listStyle: 'none', margin: 0, padding: 0,
+        fontFamily: MONO, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase',
+      }}>
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
           return (
-            <li key={`${item.label}-${index}`} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <li key={`${item.label}-${index}`} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               {index > 0 && <span aria-hidden style={{ color: 'var(--ink-faint)' }}>/</span>}
               {item.href && !isLast ? (
-                <Link
-                  href={item.href}
-                  className="breadcrumb-link"
-                  style={{ color: 'var(--ink-2)', textDecoration: 'none' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.textDecoration = 'underline'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.textDecoration = 'none'; }}
-                >
+                <Link href={item.href} className="eb-crumb" style={{ color: 'var(--ink-muted)', textDecoration: 'none' }}>
                   {item.label}
                 </Link>
               ) : (
-                <span aria-current={isLast ? 'page' : undefined} style={{ color: isLast ? 'var(--ink)' : 'var(--ink-2)' }}>
+                <span aria-current={isLast ? 'page' : undefined} style={{ color: isLast ? 'var(--ink)' : 'var(--ink-muted)' }}>
                   {item.label}
                 </span>
               )}

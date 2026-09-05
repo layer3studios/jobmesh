@@ -67,9 +67,10 @@ export default function RankedFilterSidebar({
           placeholder="Search name or email"
           value={searchDraft}
           onChange={(event) => setSearchDraft(event.target.value)}
+          className="eb-search"
           style={{
-            width: '100%', padding: '6px 8px 6px 26px', border: '0.5px solid var(--border)',
-            borderRadius: 8, fontSize: 13, background: 'var(--surface-raised)', color: 'var(--ink)',
+            width: '100%', padding: '7px 8px 7px 26px', border: '1px solid var(--border)',
+            borderRadius: 8, fontSize: 13, background: 'transparent', color: 'var(--ink)', fontFamily: 'inherit',
           }}
         />
       </div>
@@ -135,7 +136,7 @@ export default function RankedFilterSidebar({
         ))}
       </RankedFilterSection>
 
-      <div style={{ borderTop: '0.5px solid var(--border)', paddingTop: 10, display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <div style={{ borderTop: '1px solid var(--border)', paddingTop: 10, display: 'flex', flexDirection: 'column', gap: 2 }}>
         <FilterOptionRow label="Include archived" checked={value.includeArchived}
           onToggle={() => onChange({ ...value, includeArchived: !value.includeArchived })} />
         <FilterOptionRow label="Has resume" checked={serverValue.hasResume}

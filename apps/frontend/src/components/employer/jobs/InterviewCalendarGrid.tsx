@@ -28,7 +28,7 @@ function MonthNavButton({ label, onClick, children }: {
       className="icon-btn"
       style={{
         width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-        border: '0.5px solid var(--border)', background: 'var(--surface-raised)',
+        border: '1px solid var(--border)', background: 'transparent',
         color: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center',
         cursor: 'pointer', padding: 0,
       }}
@@ -65,8 +65,8 @@ export default function InterviewCalendarGrid({
         <MonthNavButton label="Previous month" onClick={() => onMonthChange(stepMonth(year, month, -1))}>
           <ChevronLeft size={16} />
         </MonthNavButton>
-        <span style={{
-          fontSize: 15, fontWeight: 500, color: 'var(--ink)',
+        <span className="font-display" style={{
+          fontSize: 20, fontWeight: 400, letterSpacing: '-0.02em', color: 'var(--ink)',
           minWidth: MONTH_LABEL_MIN_WIDTH, textAlign: 'center',
         }}>
           {monthLabel(year, month)}
@@ -76,15 +76,15 @@ export default function InterviewCalendarGrid({
         </MonthNavButton>
         <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: 10 }}>
           <LegendDot color="var(--cat-green)" label="available" />
-          <LegendDot color="var(--accent)" label="booked" />
+          <LegendDot color="var(--thread-indigo)" label="booked" />
           <LegendDot color="var(--ink-faint)" label="past" />
         </span>
       </div>
 
-      <div style={{ background: 'var(--surface-sunken)', border: '0.5px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
-        <div role="row" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', background: 'var(--surface-raised)' }}>
+      <div className="glass" style={{ borderRadius: 14, overflow: 'hidden' }}>
+        <div role="row" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: '1px solid var(--border)' }}>
           {WEEKDAY_LABELS.map((label) => (
-            <span key={label} style={{ padding: '6px 0', textAlign: 'center', fontSize: 11, color: 'var(--ink-faint)' }}>{label}</span>
+            <span key={label} style={{ padding: '7px 0', textAlign: 'center', fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>{label}</span>
           ))}
         </div>
         <div data-testid="calendar-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>

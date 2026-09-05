@@ -22,7 +22,7 @@ import {
 const LIST_STYLE = {
   position: 'absolute' as const, top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 30,
   margin: 0, padding: 4, listStyle: 'none', maxHeight: 200, overflowY: 'auto' as const,
-  background: 'var(--surface-raised)', border: '1px solid var(--border)',
+  background: 'var(--glass-card)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', border: '1px solid var(--border)',
   borderRadius: 8, boxShadow: 'var(--shadow-sm)',
 };
 const INITIALS_STYLE = {

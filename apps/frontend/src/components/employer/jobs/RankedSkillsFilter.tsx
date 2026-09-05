@@ -37,7 +37,7 @@ export default function RankedSkillsFilter({
         value={skillSearch}
         onChange={(event) => setSkillSearch(event.target.value)}
         style={{
-          padding: '5px 8px', border: '0.5px solid var(--border)', borderRadius: 6,
+          padding: '5px 8px', border: '1px solid var(--border)', borderRadius: 6,
           fontSize: 12, background: 'var(--surface-raised)', color: 'var(--ink)', marginBottom: 4,
         }}
       />

@@ -33,6 +33,12 @@ export default function SeekerAppShell({ children }: { children: ReactNode }) {
   // Reset scroll on route change so a new page never paints mid-scroll over the old one.
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
 
+  // The guest landing page brings its own nav and footer (monochrome, scoped
+  // tokens — see components/seeker/home/HomeClient). The shared chrome would
+  // paint in the app palette above it, so the shell steps aside on "/".
+  const isLanding = pathname === '/' || pathname === '/hire'
+    || pathname === '/find-work' || pathname === '/companies';
+
   const navItems: NavItem[] = currentUser ? [
     { to: '/jobs', label: 'Jobs', icon: <Briefcase size={18} /> },
     { to: '/today', label: 'Today', icon: <HomeIcon size={18} /> },
@@ -51,9 +57,10 @@ export default function SeekerAppShell({ children }: { children: ReactNode }) {
       minHeight: '100dvh',
       display: 'flex',
       flexDirection: 'column',
-      background: 'var(--paper)',
     }}>
-      <TopNav
+      {/* Ambient washes behind every app page so glass surfaces have depth to blur. */}
+      {!isLanding && <div className="app-ambient" aria-hidden />}
+      {!isLanding && <TopNav
         isMobile={isMobile}
         isCompact={isCompact}
         navItems={navItems}
@@ -64,21 +71,21 @@ export default function SeekerAppShell({ children }: { children: ReactNode }) {
         onToggleTheme={toggle}
         onOpenSkillsEditor={openSkillsEditor}
         onLogout={logout}
-      />
+      />}
 
       <main
-        className={isMobile ? 'has-bottom-nav' : ''}
+        className={isMobile && !isLanding ? 'has-bottom-nav' : ''}
         style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
       >
         {/* key by path forces a clean unmount/remount per route — prevents the
             previous page's nodes from lingering/overlapping during navigation. */}
-        <div key={pathname} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div key={pathname} className={isLanding ? undefined : 'page-enter'} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           {children}
         </div>
       </main>
 
-      {!isMobile && <Footer />}
-      {isMobile && <BottomNav items={navItems} />}
+      {!isLanding && !isMobile && <Footer />}
+      {!isLanding && isMobile && <BottomNav items={navItems} />}
 
       {skillsEditorOpen && <SkillsEditor onClose={closeSkillsEditor} />}
     </div>

@@ -29,8 +29,8 @@ export function BookingPageHeader({
         // eslint-disable-next-line @next/next/no-img-element
         <img src={companyLogoUrl} alt="" width={48} height={48} style={{ borderRadius: 10, objectFit: 'contain' }} />
       )}
-      {companyName && <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, color: 'var(--ink-muted)' }}>{companyName}</p>}
-      <h1 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: 'var(--ink)' }}>{postingTitle ?? 'Interview'}</h1>
+      {companyName && <p style={{ margin: 0, fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>{companyName}</p>}
+      <h1 className="font-display" style={{ margin: 0, fontSize: 'clamp(1.7rem, 4vw, 2.2rem)', fontWeight: 400, letterSpacing: '-0.04em', lineHeight: 1.05, color: 'var(--ink)' }}>{postingTitle ?? 'Interview'}</h1>
     </header>
   );
 }
@@ -64,7 +64,7 @@ function confirmedModeBlock(
       )}
       <a
         href={googleMapsUrl(locationText)} target="_blank" rel="noopener noreferrer"
-        style={{ fontSize: '0.88rem', color: 'var(--accent)' }}
+        className="eb-crumb" style={{ fontSize: '0.88rem', color: 'var(--ink-muted)', textDecoration: 'underline', textUnderlineOffset: 3 }}
       >
         Open in Google Maps
       </a>
@@ -87,11 +87,11 @@ export function ConfirmedState({
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <p style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: 'var(--success)' }}>
+      <p style={{ margin: 0, fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--success)' }}>
         {isReminder ? 'Your interview is already confirmed' : "You're confirmed"} ✓
       </p>
       {startAtUtc && (
-        <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--ink)' }}>{formatInterviewTime(startAtUtc)}</p>
+        <p className="font-display" style={{ margin: 0, fontSize: 'clamp(1.7rem, 4vw, 2.2rem)', fontWeight: 400, letterSpacing: '-0.04em', lineHeight: 1.05, color: 'var(--ink)' }}>{formatInterviewTime(startAtUtc)}</p>
       )}
       <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--ink-2)' }}>{describeInterview(mode, durationMinutes)}</p>
       {confirmedModeBlock(mode, { locationText, phoneCallDirection, phoneNumber, arrivalInstructions })}
@@ -108,7 +108,7 @@ export function ConfirmedState({
 export function ExpiredState({ companyName }: { companyName: string | null }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--ink)' }}>This booking link has expired</h1>
+      <h1 className="font-display" style={{ margin: 0, fontSize: 'clamp(1.7rem, 4vw, 2.2rem)', fontWeight: 400, letterSpacing: '-0.04em', lineHeight: 1.05, color: 'var(--ink)' }}>This booking link has expired</h1>
       <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--ink-2)', lineHeight: 1.55 }}>
         Booking links expire after a while — this is normal. Reply to the invitation email
         {companyName ? ` from ${companyName}` : ''} or contact the company and they can send you a fresh one.
@@ -121,7 +121,7 @@ export function ExpiredState({ companyName }: { companyName: string | null }) {
 export function InvalidState() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--ink)' }}>This interview link isn&apos;t valid</h1>
+      <h1 className="font-display" style={{ margin: 0, fontSize: 'clamp(1.7rem, 4vw, 2.2rem)', fontWeight: 400, letterSpacing: '-0.04em', lineHeight: 1.05, color: 'var(--ink)' }}>This interview link isn&apos;t valid</h1>
       <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--ink-2)', lineHeight: 1.55 }}>
         Please check you opened the most recent link from your email. If it still doesn&apos;t work, contact the company that invited you.
       </p>
@@ -138,8 +138,8 @@ export function AllTimesTakenState({
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {companyName && <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, color: 'var(--ink-muted)' }}>{companyName}</p>}
-      <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--ink)' }}>
+      {companyName && <p style={{ margin: 0, fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>{companyName}</p>}
+      <h1 className="font-display" style={{ margin: 0, fontSize: 'clamp(1.7rem, 4vw, 2.2rem)', fontWeight: 400, letterSpacing: '-0.04em', lineHeight: 1.05, color: 'var(--ink)' }}>
         All available times{postingTitle ? ` for the ${postingTitle} role` : ' for this role'} have been taken
       </h1>
       <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--ink-2)', lineHeight: 1.55 }}>
@@ -157,7 +157,7 @@ export function CancelledState({
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--ink)' }}>This interview was cancelled</h1>
+      <h1 className="font-display" style={{ margin: 0, fontSize: 'clamp(1.7rem, 4vw, 2.2rem)', fontWeight: 400, letterSpacing: '-0.04em', lineHeight: 1.05, color: 'var(--ink)' }}>This interview was cancelled</h1>
       {/* Untrusted employer text — rendered as text (React escapes), never HTML.
           When null, nothing renders: silence reads better than "No reason given". */}
       {cancelReason && (

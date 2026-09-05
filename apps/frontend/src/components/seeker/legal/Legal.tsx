@@ -57,14 +57,13 @@ export default function Legal() {
       />
 
       {/* TL;DR */}
-      <div style={{
-        background: 'var(--accent-soft)',
-        border: '1px solid var(--accent-mid)',
+      <div className="glass glass--strong" style={{
         borderRadius: 12,
+        borderLeft: '3px solid var(--thread-indigo)',
         padding: 16,
         marginBottom: 20,
       }}>
-        <p style={{ fontSize: '0.78rem', color: 'var(--accent)', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 6 }}>
+        <p style={{ fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, color: 'var(--ink-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>
           TL;DR
         </p>
         <p style={{ fontSize: '0.9rem', color: 'var(--ink)', lineHeight: 1.55 }}>
@@ -75,9 +74,7 @@ export default function Legal() {
       {/* Collapsible sections */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {SECTIONS.map((s, i) => (
-          <div key={i} style={{
-            background: 'var(--surface)',
-            border: '1px solid var(--border)',
+          <div key={i} className="glass" style={{
             borderRadius: 12,
             overflow: 'hidden',
           }}>
@@ -130,10 +127,8 @@ export default function Legal() {
       </div>
 
       {/* Contact */}
-      <div style={{
+      <div className="glass" style={{
         marginTop: 24,
-        background: 'var(--paper-2)',
-        border: '1px solid var(--border)',
         borderRadius: 12,
         padding: 18,
       }}>

@@ -109,10 +109,10 @@ describe('EmployerDashboard', () => {
     const dotOf = (type: string) =>
       (within(screen.getByTestId(`activity-${type}`)).getByTestId('activity-dot') as HTMLElement)
         .style.background.toLowerCase();
-    // happy-dom may keep hex or normalize to rgb — accept either encoding.
-    expect(['#1d9e75', 'rgb(29, 158, 117)']).toContain(dotOf('application'));       // green
-    expect(['#378add', 'rgb(55, 138, 221)']).toContain(dotOf('stage_move'));        // blue
-    expect(['#ba7517', 'rgb(186, 117, 23)']).toContain(dotOf('interview_cancelled')); // amber
+    // Dots carry categorical tokens, so both themes resolve them.
+    expect(dotOf('application')).toBe('var(--cat-green)');
+    expect(dotOf('stage_move')).toBe('var(--cat-blue)');
+    expect(dotOf('interview_cancelled')).toBe('var(--cat-amber)');
   });
 
   it('shows skeleton placeholders while loading', () => {

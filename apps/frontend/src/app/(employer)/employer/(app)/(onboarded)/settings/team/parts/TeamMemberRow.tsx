@@ -62,7 +62,7 @@ export default function TeamMemberRow({
     <div style={{
       display: narrow ? 'flex' : 'grid',
       ...(narrow ? { flexDirection: 'column' as const, gap: 8 } : { gridTemplateColumns: '1fr 110px 90px 80px', alignItems: 'center' }),
-      padding: '10px 16px', borderBottom: '0.5px solid var(--border)',
+      padding: '10px 16px', borderBottom: '1px solid var(--border)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
         <span aria-hidden style={{

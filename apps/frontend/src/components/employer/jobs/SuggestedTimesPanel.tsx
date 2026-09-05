@@ -63,7 +63,7 @@ export default function SuggestedTimesPanel({
 
   return (
     <div style={{
-      border: '0.5px solid var(--border)', borderRadius: 8, padding: 10,
+      border: '1px solid var(--border)', borderRadius: 8, padding: 10,
       background: 'var(--surface-raised)',
     }}>
       <Stack gap={8}>
@@ -107,7 +107,7 @@ export default function SuggestedTimesPanel({
                     onClick={() => onToggle(istLocal)}
                     style={{
                       padding: '4px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer',
-                      border: `0.5px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`,
+                      border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`,
                       background: isSelected ? 'var(--accent-soft)' : 'var(--surface)',
                       color: isSelected ? 'var(--accent)' : 'var(--ink)',
                       fontWeight: isSelected ? 600 : 400,

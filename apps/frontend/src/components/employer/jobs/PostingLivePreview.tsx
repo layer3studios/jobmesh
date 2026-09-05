@@ -12,7 +12,7 @@ import type { PostingFormValues } from './posting-form-helpers';
 const PREVIEW_DESCRIPTION_LIMIT = 300;
 const PILL = {
   fontSize: 11, padding: '2px 8px', borderRadius: 999,
-  background: 'var(--surface-sunken)', color: 'var(--ink-2)', border: '0.5px solid var(--border)',
+  background: 'transparent', color: 'var(--ink-muted)', border: '1px solid var(--border)',
 } as const;
 
 const WORKPLACE_LABEL: Record<string, string> = { remote: 'Remote', hybrid: 'Hybrid', onsite: 'On-site' };
@@ -34,9 +34,8 @@ export default function PostingLivePreview({ values }: { values: PostingFormValu
   // Stickiness is owned by the parent column in New.tsx, not here.
   return (
     <div>
-      <p style={{ margin: '0 0 2px', fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>Live preview</p>
-      <p style={{ margin: '0 0 10px', fontSize: 11, color: 'var(--ink-faint)' }}>How candidates see it</p>
-      <div style={{ background: 'var(--surface-raised)', border: '0.5px solid var(--border)', borderRadius: 12, padding: 16 }}>
+      <p style={{ margin: '0 0 10px', fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>Live preview · how candidates see it</p>
+      <div className="glass" style={{ borderRadius: 14, padding: 18 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
           <span aria-hidden style={{
             width: 28, height: 28, borderRadius: '50%', display: 'inline-flex', alignItems: 'center',
@@ -47,7 +46,7 @@ export default function PostingLivePreview({ values }: { values: PostingFormValu
           </span>
           <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{company?.name ?? 'Your company'}</span>
         </div>
-        <p style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 600, color: 'var(--ink)' }}>
+        <p className="font-display" style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 400, letterSpacing: '-0.03em', lineHeight: 1.1, color: 'var(--ink)' }}>
           {values.title.trim() || 'Untitled'}
         </p>
         {pills.length > 0 && (

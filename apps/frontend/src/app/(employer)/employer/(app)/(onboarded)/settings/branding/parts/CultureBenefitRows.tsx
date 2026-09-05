@@ -66,7 +66,7 @@ export default function CultureBenefitRows({ benefits, disabled, onChange }: {
         <div
           key={index}
           style={{
-            border: '0.5px solid var(--border)', borderRadius: 8, padding: 10,
+            border: '1px solid var(--border)', borderRadius: 8, padding: 10,
             background: 'var(--surface-raised)',
           }}
         >

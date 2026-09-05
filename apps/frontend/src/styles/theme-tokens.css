@@ -1,246 +1,206 @@
-/* Ported verbatim from frontend/src/theme/themes.ts (lightVars / darkVars).
-   Runtime JS injection is replaced by static CSS so SSR paints the right theme
-   with no FOUC (MIGRATION-MAP Risk 1). The pre-hydration script in the root
-   layout sets data-theme before paint; these blocks supply the values. */
+/* FILE: src/styles/theme-tokens.css
+   The product's design tokens — "Functional Sanctuary": a strictly
+   monochromatic system rooted in deep obsidian, where depth and density carry
+   hierarchy instead of colour. Dark is the product. Light is a neutral
+   monochrome alternate for people who need it, never a different palette.
 
-/* LIGHT MODE = warm parchment, not bleached paper. The page ground and the card
-   surfaces are now drawn from ONE warm family: previously --paper was warm
-   (#FBFAF7) while cards were pure #FFFFFF, and that warm/cool clash across every
-   card edge was the actual source of eye strain. Overall brightness drops ~5-8%.
-   Dark mode is deliberately untouched. */
+   Only hues: the ink threads (amber → indigo) as structural delimiters, and
+   muted status hues for meaning. The root layout stamps data-theme pre-paint. */
+
 :root {
-  --paper: #F5F3ED;
-  --paper-2: #EEEBE3;
-  --paper-3: #E6E3DA;
-  /* Slightly lifted off true black: #2C2C2A on --paper is ~12.6:1, far above the
-     4.5:1 AA floor, while shedding the glare of near-#000 on a bright ground. */
-  --ink: #2C2C2A;
-  --ink-2: #44423C;
-  --ink-muted: #6F6E69;
-  --ink-faint: #9B9990;
-  --border: rgba(55, 53, 47, 0.07);
-  --border-strong: rgba(55, 53, 47, 0.13);
-  --border-mid: rgba(55, 53, 47, 0.12);
-  --surface: #FAF9F6;
-  --surface-solid: #FAF9F6;
-  --surface-2: #F5F3EE;
-  --surface-alt: rgba(250, 249, 246, 0.85);
-  --accent: #2D6A4F;
-  --accent-hover: #214F3B;
-  --accent-soft: rgba(45, 106, 79, 0.10);
-  --accent-mid: rgba(45, 106, 79, 0.32);
-  --primary: #2D6A4F;
-  --primary-hover: #214F3B;
-  --primary-soft: rgba(45, 106, 79, 0.10);
-  /* Alias of --ink; moves with it or some text renders darker than the rest. */
-  --text-primary: #2C2C2A;
-  --text-secondary: #6F6E69;
-  --muted-ink: #6F6E69;
-  --subtle-ink: #9B9990;
-  --acid: #2D6A4F;
-  --acid-dim: rgba(45, 106, 79, 0.10);
-  --acid-mid: rgba(45, 106, 79, 0.32);
-  --acid-soft: rgba(45, 106, 79, 0.10);
-  --ink-border: rgba(55, 53, 47, 0.12);
-  --ink-border-strong: rgba(55, 53, 47, 0.20);
-  --paper2: #EEEBE3;
-  --success: #0F7B5A;
-  --success-soft: rgba(15, 123, 90, 0.10);
-  --warning: #B66B0A;
-  --warning-soft: rgba(182, 107, 10, 0.10);
-  --danger: #C5380F;
-  --danger-soft: rgba(197, 56, 15, 0.10);
-  --info: #0A6CC7;
-  --info-soft: rgba(10, 108, 199, 0.10);
-  --focus-ring: 0 0 0 3px rgba(45, 106, 79, 0.22);
-  --link: #2D6A4F;
-  --shadow-xs: 0 1px 2px rgba(15, 15, 14, 0.03);
-  --shadow-sm: 0 1px 2px rgba(15, 15, 14, 0.03), 0 2px 6px rgba(15, 15, 14, 0.02);
-  --shadow-md: 0 4px 8px rgba(15, 15, 14, 0.06), 0 10px 24px rgba(15, 15, 14, 0.04);
-  --shadow-lg: 0 8px 16px rgba(15, 15, 14, 0.08), 0 24px 48px rgba(15, 15, 14, 0.06);
-  --highlight-edge: inset 0 1px 0 rgba(255,255,255,0.5);
-  /* ── Stacking order ──────────────────────────────────────────────────────
-     Mirrors the Z scale in src/theme/tokens.ts, which stylesheets cannot import.
-     If one changes, change the other. Theme-independent, so these are declared
-     once here and never overridden in the dark block. */
-  --z-base: 0;
-  --z-card: 10;
-  --z-sticky: 40;
-  --z-dropdown: 50;
-  --z-nav: 60;
-  --z-sheet: 70;
-  --z-overlay: 80;
-  --z-modal: 90;
-  --z-toast: 100;
-
-  /* ── Status surfaces ─────────────────────────────────────────────────────
-     Tinted backgrounds for badges and chips. Light mode keeps the original
-     hand-picked pastels; dark mode uses a low-alpha wash of the same hue, so a
-     status chip stays legible instead of becoming a bright block on a dark page. */
-  --status-success-bg: #E6F7EF;
-  --status-danger-bg: #FAECE7;
-  --status-warning-bg: #FAEEDA;
-  --status-info-bg: #E3F2FD;
-  --status-accent-bg: #E1F5EE;
-  --status-purple-bg: #EEEDFE;
-
-  /* ── Categorical palette ─────────────────────────────────────────────────
-     Hues that encode a CATEGORY rather than a state: pipeline stages, activity
-     types, score tiers, chart series, role tiles. They were duplicated as raw
-     hex across ~20 files with no dark variant. Distinct from --success/--danger,
-     which carry a judgement; these only say "a different thing from that one". */
-  --cat-green: #1D9E75;
-  --cat-blue: #378ADD;
-  --cat-amber: #BA7517;
-  --cat-purple: #7F77DD;
-  --cat-indigo: #534AB7;
-  --cat-orange: #D85A30;
-  --cat-red: #E24B4A;
-
-  /* ── Candidate tag pills ─────────────────────────────────────────────────
-     Six soft grounds, one per --cat-* hue above. A tag is assigned one by a hash
-     of its name, so "referral" is the same colour everywhere it appears. The
-     colour carries no meaning beyond "not that other tag" — pair each ground with
-     its --cat-* hue for the label. */
-  --tag-1-bg: rgba(29, 158, 117, 0.12);
-  --tag-2-bg: rgba(55, 138, 221, 0.12);
-  --tag-3-bg: rgba(186, 117, 23, 0.12);
-  --tag-4-bg: rgba(127, 119, 221, 0.12);
-  --tag-5-bg: rgba(83, 74, 183, 0.12);
-  --tag-6-bg: rgba(216, 90, 48, 0.12);
-
-  --glass-bg: rgba(250, 249, 246, 0.72);
-  --glass-stroke: rgba(55, 53, 47, 0.10);
-  /* These three are the card/panel triplet and are aliases of --surface,
-     --paper-2 and --paper-3 respectively. They move together or a card ends up
-     lighter than the surface token it is meant to match. */
-  --surface-raised: #FAF9F6;
-  --surface-sunken: #EEEBE3;
-  --surface-muted: #E6E3DA;
+  /* ── Light: neutral monochrome. Same structure, inverted. ─────────── */
+  --paper: #F5F4F1;
+  --paper-2: #EDECE8;
+  --paper-3: #E4E3DE;
+  --ink: #09090B;
+  --ink-2: #26262A;
+  --ink-muted: #5C5B60;
+  --ink-faint: #8E8D93;
+  --border: rgba(9, 9, 11, 0.09);
+  --border-strong: rgba(9, 9, 11, 0.18);
+  --border-mid: rgba(9, 9, 11, 0.13);
+  --surface: #FBFAF8;
+  --surface-solid: #FBFAF8;
+  --surface-2: #F1F0EC;
+  --surface-alt: rgba(251, 250, 248, 0.85);
+  --surface-raised: #FBFAF8;
+  --surface-sunken: #EDECE8;
+  --surface-muted: #E4E3DE;
+  --surface-3: #E4E3DE; --border-hairline: rgba(9, 9, 11, 0.12);
+  --glass-panel: rgba(241, 240, 236, 0.78);
+  --glass-card: rgba(251, 250, 248, 0.55); --glass-strong: rgba(251, 250, 248, 0.82);
+  /* The sheen along a glass edge and the light it catches at the top. */
+  --glass-sheen: rgba(255, 255, 255, 0.55);
+  --glass-glow: rgba(255, 255, 255, 0.35);
+  --glass-blur: 22px; --glass-sat: 170%;
+  --on-indigo: #FFFFFF;
+  --accent: #09090B;
+  --accent-hover: #26262A;
+  --accent-soft: rgba(9, 9, 11, 0.07);
+  --accent-mid: rgba(9, 9, 11, 0.22);
+  --primary: #09090B;
+  --primary-hover: #26262A;
+  --primary-soft: rgba(9, 9, 11, 0.07);
+  --text-primary: #09090B;
+  --text-secondary: #5C5B60;
+  --muted-ink: #5C5B60;
+  --subtle-ink: #8E8D93;
+  --acid: #09090B;
+  --acid-dim: rgba(9, 9, 11, 0.07);
+  --acid-mid: rgba(9, 9, 11, 0.22);
+  --acid-soft: rgba(9, 9, 11, 0.07);
+  --ink-border: rgba(9, 9, 11, 0.13);
+  --ink-border-strong: rgba(9, 9, 11, 0.22);
+  --paper2: #EDECE8;
+  --success: #1F7A4D;
+  --success-soft: rgba(31, 122, 77, 0.10);
+  --warning: #9A6410;
+  --warning-soft: rgba(154, 100, 16, 0.10);
+  --danger: #B5341A;
+  --danger-soft: rgba(181, 52, 26, 0.10);
+  --info: #3F5FBF;
+  --info-soft: rgba(63, 95, 191, 0.10);
+  --focus-ring: 0 0 0 3px rgba(9, 9, 11, 0.18);
+  --link: #09090B;
+  --thread-amber: #D97706;
+  --thread-indigo: #4F46E5;
+  --thread-gradient: linear-gradient(90deg, var(--thread-amber) 0%, var(--thread-indigo) 100%);
+  --shadow-xs: 0 1px 2px rgba(9, 9, 11, 0.04);
+  --shadow-sm: 0 1px 2px rgba(9, 9, 11, 0.04), 0 2px 6px rgba(9, 9, 11, 0.03);
+  --shadow-md: 0 4px 10px rgba(9, 9, 11, 0.07), 0 12px 28px rgba(9, 9, 11, 0.05);
+  --shadow-lg: 0 8px 18px rgba(9, 9, 11, 0.09), 0 24px 52px rgba(9, 9, 11, 0.07);
+  --highlight-edge: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  --glass-bg: rgba(251, 250, 248, 0.72);
+  --glass-stroke: rgba(9, 9, 11, 0.10);
   --text-inverse: #FFFFFF;
-  --brand-50: #EAF3EE;
-  --brand-500: #2D6A4F;
-  --brand-600: #214F3B;
-  --brand-700: #163A2B;
-  --overlay: rgba(15, 15, 14, 0.45);
   --text-on-accent: #FFFFFF;
+  --brand-50: #EDECE8;
+  --brand-500: #09090B;
+  --brand-600: #26262A;
+  --brand-700: #000000;
+  --overlay: rgba(9, 9, 11, 0.45);
+  --status-success-bg: rgba(31, 122, 77, 0.10);
+  --status-danger-bg: rgba(181, 52, 26, 0.10);
+  --status-warning-bg: rgba(154, 100, 16, 0.10);
+  --status-info-bg: rgba(63, 95, 191, 0.10);
+  --status-accent-bg: rgba(9, 9, 11, 0.07);
+  --status-purple-bg: rgba(79, 70, 229, 0.10);
+  /* Categorical palette — "a different thing from that one", never a judgement. */
+  --cat-green: #1F7A4D;
+  --cat-blue: #3F5FBF;
+  --cat-amber: #9A6410;
+  --cat-purple: #6B5FD6;
+  --cat-indigo: #4F46E5;
+  --cat-orange: #B5501F;
+  --cat-red: #B5341A;
+  --tag-1-bg: rgba(31, 122, 77, 0.12);
+  --tag-2-bg: rgba(63, 95, 191, 0.12);
+  --tag-3-bg: rgba(154, 100, 16, 0.12);
+  --tag-4-bg: rgba(107, 95, 214, 0.12);
+  --tag-5-bg: rgba(79, 70, 229, 0.12);
+  --tag-6-bg: rgba(181, 80, 31, 0.12);
+  /* Stacking order — mirrors Z in src/theme/tokens.ts. */
+  --z-base: 0; --z-card: 10; --z-sticky: 40; --z-dropdown: 50; --z-nav: 60; --z-sheet: 70; --z-overlay: 80; --z-modal: 90; --z-toast: 100;
 }
 
 :root[data-theme="dark"] {
-  --paper: #191918;
-  --paper-2: #202020;
-  --paper-3: #2A2A28;
-  --ink: #E8E8E7;
-  --ink-2: #D1D0CC;
-  --ink-muted: #9B9890;
-  --ink-faint: #6F6D67;
-  --border: rgba(255, 255, 255, 0.09);
+  /* ── Dark: the product. Deep obsidian, zinc text, hairline borders. ── */
+  --paper: #09090B;
+  --paper-2: #141313;
+  --paper-3: #1C1B1B;
+  --ink: #E5E2E1;
+  --ink-2: #C8C5CA;
+  --ink-muted: #A1A1AA;
+  --ink-faint: #6B6A6E;
+  --border: rgba(255, 255, 255, 0.08);
   --border-strong: rgba(255, 255, 255, 0.18);
-  --border-mid: rgba(255, 255, 255, 0.13);
-  --surface: #202020;
-  --surface-solid: #202020;
-  --surface-2: #262624;
-  --surface-alt: rgba(32, 32, 32, 0.78);
-  --accent: #5FB58D;
-  --accent-hover: #74C29B;
-  --accent-soft: rgba(95, 181, 141, 0.14);
-  --accent-mid: rgba(95, 181, 141, 0.35);
-  --primary: #5FB58D;
-  --primary-hover: #74C29B;
-  --primary-soft: rgba(95, 181, 141, 0.14);
-  --text-primary: #E8E8E7;
-  --text-secondary: #9B9890;
-  --muted-ink: #9B9890;
-  --subtle-ink: #6F6D67;
-  --acid: #5FB58D;
-  --acid-dim: rgba(95, 181, 141, 0.14);
-  --acid-mid: rgba(95, 181, 141, 0.35);
-  --acid-soft: rgba(95, 181, 141, 0.14);
-  --ink-border: rgba(255, 255, 255, 0.13);
+  --border-mid: rgba(255, 255, 255, 0.12);
+  --surface: #141313;
+  --surface-solid: #141313;
+  --surface-2: #201F1F;
+  --surface-alt: rgba(20, 19, 19, 0.78);
+  --surface-raised: #1C1B1B;
+  --surface-sunken: #0E0E0E;
+  --surface-muted: #2B2A2A;
+  --surface-3: #2B2A2A; --border-hairline: rgba(255, 255, 255, 0.12);
+  --glass-panel: rgba(32, 31, 31, 0.72);
+  --glass-card: rgba(24, 23, 23, 0.48); --glass-strong: rgba(20, 19, 19, 0.78);
+  --glass-sheen: rgba(255, 255, 255, 0.10);
+  --glass-glow: rgba(255, 255, 255, 0.05);
+  --glass-blur: 22px; --glass-sat: 170%;
+  --on-indigo: #FFFFFF;
+  --accent: #E5E2E1;
+  --accent-hover: #FFFFFF;
+  --accent-soft: rgba(255, 255, 255, 0.08);
+  --accent-mid: rgba(255, 255, 255, 0.24);
+  --primary: #E5E2E1;
+  --primary-hover: #FFFFFF;
+  --primary-soft: rgba(255, 255, 255, 0.08);
+  --text-primary: #E5E2E1;
+  --text-secondary: #A1A1AA;
+  --muted-ink: #A1A1AA;
+  --subtle-ink: #6B6A6E;
+  --acid: #E5E2E1;
+  --acid-dim: rgba(255, 255, 255, 0.08);
+  --acid-mid: rgba(255, 255, 255, 0.24);
+  --acid-soft: rgba(255, 255, 255, 0.08);
+  --ink-border: rgba(255, 255, 255, 0.12);
   --ink-border-strong: rgba(255, 255, 255, 0.22);
-  --paper2: #202020;
-  --success: #3DCB89;
-  --success-soft: rgba(61, 203, 137, 0.14);
-  --warning: #E6A33A;
-  --warning-soft: rgba(230, 163, 58, 0.14);
-  --danger: #F26C4F;
-  --danger-soft: rgba(242, 108, 79, 0.14);
-  --info: #5BA2F2;
-  --info-soft: rgba(91, 162, 242, 0.14);
-  --focus-ring: 0 0 0 3px rgba(95, 181, 141, 0.30);
-  --link: #74C29B;
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.20);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.30), 0 2px 6px rgba(0, 0, 0, 0.20);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.32), 0 12px 28px rgba(0, 0, 0, 0.22);
-  --shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.40), 0 24px 56px rgba(0, 0, 0, 0.30);
-  --highlight-edge: inset 0 1px 0 rgba(255,255,255,0.04);
-  /* Status surfaces: a low-alpha wash of the hue rather than the light pastel,
-     which would read as a bright block on a dark page. The --z-* scale is
-     theme-independent and is NOT redeclared here. */
-  --status-success-bg: rgba(15, 123, 90, 0.15);
-  --status-danger-bg: rgba(197, 56, 15, 0.15);
-  --status-warning-bg: rgba(182, 107, 10, 0.15);
-  --status-info-bg: rgba(10, 108, 199, 0.15);
-  --status-accent-bg: rgba(45, 106, 79, 0.12);
-  --status-purple-bg: rgba(120, 100, 230, 0.15);
-
-  /* Categorical hues, lightened so they clear the dark ground. Same ordering and
-     meaning as the light block — only the luminance changes. */
-  --cat-green: #3DCB89;
-  --cat-blue: #6BAEF0;
-  --cat-amber: #E6A33A;
-  --cat-purple: #A49CF0;
-  --cat-indigo: #9C93F0;
-  --cat-orange: #F08A5D;
-  --cat-red: #F27C7B;
-
-  /* Tag grounds: the same six hues at a lower alpha, so a pill sits on the dark
-     page as a tint rather than a block. Ordering matches the light block exactly. */
-  --tag-1-bg: rgba(61, 203, 137, 0.16);
-  --tag-2-bg: rgba(107, 174, 240, 0.16);
-  --tag-3-bg: rgba(230, 163, 58, 0.16);
-  --tag-4-bg: rgba(164, 156, 240, 0.16);
-  --tag-5-bg: rgba(156, 147, 240, 0.16);
-  --tag-6-bg: rgba(240, 138, 93, 0.16);
-
-  --glass-bg: rgba(25, 25, 24, 0.72);
+  --paper2: #141313;
+  --success: #4FC98A;
+  --success-soft: rgba(79, 201, 138, 0.12);
+  --warning: #E0A23F;
+  --warning-soft: rgba(224, 162, 63, 0.12);
+  --danger: #EF7A5E;
+  --danger-soft: rgba(239, 122, 94, 0.12);
+  --info: #8B95F2;
+  --info-soft: rgba(139, 149, 242, 0.12);
+  --focus-ring: 0 0 0 3px rgba(255, 255, 255, 0.22);
+  --link: #E5E2E1;
+  --thread-amber: #F59E0B;
+  --thread-indigo: #6366F1;
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.38), 0 12px 28px rgba(0, 0, 0, 0.28);
+  --shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.45), 0 24px 56px rgba(0, 0, 0, 0.35);
+  --highlight-edge: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --glass-bg: rgba(9, 9, 11, 0.72);
   --glass-stroke: rgba(255, 255, 255, 0.08);
-  --surface-raised: #202020;
-  --surface-sunken: #1B1B1A;
-  --surface-muted: #2A2A28;
-  --text-inverse: #191918;
-  --brand-50: rgba(95, 181, 141, 0.14);
-  --brand-500: #5FB58D;
-  --brand-600: #74C29B;
-  --brand-700: #8ED0AD;
-  --overlay: rgba(0, 0, 0, 0.6);
-  --text-on-accent: #FFFFFF;
+  --text-inverse: #09090B;
+  --text-on-accent: #09090B;
+  --brand-50: rgba(255, 255, 255, 0.08);
+  --brand-500: #E5E2E1;
+  --brand-600: #FFFFFF;
+  --brand-700: #FFFFFF;
+  --overlay: rgba(0, 0, 0, 0.62);
+  --status-success-bg: rgba(79, 201, 138, 0.14);
+  --status-danger-bg: rgba(239, 122, 94, 0.14);
+  --status-warning-bg: rgba(224, 162, 63, 0.14);
+  --status-info-bg: rgba(139, 149, 242, 0.14);
+  --status-accent-bg: rgba(255, 255, 255, 0.08);
+  --status-purple-bg: rgba(99, 102, 241, 0.16);
+  --cat-green: #4FC98A;
+  --cat-blue: #7EA6F0;
+  --cat-amber: #E0A23F;
+  --cat-purple: #A79FF2;
+  --cat-indigo: #8B95F2;
+  --cat-orange: #F0916A;
+  --cat-red: #EF7A5E;
+  --tag-1-bg: rgba(79, 201, 138, 0.14);
+  --tag-2-bg: rgba(126, 166, 240, 0.14);
+  --tag-3-bg: rgba(224, 162, 63, 0.14);
+  --tag-4-bg: rgba(167, 159, 242, 0.14);
+  --tag-5-bg: rgba(139, 149, 242, 0.14);
+  --tag-6-bg: rgba(240, 145, 106, 0.14);
 }
 
-/* ── Page shell ────────────────────────────────────────────────────────────
-   ONE set of page-level spacing values for the employer and admin apps. Before
-   this, comparable pages ran at 20px, 24px, 32px, 40px and 48px, so moving
-   between Jobs and Settings shifted the content sideways for no reason.
-
-   These are theme-independent (a gap is a gap in both modes), but they live here
-   with the rest of the design tokens so there is one file to read when asking
-   "what are the numbers?".
-
-   The seeker and apply pages deliberately do NOT use these: a job feed reads
-   better edge-to-edge on a phone, and the apply page is a single narrow column
-   with its own measure. */
+/* ── Page shell — one set of page-level spacing for employer + admin. ─── */
 :root {
-  --page-padding-x: 16px;
-  --page-padding-y: 20px;
-  /* The default working width. Data-dense surfaces opt into --page-max-width-wide
-     instead — see PageShell's `width` prop. */
-  --page-max-width: 1280px;
-  --page-max-width-wide: 1536px;
+  --page-padding-x: 16px; --page-padding-y: 20px;
+  --page-max-width: 1280px; --page-max-width-wide: 1536px;
+  /* Board layout: sidebar / detail widths + gutter. */
+  --sidebar-width: 280px; --detail-panel-width: 420px; --gutter: 12px; --margin-page: 24px;
 }
-
 @media (min-width: 768px) {
-  :root {
-    --page-padding-x: 24px;
-    --page-padding-y: 24px;
-  }
+  :root { --page-padding-x: 24px; --page-padding-y: 24px; }
 }

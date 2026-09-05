@@ -18,9 +18,10 @@
 
 .anim-up { animation: fadeUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .anim-fade { animation: fadeIn 0.3s ease both; }
-.anim-scale { animation: scaleIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both; }
+/* App pages do not animate in (UI overhaul): the entrance classes are inert. */
+.anim-scale { animation: none; }
 
-.stagger > * { animation: fadeUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.stagger > * { animation: none; }
 .stagger > *:nth-child(1) { animation-delay: 0.02s; }
 .stagger > *:nth-child(2) { animation-delay: 0.06s; }
 .stagger > *:nth-child(3) { animation-delay: 0.1s; }
@@ -52,8 +53,12 @@
 }
 
 .card {
-  background: var(--surface);
+  background-color: var(--glass-card);
+  background-image: linear-gradient(180deg, var(--glass-glow) 0%, transparent 42%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
   border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 var(--glass-sheen), var(--shadow-sm);
   border-radius: 14px;
   transition: border-color 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
               transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
@@ -61,7 +66,8 @@
 }
 .card.hover:hover {
   border-color: var(--border-strong);
-  box-shadow: var(--shadow-md);
+  background-color: var(--glass-strong);
+  box-shadow: inset 0 1px 0 var(--glass-sheen), var(--shadow-md);
   transform: translateY(-2px);
 }
 .sketch-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; }
@@ -97,19 +103,13 @@
 .snap-carousel::-webkit-scrollbar { display: none; }
 .snap-carousel > * { scroll-snap-align: start; }
 
-.glass {
-  background: var(--glass-bg);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border: 1px solid var(--glass-stroke);
-}
 
 .job-description-html { font-size: inherit; }
 .job-description-html p { margin: 0 0 12px; }
 .job-description-html ul, .job-description-html ol { padding-left: 22px; margin: 0 0 14px; }
 .job-description-html li { margin: 4px 0; }
 .job-description-html h1, .job-description-html h2, .job-description-html h3, .job-description-html h4 {
-  font-family: var(--font-serif);
+  font-family: var(--font-instrument-serif), Georgia, serif;
   font-weight: 600; margin-top: 22px; margin-bottom: 10px;
   letter-spacing: -0.015em; color: var(--ink);
 }

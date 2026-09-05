@@ -8,8 +8,10 @@
 // string, and keeping them apart makes that visible.
 
 import { SEEKER_HOME_COPY } from './copy-seeker-home';
+import { SEEKER_HIRE_COPY } from './copy-seeker-hire';
 
 export const SEEKER_COPY = {
+  ...SEEKER_HIRE_COPY,
   nav: {
     today: 'Today',
     companies: 'Companies',
@@ -52,6 +54,27 @@ export const SEEKER_COPY = {
     historySubtitle: 'Your latest applied jobs, useful for follow-ups and interview prep.',
     emptyTitle: 'No applications tracked yet',
     emptyBody: 'Start applying from the jobs feed and your recent history will appear here.',
+  },
+  // ── /find-work — the seeker LANDING page (the board itself is /jobs) ──
+  findWork: {
+    metaTitle: 'Find your next tech role in India · JobMesh',
+    metaDescription: 'Fresh tech roles from top Indian companies, updated daily. Direct apply links, no middlemen, no account required.',
+    titleLead: 'Find your next',
+    titleAccent: 'tech role',
+    titleTail: 'in India',
+    lede: 'Fresh roles from top Indian tech companies, updated daily. Direct apply links, no middlemen — no account required.',
+  },
+  // ── /companies — the companies LANDING page (the directory is /directory) ──
+  companies: {
+    metaTitle: 'Tech companies hiring in India · JobMesh',
+    metaDescription: 'Every company on JobMesh with the roles they have open right now, straight from their own career pages.',
+    badgeSuffix: 'companies hiring',
+    badgeFallback: 'Companies hiring now',
+    titleLead: 'Tech companies',
+    titleAccent: 'hiring in India',
+    lede: 'Every company on JobMesh, with the roles they have open right now. Updated daily, straight from their own career pages.',
+    gridEyebrow: 'Hiring now',
+    gridHeading: 'Most open roles this week',
   },
   directory: {
     pageLabel: 'Company directory',

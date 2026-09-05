@@ -1,7 +1,7 @@
 'use client';
 // FILE: src/components/ui/Table.tsx
-// Generic data table with sticky header, sortable columns and hover rows.
-import { useState } from 'react';
+// Generic data table: a glass surface with a mono uppercase header row, hairline
+// row separators and CSS hover (board.css `.tbl-row`) — never hover-as-state.
 import type { ReactNode } from 'react';
 import { ChevronsUpDown } from 'lucide-react';
 import { TYPE } from '../../theme/tokens';
@@ -13,6 +13,8 @@ export interface Column<T> {
   render?: (row: T) => ReactNode;
 }
 
+const MONO = 'var(--font-jetbrains-mono), ui-monospace, monospace';
+
 export function Table<T>({
   columns, data, onSort, onRowClick, emptyMessage = 'No data',
 }: {
@@ -23,11 +25,10 @@ export function Table<T>({
   onRowClick?: (row: T) => void;
   emptyMessage?: string;
 }) {
-  const [hovered, setHovered] = useState<number | null>(null);
-  const cell: React.CSSProperties = { padding: '10px 14px', textAlign: 'left', fontSize: TYPE.base, color: 'var(--ink)' };
+  const cell: React.CSSProperties = { padding: '11px 14px', textAlign: 'left', fontSize: TYPE.base, color: 'var(--ink)' };
 
   return (
-    <div style={{ overflow: 'auto', border: '1px solid var(--border)', borderRadius: 10 }}>
+    <div className="glass" style={{ overflow: 'auto', borderRadius: 14 }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 480 }}>
         <thead>
           <tr>
@@ -37,8 +38,9 @@ export function Table<T>({
                 scope="col"
                 aria-sort={col.sortable ? 'none' : undefined}
                 style={{
-                  ...cell, position: 'sticky', top: 0, background: 'var(--surface-sunken)',
-                  fontSize: TYPE.sm, fontWeight: 600, color: 'var(--ink-muted)',
+                  ...cell, position: 'sticky', top: 0, background: 'var(--glass-strong)',
+                  fontFamily: MONO, fontSize: 10, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase',
+                  color: 'var(--ink-muted)',
                   borderBottom: '1px solid var(--border)', cursor: col.sortable ? 'pointer' : 'default',
                   whiteSpace: 'nowrap', userSelect: 'none',
                 }}
@@ -63,13 +65,9 @@ export function Table<T>({
             data.map((row, i) => (
               <tr
                 key={i}
-                onMouseEnter={() => setHovered(i)}
-                onMouseLeave={() => setHovered(null)}
+                className="tbl-row"
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
-                style={{
-                  background: hovered === i ? 'var(--paper-2)' : 'transparent', transition: 'background 120ms ease',
-                  cursor: onRowClick ? 'pointer' : 'default',
-                }}
+                style={{ cursor: onRowClick ? 'pointer' : 'default' }}
               >
                 {columns.map((col) => (
                   <td key={col.key} style={{ ...cell, borderBottom: i === data.length - 1 ? 'none' : '1px solid var(--border)' }}>

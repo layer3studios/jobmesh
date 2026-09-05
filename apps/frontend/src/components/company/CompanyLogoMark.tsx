@@ -44,7 +44,7 @@ export default function CompanyLogoMark({
           borderRadius,
           objectFit: 'cover',
           background: 'var(--surface-raised)',
-          border: '0.5px solid var(--border)',
+          border: '1px solid var(--border)',
           display: 'block',
         }}
       />

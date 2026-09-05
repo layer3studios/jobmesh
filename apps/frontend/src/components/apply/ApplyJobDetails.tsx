@@ -27,8 +27,8 @@ export default function ApplyJobDetails({ company, job, assignmentPreview }: {
           )}
         </div>
       </div>
-      <h1 className="font-display" style={{ fontSize: 'clamp(1.4rem, 4vw, 1.9rem)', fontWeight: 600, color: 'var(--ink)' }}>{job.title}</h1>
-      <p style={{ fontSize: '0.9rem', color: 'var(--ink-muted)', marginTop: 4 }}>
+      <h1 className="font-display" style={{ fontSize: 'clamp(2rem, 4vw, 2.8rem)', fontWeight: 400, letterSpacing: '-0.04em', lineHeight: 1.05, color: 'var(--ink)' }}>{job.title}</h1>
+      <p style={{ fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)', marginTop: 10 }}>
         {[job.location, job.employmentType, formatSalaryLPA(job.salaryMin, job.salaryMax)].filter(Boolean).join(' · ')}
       </p>
       {/* ABOVE the description, deliberately. A take-home is the single largest
@@ -41,7 +41,7 @@ export default function ApplyJobDetails({ company, job, assignmentPreview }: {
           assignmentPreview slot and ships no markdown JavaScript to the browser.
           Moving it is a change of position, not of ownership. */}
       {assignmentPreview && <div style={{ marginTop: 16 }}>{assignmentPreview}</div>}
-      <p className="apply-jd-description" style={{ fontSize: '0.875rem', color: 'var(--ink)', marginTop: 12, whiteSpace: 'pre-wrap', lineHeight: 1.55 }}>{job.description}</p>
+      <p className="apply-jd-description" style={{ fontSize: '0.95rem', color: 'var(--ink-2)', marginTop: 18, whiteSpace: 'pre-wrap', lineHeight: 1.65 }}>{job.description}</p>
     </div>
   );
 }

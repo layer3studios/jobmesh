@@ -42,7 +42,7 @@ export default function InviteAcceptClient({ token }: { token: string }) {
     <AuthLayout>
       <Stack gap={16}>
         <div>
-          <h1 style={{ fontSize: TYPE.xl, fontWeight: 600, color: 'var(--ink)', letterSpacing: '-0.02em' }}>
+          <h1 className="font-display" style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.2rem)', fontWeight: 400, letterSpacing: '-0.04em', lineHeight: 1.05, color: 'var(--ink)' }}>
             You&apos;ve been invited
           </h1>
           <p style={{ fontSize: TYPE.sm, color: 'var(--ink-muted)', marginTop: 4, lineHeight: 1.55 }}>

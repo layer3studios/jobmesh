@@ -22,7 +22,7 @@ export default function InviteStatusView({ variant }: { variant: InviteStatusVar
   return (
     <AuthLayout>
       <Stack gap={14}>
-        <h1 style={{ fontSize: TYPE.xl, fontWeight: 600, color: 'var(--ink)', letterSpacing: '-0.02em' }}>{title}</h1>
+        <h1 className="font-display" style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.2rem)', fontWeight: 400, color: 'var(--ink)', letterSpacing: '-0.04em', lineHeight: 1.05 }}>{title}</h1>
         <p style={{ fontSize: TYPE.sm, color: 'var(--ink-muted)', lineHeight: 1.55 }}>{body}</p>
         {variant === 'accepted' && (
           <Link href="/employer" style={{ textDecoration: 'none' }}>

@@ -39,7 +39,7 @@ export default function NewsSection() {
           ))
         ) : error || news.length === 0 ? (
           <div style={{
-            padding: '20px 14px', background: 'var(--surface)',
+            padding: '20px 14px', background: 'var(--glass-card)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
             border: '1px solid var(--border)', borderRadius: 12, textAlign: 'center',
           }}>
             <Newspaper size={20} style={{ color: 'var(--ink-faint)', marginBottom: 8 }} />
@@ -56,7 +56,7 @@ export default function NewsSection() {
               rel="noopener noreferrer"
               style={{
                 display: 'flex', alignItems: 'flex-start', gap: 10,
-                padding: '11px 12px', background: 'var(--surface)',
+                padding: '11px 12px', background: 'var(--glass-card)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
                 border: '1px solid var(--border)', borderRadius: 11,
                 textDecoration: 'none', transition: 'border-color 160ms ease',
               }}

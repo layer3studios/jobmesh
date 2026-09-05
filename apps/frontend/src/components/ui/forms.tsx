@@ -10,8 +10,8 @@ import { RADIUS, TYPE, SHADOW } from '../../theme/tokens';
 export const fieldBaseStyle: CSSProperties = {
   width: '100%', padding: '10px 12px',
   fontFamily: 'inherit', fontSize: TYPE.base,
-  background: 'var(--surface)', color: 'var(--ink)',
-  border: '1px solid var(--border-strong)', borderRadius: RADIUS.md,
+  background: 'var(--glass-card)', color: 'var(--ink)',
+  border: '1px solid var(--border)', borderRadius: RADIUS.md,
   outline: 'none', transition: 'border-color 180ms ease, box-shadow 180ms ease',
 };
 
@@ -19,11 +19,11 @@ export const fieldBaseStyle: CSSProperties = {
 export function focusHandlers<T extends HTMLElement>(hasError?: boolean) {
   return {
     onFocus: (e: FocusEvent<T>) => {
-      e.currentTarget.style.borderColor = 'var(--accent)';
+      e.currentTarget.style.borderColor = 'var(--border-strong)';
       e.currentTarget.style.boxShadow = SHADOW.focus;
     },
     onBlur: (e: FocusEvent<T>) => {
-      e.currentTarget.style.borderColor = hasError ? 'var(--danger)' : 'var(--border-strong)';
+      e.currentTarget.style.borderColor = hasError ? 'var(--danger)' : 'var(--border)';
       e.currentTarget.style.boxShadow = 'none';
     },
   };

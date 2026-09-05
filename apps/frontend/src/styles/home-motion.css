@@ -1,0 +1,20 @@
+/* FILE: src/styles/home-motion.css
+   The 3D scene host and the resting states for GSAP's choreography
+   (ScrollMotion.tsx). GSAP animates FROM these values TO rest, so with
+   scripting off or reduced motion on, everything simply sits at rest:
+   nothing here hides content. */
+
+/* ── The Three.js scene ─────────────────────────────────────────────── */
+.hm-scene-host { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.hm-scene { width: 100% !important; height: 100% !important; }
+
+/* ── Hero words rise out of a clipped line ──────────────────────────── */
+.hm-line { display: inline-block; overflow: hidden; vertical-align: bottom; padding: 0 0.08em; margin: 0 -0.08em; }
+.hm-word { display: inline-block; will-change: transform, opacity; }
+
+/* ── Nav gains a hairline once the page has moved ───────────────────── */
+.hm-nav { transition: box-shadow var(--m-slow) var(--ease), background-color var(--m-slow) var(--ease); }
+.hm-nav--scrolled { background: rgba(9, 9, 11, 0.86); box-shadow: 0 1px 0 var(--border-mid), 0 12px 32px rgba(0, 0, 0, 0.35); }
+
+/* ── Bars: GSAP scales these from 0; at rest they are full ──────────── */
+.hm-bar__fill, .hm-band__fill, .hm-rank__fill { transform-origin: left center; }

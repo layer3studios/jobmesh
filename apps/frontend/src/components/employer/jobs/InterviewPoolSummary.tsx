@@ -16,7 +16,7 @@ export default function InterviewPoolSummary({ times }: { times: InterviewTime[]
 
   if (summary.total === 0) return null;
   return (
-    <div style={{ background: 'var(--surface-raised)', border: '0.5px solid var(--border)', borderRadius: 10, padding: 10 }}>
+    <div style={{ background: 'var(--glass-card)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', boxShadow: 'inset 0 1px 0 var(--glass-sheen), var(--shadow-sm)', border: '1px solid var(--border)', borderRadius: 10, padding: 10 }}>
       <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
         {summary.available} available
       </p>

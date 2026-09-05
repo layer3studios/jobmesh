@@ -1,9 +1,10 @@
 'use client';
 // FILE: src/components/layouts/EmployerAppShell.tsx
-// Client shell for the employer audience — verbatim adaptation of the Vite
-// EmployerAppLayout. The (employer)/(app) server layout runs the auth guard and
-// seeds EmployerProvider; this shell reads that session and renders the persistent
-// EmployerTopNav. Desktop-first: no footer, no mobile bottom nav (D1).
+// Client shell for the employer audience. The (employer)/(app) server layout
+// runs the auth guard and seeds EmployerProvider; this shell reads that session
+// and renders the persistent EmployerTopNav over the same ambient ground the
+// seeker app uses, so glass surfaces have depth to blur, and the shared footer
+// in its employer voice. Desktop-first: no mobile bottom nav (D1).
 import { useEffect, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { displayPictureFor } from '@/context/employer/employer-context-types';
@@ -11,6 +12,7 @@ import { useEmployer } from '../../context/employer/EmployerContext';
 import { useTheme } from '../../context/theme/ThemeProvider';
 import { useViewport } from '../../hooks/shared/useViewport';
 import EmployerTopNav from './parts/EmployerTopNav';
+import Footer from './Footer';
 
 const COMPACT_BREAKPOINT_WIDTH = 1024;
 
@@ -42,9 +44,9 @@ export default function EmployerAppShell({ children }: { children: ReactNode }) 
   };
 
   return (
-    <div style={{
-      minHeight: '100dvh', display: 'flex', flexDirection: 'column', background: 'var(--paper)',
-    }}>
+    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
+      {/* Ambient washes behind every app page so glass surfaces have depth to blur. */}
+      <div className="app-ambient app-ambient--quiet" aria-hidden />
       <EmployerTopNav
         isCompact={isCompact}
         currentUser={currentUser}
@@ -54,12 +56,13 @@ export default function EmployerAppShell({ children }: { children: ReactNode }) 
         onThemeToggle={toggle}
         onLogout={logout}
       />
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
         {/* key by path forces a clean unmount/remount per route (mirror seeker). */}
-        <div key={pathname} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div key={pathname} className="page-enter" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           {children}
         </div>
       </main>
+      <Footer audience="employer" />
     </div>
   );
 }

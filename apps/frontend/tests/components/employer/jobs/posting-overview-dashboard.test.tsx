@@ -66,9 +66,9 @@ describe('PostingOverview dashboard', () => {
   it('"Days open" computes from createdAt; KPI values load from existing endpoints', async () => {
     renderOverview();
     expect(screen.getByText('28')).toBeTruthy(); // days open — synchronous
-    await waitFor(() => expect(screen.getByText('Total applicants').nextElementSibling?.textContent).toBe('3'));
-    expect(screen.getByText('Avg. AI score').nextElementSibling?.textContent).toBe('70'); // (80+60)/2
-    expect(screen.getByText('Interviews scheduled').nextElementSibling?.textContent).toBe('1');
+    await waitFor(() => expect(screen.getByText('Total applicants').previousElementSibling?.textContent).toBe('3'));
+    expect(screen.getByText('Avg. AI score').previousElementSibling?.textContent).toBe('70'); // (80+60)/2
+    expect(screen.getByText('Interviews scheduled').previousElementSibling?.textContent).toBe('1');
   });
 
   it('the status badge renders success styling for active', () => {

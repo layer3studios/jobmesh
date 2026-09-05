@@ -13,7 +13,7 @@ export const TIER_COLOR: Record<string, string> = {
 };
 
 export function SectionLabel({ children }: { children: ReactNode }) {
-  return <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--ink-faint)' }}>{children}</div>;
+  return <div style={{ fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>{children}</div>;
 }
 
 export function SkillRow({ label, skills, variant }: { label: string; skills: string[]; variant: 'success' | 'warning' | 'info' }) {
@@ -37,8 +37,8 @@ export function RescoreButton({ isRescoring, disabled, onClick }: { isRescoring:
 
 export function FitTile({ icon, label, value }: { icon: ReactNode; label: string; value: string | null | undefined }) {
   return (
-    <div style={{ flex: 1, minWidth: 0, background: 'var(--surface-sunken)', border: '1px solid var(--border)', borderRadius: 12, padding: '10px 12px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--ink-faint)', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+    <div style={{ flex: 1, minWidth: 0, border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--ink-muted)', fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
         {icon}{label}
       </div>
       <div style={{ marginTop: 4, fontSize: '0.85rem', color: 'var(--ink)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis' }}>{value || EMPTY_VALUE}</div>

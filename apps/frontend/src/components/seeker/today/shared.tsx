@@ -6,9 +6,10 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
 export const eyebrowStyle: CSSProperties = {
-  fontSize: '0.75rem', color: 'var(--ink-muted)',
-  letterSpacing: '0.05em', textTransform: 'uppercase',
-  fontWeight: 600, marginBottom: 6,
+  fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace',
+  fontSize: 11, color: 'var(--ink-muted)',
+  letterSpacing: '0.08em', textTransform: 'uppercase',
+  fontWeight: 500, marginBottom: 8,
 };
 
 export function SectionHead({ eyebrow, title, linkLabel, linkTo }: {

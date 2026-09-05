@@ -12,6 +12,7 @@ import { Card, Switch, Button, useToast } from '@/components/ui';
 import { fetchAlertSettings, patchAlertSettings, sendTestDigest } from '@/api/admin-alert-settings-api';
 import type { AlertSettings } from '@/types/admin-alert-settings';
 import { relativeTime } from '../parts/mission-format';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 
 const CONTROL = {
   padding: '7px 10px', borderRadius: 8, fontSize: '0.85rem',
@@ -106,12 +107,7 @@ export default function AlertsClient() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div>
-        <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--ink)' }}>Alerts &amp; Digest</h1>
-        <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: 'var(--ink-muted)' }}>
-          AI budget alerts and the Monday digest. Every change is recorded in the audit log.
-        </p>
-      </div>
+      <AdminPageHeader title={<>Alerts &amp; Digest</>} subtitle="AI budget alerts and the Monday digest. Every change is recorded in the audit log." />
 
       <Card variant="raised">
         <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--ink)' }}>Email alerts</h2>

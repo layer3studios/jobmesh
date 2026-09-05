@@ -1,14 +1,23 @@
 'use client';
 // FILE: src/components/seeker/JobDetailPanel/Body.tsx
+// Scrolling body: TECH STACK (mono chips), COMPENSATION (hairline block),
+// the description, then similar roles. Sections are mono-labelled and
+// separated by hairlines — no tinted blocks.
 import { useState, useMemo, useEffect } from 'react';
 import type { IJob } from '../../../types';
 import SimilarJobs from '../SimilarJobs';
-import { getAutoTags, stripHtmlText, BOILERPLATE_REGEX, sectionLabel } from './job-detail-helpers';
+import { getAutoTags, stripHtmlText, BOILERPLATE_REGEX, sectionLabel, MONO } from './job-detail-helpers';
 
 interface Props {
   job: IJob;
   mobileMode?: boolean;
   onSelectJob?: (job: IJob) => void;
+}
+
+function salaryText(job: IJob): string | null {
+  if (job.SalaryInfo) return job.SalaryInfo;
+  if (!job.SalaryMin) return null;
+  return `${job.SalaryMin}${job.SalaryMax ? ` – ${job.SalaryMax}` : ''} ${job.SalaryCurrency || ''}`.trim();
 }
 
 export default function Body({ job, mobileMode, onSelectJob }: Props) {
@@ -17,43 +26,49 @@ export default function Body({ job, mobileMode, onSelectJob }: Props) {
 
   const auto = getAutoTags(job);
   const html = useMemo(() => job.DescriptionCleaned || job.Description || '', [job]);
+  const salary = salaryText(job);
 
   return (
     <div className="thin-scroll" style={{
       flex: 1, overflowY: 'auto',
-      padding: mobileMode ? '16px 16px 80px' : '20px 22px',
+      padding: mobileMode ? '16px 16px 80px' : '20px 24px 28px',
     }}>
       {auto.techStack && auto.techStack.length > 0 && (
-        <div style={{ marginBottom: 18 }}>
+        <section style={{ marginBottom: 20 }}>
           <p style={sectionLabel}>Tech stack</p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {auto.techStack.slice(0, 12).map(t => (
               <span key={t} style={{
-                fontSize: '0.78rem', padding: '3px 9px', borderRadius: 6,
-                background: 'var(--accent-soft)', color: 'var(--accent)',
-                fontWeight: 500,
+                fontFamily: MONO, fontSize: 12, padding: '4px 10px', borderRadius: 8,
+                background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--ink-2)',
               }}>{t}</span>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
-      <div className="job-description-html" dangerouslySetInnerHTML={{ __html: html }} />
+      {salary && (
+        <section style={{
+          marginBottom: 20, padding: '14px 0',
+          borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)',
+        }}>
+          <p style={{ ...sectionLabel, marginBottom: 6 }}>Compensation</p>
+          <p style={{ fontSize: 17, fontWeight: 500, color: 'var(--ink)', letterSpacing: '-0.01em' }}>{salary}</p>
+        </section>
+      )}
+
+      {html && (
+        <>
+          <p style={sectionLabel}>About the role</p>
+          <div className="job-description-html" style={{ fontSize: 14, lineHeight: 1.65, color: 'var(--ink-2)' }}
+            dangerouslySetInnerHTML={{ __html: html }} />
+        </>
+      )}
 
       {html && BOILERPLATE_REGEX.test(stripHtmlText(html)) && !boilerplateOpen && (
         <button className="jd-boilerplate-toggle" onClick={() => setBoilerplateOpen(true)}>
           Show benefits & EEO statement
         </button>
-      )}
-
-      {(job.SalaryInfo || job.SalaryMin) && (
-        <div style={{
-          marginTop: 18, padding: '10px 14px',
-          background: 'var(--success-soft)', color: 'var(--success)',
-          borderRadius: 10, fontSize: '0.875rem', fontWeight: 500,
-        }}>
-          💰 {job.SalaryInfo || `${job.SalaryMin}${job.SalaryMax ? ` – ${job.SalaryMax}` : ''} ${job.SalaryCurrency || ''}`}
-        </div>
       )}
 
       {onSelectJob && <SimilarJobs jobId={job._id} onSelect={onSelectJob} />}

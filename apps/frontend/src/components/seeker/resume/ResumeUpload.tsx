@@ -8,7 +8,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Container, PageHeader, Spinner, useToast } from '../../ui';
+import { Spinner, useToast } from '../../ui';
+import SeekerWorkspace from '../SeekerWorkspace';
 import ConsentGate from '../../shared/ConsentGate';
 import ResumeUploadZone from '../ResumeUploadZone';
 import ResumeParsingScreen from '../ResumeParsingScreen';
@@ -63,9 +64,8 @@ export default function ResumeUpload() {
   };
 
   return (
-    <Container size="md" style={{ paddingTop: 32, paddingBottom: 60 }}>
-      <PageHeader label="SEEKER" title="Upload your resume" />
-      {renderBody()}
-    </Container>
+    <SeekerWorkspace label="Seeker" title="Upload your resume">
+      <div style={{ maxWidth: 760 }}>{renderBody()}</div>
+    </SeekerWorkspace>
   );
 }

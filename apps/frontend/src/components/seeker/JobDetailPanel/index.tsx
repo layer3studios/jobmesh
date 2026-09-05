@@ -32,12 +32,12 @@ export default function JobDetailPanel({
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', height: '100%',
-      background: 'var(--surface)', overflow: 'hidden',
+      background: 'transparent', overflow: 'hidden',
     }}>
       <div style={{
         padding: mobileMode ? '16px 16px 12px' : '20px 22px 14px',
         borderBottom: '1px solid var(--border)',
-        background: 'var(--surface)', flexShrink: 0,
+        flexShrink: 0,
       }}>
         <Header job={job} domain={domain} mobileMode={mobileMode} />
         <Actions

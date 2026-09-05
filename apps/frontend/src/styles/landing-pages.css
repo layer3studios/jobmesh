@@ -1,0 +1,102 @@
+/* FILE: src/styles/landing-pages.css
+   The secondary landing pages, /find-work and /companies: a centred hero on
+   the PURE ink ground (no photograph — the reference's job-board screen is
+   flat #09090B with the object floating in it), the search console, and the
+   suggestion row. `lp-` for the hero, `fw-` for the console. Everything else
+   on these pages reuses the landing's own sections and rules. */
+
+/* ── Centred hero on flat ink. The 3D field fills the whole band. ─────── */
+.lp-hero {
+  position: relative; overflow: hidden; isolation: isolate;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: min(86svh, 860px);
+  padding-top: var(--s-9); padding-bottom: var(--s-9);
+  text-align: center; background: var(--paper);
+}
+.lp-hero__veil {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background:
+    radial-gradient(ellipse 44% 46% at 50% 50%, rgba(9, 9, 11, 0.72) 0%, rgba(9, 9, 11, 0.25) 60%, rgba(9, 9, 11, 0) 85%),
+    linear-gradient(to bottom, rgba(9, 9, 11, 0) 82%, var(--paper) 100%);
+}
+.lp-hero__content { position: relative; z-index: 3; width: 100%; max-width: 900px; }
+.lp-hero__title {
+  margin: 0 auto var(--s-5); max-width: 15ch;
+  font-size: var(--t-display-1); line-height: 1.06; letter-spacing: -0.02em; color: var(--ink);
+  text-wrap: balance;
+}
+.lp-hero__title .hm-word { font-style: normal; }
+.lp-hero__title .hm-word--accent { font-style: italic; }
+.lp-hero__lede { margin-bottom: var(--s-7); }
+
+/* ── The search console — one object, hairline shell, white button. ──── */
+.fw-search {
+  display: flex; align-items: center; gap: 0;
+  width: 100%; max-width: 640px; margin: 0 auto; padding: 8px;
+  background: rgba(19, 19, 22, 0.62);
+  backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md); box-shadow: var(--shadow-md), var(--highlight-edge);
+  text-align: left;
+  transition: border-color var(--m-base) var(--ease), box-shadow var(--m-base) var(--ease);
+}
+.fw-search:focus-within { border-color: var(--border-loud); box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255, 255, 255, 0.08); }
+.fw-search__field { display: flex; align-items: center; gap: var(--s-3); flex: 1; min-width: 0; height: 44px; padding: 0 var(--s-3) 0 var(--s-4); }
+.fw-search__icon { flex-shrink: 0; color: var(--ink-muted); }
+.fw-search__input { flex: 1; min-width: 0; height: 100%; border: none; background: transparent; font-size: var(--t-body); color: var(--ink); }
+.fw-search__input::placeholder { color: var(--ink-muted); }
+.fw-search__input::-webkit-search-cancel-button { display: none; }
+.fw-search__divider { width: 1px; height: 28px; margin: 0 var(--s-2); background: var(--border-strong); flex-shrink: 0; }
+.fw-search__loc {
+  display: inline-flex; align-items: center; gap: var(--s-3); flex-shrink: 0;
+  height: 44px; padding: 0 var(--s-4); border: none; border-radius: var(--r-sm);
+  background: transparent; cursor: pointer;
+  font-size: var(--t-body); color: var(--ink);
+  transition: background-color var(--m-base) var(--ease);
+}
+.fw-search__loc:hover { background: rgba(255, 255, 255, 0.04); }
+.fw-search__loc:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.fw-search__btn {
+  display: inline-flex; align-items: center; flex-shrink: 0;
+  height: 44px; padding: 0 var(--s-5); margin-left: var(--s-2);
+  border: none; border-radius: var(--r-sm);
+  background: var(--ink); color: var(--paper);
+  font-size: var(--t-label); font-weight: 500; letter-spacing: -0.02em; cursor: pointer;
+  transition: background-color var(--m-base) var(--ease), transform var(--m-base) var(--ease);
+}
+.fw-search__btn:hover { background: #ffffff; transform: translateY(-1px); }
+.fw-search__btn:active { transform: translateY(0) scale(0.98); transition-duration: var(--m-fast); }
+.fw-search__btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.fw-search--single .fw-search__field { height: 48px; }
+
+/* ── Suggestion row: mono pills on the surface tone. ───────────────────── */
+.fw-tags { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--s-2); margin-top: var(--s-5); }
+.fw-tags__label { margin-right: var(--s-2); font-size: var(--t-label); color: var(--ink-muted); }
+.fw-tag {
+  padding: 6px 12px; border: 1px solid var(--border-mid); border-radius: var(--r-pill);
+  background: rgba(26, 26, 30, 0.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--ink); font-size: var(--t-label); text-decoration: none;
+  transition: border-color var(--m-base) var(--ease), background-color var(--m-base) var(--ease);
+}
+.fw-tag:hover { border-color: var(--ink); }
+.fw-tag:active { background: var(--surface); }
+.fw-tag:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* ── Company cards on /companies: three across, arrow slides on hover. ── */
+@media (min-width: 900px) { .lp-companies__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.lp-company { position: relative; padding-right: var(--s-8); }
+.lp-company__arrow { position: absolute; right: var(--s-4); top: 50%; margin-top: -7px; color: var(--ink-muted); }
+
+@media (max-width: 767px) {
+  .lp-hero { min-height: min(78svh, 720px); padding-top: var(--s-8); padding-bottom: var(--s-8); }
+  .lp-hero__title { max-width: 12ch; }
+  .fw-search { flex-wrap: wrap; gap: var(--s-2); }
+  .fw-search__field { flex: 1 1 100%; }
+  .fw-search__divider { display: none; }
+  .fw-search__loc { flex: 1 1 auto; }
+  .fw-search__btn { margin-left: 0; }
+  /* A single-field console has room for its button on one row on a phone. */
+  .fw-search--single { flex-wrap: nowrap; }
+  .fw-search--single .fw-search__field { flex: 1 1 auto; height: 44px; }
+  .fw-search--single .fw-search__btn { margin-left: var(--s-2); }
+}
+@media (prefers-reduced-motion: reduce) { .fw-search__btn:hover, .fw-search__btn:active { transform: none; } }

@@ -34,17 +34,23 @@ export default function AdminAppShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div style={{
-      minHeight: '100dvh', display: 'flex', flexDirection: 'column', background: 'var(--paper)',
-    }}>
+    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
+      {/* Ambient washes behind every app page so glass surfaces have depth to blur. */}
+      <div className="app-ambient app-ambient--quiet" aria-hidden />
       <AdminTopNav
         isCompact={isCompact}
         currentUser={navUser}
         onLogout={logout}
       />
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
         {/* key by path forces a clean unmount/remount per route (mirror seeker). */}
-        <div key={pathname} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* The one page frame for every admin panel — the same width and padding
+            the employer PageShell uses, so the nav and the content align. */}
+        <div key={pathname} className="page-enter" style={{
+          flex: 1, display: 'flex', flexDirection: 'column', width: '100%',
+          maxWidth: 'var(--page-max-width-wide)', margin: '0 auto',
+          padding: 'var(--page-padding-y) var(--page-padding-x)', boxSizing: 'border-box',
+        }}>
           {children}
         </div>
       </main>

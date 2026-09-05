@@ -12,7 +12,7 @@
 
 import type { RefObject } from 'react';
 import type { IJob } from '../../../types';
-import { Container, PageHeader } from '../../ui';
+import { Container } from '../../ui';
 import { COPY } from '../../../theme/brand';
 import type { useSeeker } from '../../../context/seeker/SeekerContext';
 import type { useComeBack } from '../../../hooks/seeker/useComeBack';
@@ -70,11 +70,14 @@ export default function DashboardLayout(p: DashboardLayoutProps) {
 
   return (
     <Container size="xl" style={{ paddingTop: 'clamp(16px, 4vw, 24px)', paddingBottom: p.isMobile ? 80 : 40, width: '100%' }}>
-      <PageHeader
-        label={COPY.jobs.pageLabel}
-        title={COPY.jobs.pageTitle}
-        subtitle={p.loading ? 'Loading…' : `${p.totalJobs.toLocaleString()} ${COPY.jobs.rolesAvailable}`}
-      />
+      {/* No page title: the search band is the header. One mono line states scale. */}
+      <p style={{
+        fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace',
+        fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase',
+        color: 'var(--ink-muted)', marginBottom: 12,
+      }}>
+        {COPY.jobs.pageLabel} · {p.loading ? 'Loading…' : `${p.totalJobs.toLocaleString()} ${COPY.jobs.rolesAvailable}`}
+      </p>
 
       <DashboardControls
         isMobile={p.isMobile}

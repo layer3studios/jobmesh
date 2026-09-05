@@ -8,13 +8,12 @@ import type { SchemaHealth, IndexingStats, StaleUrl } from '@/types/admin-seo';
 import { relativeTime } from '../../parts/mission-format';
 
 const CARD = {
-  background: 'var(--surface)', border: '1px solid var(--border)',
+  background: 'var(--glass-card)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', boxShadow: 'inset 0 1px 0 var(--glass-sheen), var(--shadow-sm)', border: '1px solid var(--border)',
   borderRadius: 12, padding: '12px 14px', minWidth: 0,
 } as const;
 
 const LABEL = {
-  fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.04em',
-  textTransform: 'uppercase', color: 'var(--ink-faint)',
+  fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 10, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)',
 } as const;
 
 const TH = {
@@ -35,7 +34,7 @@ function GapTile({ label, value, total }: { label: string; value: number; total:
     <div style={{ ...CARD, borderColor: bad ? 'var(--danger)' : 'var(--border)' }}>
       <div style={LABEL}>{label}</div>
       <div style={{
-        fontSize: '1.5rem', fontWeight: 700, marginTop: 4, lineHeight: 1.1,
+        fontFamily: 'var(--font-instrument-serif), var(--font-source-serif), Georgia, serif', fontSize: 28, fontWeight: 400, letterSpacing: '-0.03em', marginTop: 6, lineHeight: 1,
         color: bad ? 'var(--danger)' : 'var(--ink)',
       }}>
         {value.toLocaleString()}
@@ -52,7 +51,7 @@ export function SchemaHealthPanel({ schema }: { schema: SchemaHealth }) {
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10 }}>
       <div style={CARD}>
         <div style={LABEL}>Live postings</div>
-        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--ink)', marginTop: 4, lineHeight: 1.1 }}>
+        <div style={{ fontFamily: 'var(--font-instrument-serif), var(--font-source-serif), Georgia, serif', fontSize: 28, fontWeight: 400, letterSpacing: '-0.03em', color: 'var(--ink)', marginTop: 6, lineHeight: 1 }}>
           {schema.total.toLocaleString()}
         </div>
         <div style={{ fontSize: '0.75rem', color: 'var(--ink-muted)', marginTop: 2 }}>with a public page</div>

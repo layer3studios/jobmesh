@@ -32,7 +32,8 @@ export default function PublicProfile({ profile, shareUrl }: {
   shareUrl: string;
 }) {
   return (
-    <div className="pp-shell">
+    <div className="pp-shell" style={{ position: 'relative' }}>
+      <div className="app-ambient" aria-hidden />
       <PublicProfileHeader profile={profile} shareUrl={shareUrl} />
 
       <PublicSkills profile={profile} />

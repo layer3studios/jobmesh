@@ -41,7 +41,7 @@ export function Drawer({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        style={{ position: 'absolute', display: 'flex', flexDirection: 'column', background: 'var(--surface)', boxShadow: SHADOW.lg, ...panel }}
+        style={{ position: 'absolute', display: 'flex', flexDirection: 'column', background: 'var(--glass-strong)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', boxShadow: SHADOW.lg, ...panel }}
       >
         <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
           <h2 id={titleId} style={{ fontSize: TYPE.lg, fontWeight: 600, color: 'var(--ink)', margin: 0 }}>{title}</h2>

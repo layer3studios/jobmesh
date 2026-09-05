@@ -1,0 +1,71 @@
+/* FILE: src/styles/hire.css
+   The /hire page — the employer pitch on the seeker host. Reuses every
+   landing token, control and motion rule; this file only lays out the four
+   sections that are unique to it: the split hero with the ranked kanban, the
+   six proof cards, the four steps, and the close. `hr-` prefix. */
+
+/* ── Hero: copy left, kanban right, on the companies ink. ───────────── */
+.hr-hero {
+  position: relative; overflow: hidden; isolation: isolate;
+  padding-top: var(--s-10); padding-bottom: var(--s-10);
+  min-height: min(92svh, 920px); display: flex; align-items: center;
+}
+.hr-hero__grid { position: relative; z-index: 3; display: grid; grid-template-columns: 1fr; gap: var(--s-8); align-items: center; }
+@media (min-width: 1000px) { .hr-hero__grid { grid-template-columns: 1.05fr 1fr; gap: var(--s-9); } }
+.hr-hero__title { margin: 0 0 var(--s-5); max-width: 14ch; font-size: var(--t-display-1); line-height: 1.06; letter-spacing: -0.02em; color: var(--ink); }
+.hr-hero__lede { margin: 0 0 var(--s-6); max-width: 50ch; text-align: left; }
+.hr-hero__doors { justify-content: flex-start; margin-bottom: var(--s-7); }
+.hr-hero__stats { display: flex; gap: var(--s-7); margin: 0; padding-top: var(--s-5); border-top: 1px solid var(--border); }
+.hr-hero__stat { margin: 0; }
+.hr-hero__stat-label { font-size: var(--t-label-sm); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-muted); }
+.hr-hero__stat-value { margin: var(--s-1) 0 0; font-size: 30px; line-height: 1; color: var(--ink); }
+.hr-hero__panel { position: relative; }
+@media (max-width: 999px) { .hr-hero { min-height: 0; } .hr-hero__doors { flex-direction: column; align-items: stretch; } }
+
+/* ── The ranked kanban. ─────────────────────────────────────────────── */
+.hr-kanban { padding: var(--s-5); }
+.hr-kanban__columns { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-3); }
+@media (max-width: 639px) { .hr-kanban__columns { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.hr-kanban__column { display: grid; gap: var(--s-2); align-content: start; min-width: 0; }
+.hr-kanban__head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); min-width: 0; padding-bottom: var(--s-2); margin-bottom: var(--s-1); border-bottom: 1px solid var(--border-mid); font-size: 9.5px; letter-spacing: 0.08em; color: var(--ink-muted); }
+.hr-kanban__head > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hr-kanban__count { flex-shrink: 0; padding: 1px 6px; border-radius: var(--r-sm); background: var(--surface-2); color: var(--ink); }
+.hr-card { min-width: 0; overflow: hidden; padding: var(--s-3); background: rgba(9, 9, 11, 0.8); border: 1px solid var(--border); border-radius: var(--r-sm); transition: border-color var(--m-base) var(--ease), transform var(--m-base) var(--ease); }
+.hr-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+.hr-card--offer { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.hr-card__row { display: flex; align-items: center; gap: var(--s-2); }
+.hr-card__avatar { width: 26px; height: 26px; flex-shrink: 0; border-radius: 50%; border: 1px solid currentColor; display: grid; place-items: center; font-size: 9px; opacity: 0.85; }
+.hr-card__who { min-width: 0; flex: 1; }
+.hr-card__name { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hr-card__role { font-size: 10.5px; opacity: 0.6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hr-card__score { font-size: 12px; font-weight: 600; }
+.hr-card__track { height: 2px; margin-top: var(--s-2); background: rgba(255, 255, 255, 0.1); }
+.hr-card--offer .hr-card__track { background: rgba(9, 9, 11, 0.15); }
+.hr-card__fill { height: 100%; background: currentColor; }
+
+/* ── Proof cards. ───────────────────────────────────────────────────── */
+.hr-proof { padding-top: var(--s-10); padding-bottom: var(--s-10); border-bottom: 1px solid var(--border); }
+.hr-proof__head { max-width: 560px; margin-bottom: var(--s-8); }
+.hr-proof__head .hm-lede { margin-top: var(--s-4); }
+.hr-proof__grid { display: grid; grid-template-columns: 1fr; gap: var(--s-4); }
+@media (min-width: 640px) { .hr-proof__grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1000px) { .hr-proof__grid { grid-template-columns: repeat(3, 1fr); gap: var(--s-5); } }
+.hr-feature { padding: var(--s-6); cursor: default; }
+.hr-kanban { background: rgba(19, 19, 22, 0.58); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); }
+.hr-feature__icon { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: var(--s-5); border: 1px solid var(--border-strong); border-radius: var(--r-sm); color: var(--ink); transition: border-color var(--m-base) var(--ease); }
+.hr-feature:hover .hr-feature__icon { border-color: var(--ink); }
+.hr-feature__title { margin-bottom: var(--s-2); font-size: var(--t-title-lg); line-height: 1.3; color: var(--ink); }
+.hr-feature__body { font-size: var(--t-body); line-height: 1.6; color: var(--ink-muted); }
+
+/* ── Four steps on a rail. ──────────────────────────────────────────── */
+.hr-process { padding-top: var(--s-10); padding-bottom: var(--s-10); border-bottom: 1px solid var(--border); }
+.hr-process__title { margin-bottom: var(--s-8); }
+.hr-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr; border-top: 1px solid var(--border); }
+@media (min-width: 900px) { .hr-steps { grid-template-columns: repeat(4, 1fr); } }
+.hr-step { display: grid; grid-template-columns: auto 1fr; gap: var(--s-4); padding: var(--s-6) var(--s-5) var(--s-6) 0; border-bottom: 1px solid var(--border); }
+@media (min-width: 900px) { .hr-step { grid-template-columns: 1fr; padding: var(--s-6); border-bottom: none; } .hr-step + .hr-step { border-left: 1px solid var(--border); } }
+.hr-step__n { font-size: var(--t-label); letter-spacing: 0.05em; color: var(--ink-muted); }
+.hr-step__title { margin: var(--s-2) 0; font-size: var(--t-title); color: var(--ink); }
+.hr-step__body { font-size: var(--t-body-sm); line-height: 1.6; color: var(--ink-muted); }
+
+@media (prefers-reduced-motion: reduce) { .hr-card:hover { transform: none; } }

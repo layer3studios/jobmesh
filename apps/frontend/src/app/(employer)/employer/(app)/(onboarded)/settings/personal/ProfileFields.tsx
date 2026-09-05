@@ -18,7 +18,7 @@ const CLOCK_TICK_MS = 30_000;
 
 const READ_ONLY_ROW = {
   display: 'flex', justifyContent: 'space-between', gap: 12,
-  padding: '7px 0', fontSize: 13, borderBottom: '0.5px solid var(--border)',
+  padding: '7px 0', fontSize: 13, borderBottom: '1px solid var(--border)',
 } as const;
 
 function ReadOnlyRow({ label, value }: { label: string; value: string }) {
@@ -53,7 +53,9 @@ export default function ProfileFields({
     return () => window.clearInterval(timer);
   }, []);
 
-  const groups = buildTimezoneGroups(timezone);
+  // Full list only once mounted (`now` is null on the server and on the first
+  // client render), so both sides hydrate the same pinned group.
+  const groups = buildTimezoneGroups(timezone, { full: now !== null });
   const localTime = now ? formatCurrentTimeIn(timezone, now) : null;
 
   return (

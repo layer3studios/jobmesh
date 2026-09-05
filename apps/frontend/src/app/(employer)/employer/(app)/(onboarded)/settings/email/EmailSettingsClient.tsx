@@ -17,7 +17,7 @@ const PLATFORM_FROM_ADDRESS = 'hello@jobmesh.in';
 
 const ROW = {
   display: 'flex', gap: 12, padding: '12px 16px',
-  borderBottom: '0.5px solid var(--border)', flexWrap: 'wrap' as const,
+  borderBottom: '1px solid var(--border)', flexWrap: 'wrap' as const,
 };
 const LABEL = { width: 160, flexShrink: 0, fontSize: 13, fontWeight: 500, color: 'var(--ink)' } as const;
 const VALUE = { flex: 1, minWidth: 220, fontSize: 13, color: 'var(--ink-2)' } as const;
@@ -38,7 +38,7 @@ export default function EmailSettingsClient() {
         subtitle="How candidate-facing emails are sent for your company."
       />
       <div style={{
-        background: 'var(--surface-sunken)', border: '0.5px solid var(--border)',
+        background: 'var(--glass-card)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', boxShadow: 'inset 0 1px 0 var(--glass-sheen), var(--shadow-sm)', border: '1px solid var(--border)',
         borderRadius: 12, overflow: 'hidden', maxWidth: 640,
       }}>
         <div style={ROW}>

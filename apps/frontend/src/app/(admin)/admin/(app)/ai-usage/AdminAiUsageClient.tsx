@@ -13,18 +13,19 @@ import type { AiUsageRange, AiUsageReport } from '@/types/admin-ai-usage';
 import { compactNumber, percent } from './parts/ai-usage-format';
 import { TierCards, ModelTable, DailyBars } from './parts/AiUsageCharts';
 import CurrentLimitsTable from './parts/CurrentLimitsTable';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 
 const RANGES: AiUsageRange[] = ['7d', '14d', '30d', '90d'];
 const POLL_INTERVAL_MS = 60_000;
 
 const SECTION_TITLE = {
-  margin: '0 0 10px', fontSize: '0.95rem', fontWeight: 600, color: 'var(--ink)',
+  margin: '0 0 10px', fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)',
 } as const;
 
 function KpiTile({ label, value }: { label: string; value: string }) {
   return (
     <div data-testid="kpi-tile" style={{
-      background: 'var(--surface)', border: '1px solid var(--border)',
+      background: 'var(--glass-card)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', boxShadow: 'inset 0 1px 0 var(--glass-sheen), var(--shadow-sm)', border: '1px solid var(--border)',
       borderRadius: 12, padding: '12px 14px', minWidth: 0,
     }}>
       <div style={{
@@ -33,7 +34,7 @@ function KpiTile({ label, value }: { label: string; value: string }) {
       }}>
         {label}
       </div>
-      <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--ink)', marginTop: 4, lineHeight: 1.1 }}>
+      <div style={{ fontFamily: 'var(--font-instrument-serif), var(--font-source-serif), Georgia, serif', fontSize: 28, fontWeight: 400, letterSpacing: '-0.03em', color: 'var(--ink)', marginTop: 6, lineHeight: 1 }}>
         {value}
       </div>
     </div>
@@ -82,12 +83,7 @@ export default function AdminAiUsageClient() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--ink)' }}>AI Usage</h1>
-          <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: 'var(--ink-muted)' }}>
-            Spend and live rate-limit budget. Refreshes every 60s.
-          </p>
-        </div>
+        <AdminPageHeader title="AI Usage" subtitle="Spend and live rate-limit budget. Refreshes every 60s." />
         <div role="group" aria-label="Range" style={{
           display: 'inline-flex', gap: 2, padding: 3, borderRadius: 10,
           background: 'var(--paper-2)', border: '1px solid var(--border)',

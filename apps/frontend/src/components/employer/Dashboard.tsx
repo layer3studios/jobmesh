@@ -34,16 +34,13 @@ const LOCKED_PAGE_STYLE: CSSProperties = {
   // 100dvh lock rather than adding to it — without this the last row clips.
   boxSizing: 'border-box',
 };
-const SKELETON_STYLE = { borderRadius: 10, animation: 'jm-dash-pulse 1.2s ease-in-out infinite' } as const;
-
 function Skeleton({ height }: { height: number }) {
-  return <div data-testid="dashboard-skeleton" style={{ ...SKELETON_STYLE, height }} />;
+  return <div data-testid="dashboard-skeleton" className="skeleton" style={{ borderRadius: 12, height }} />;
 }
 
 function LoadingState() {
   return (
     <PageShell width="wide" style={PAGE_STYLE}>
-      <style>{`@keyframes jm-dash-pulse { 0%, 100% { background: var(--surface); } 50% { background: var(--surface-raised); } }`}</style>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
         {Array.from({ length: 5 }, (_, i) => <Skeleton key={i} height={64} />)}
       </div>
@@ -83,14 +80,14 @@ export default function EmployerDashboard() {
 
   return (
     <PageShell width="wide" style={narrow ? PAGE_STYLE : LOCKED_PAGE_STYLE}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12, flexShrink: 0, flexWrap: 'wrap' }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 500, color: 'var(--ink)' }}>
-            Welcome back, {firstName}
-          </h1>
-          <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--ink-2)' }}>
-            Here&apos;s what&apos;s happening with your hiring.
+          <p style={{ margin: '0 0 8px', fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>
+            Dashboard
           </p>
+          <h1 className="font-display" style={{ margin: 0, fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)', fontWeight: 400, letterSpacing: '-0.04em', lineHeight: 1.05, color: 'var(--ink)' }}>
+            Welcome back, {firstName}.
+          </h1>
         </div>
         <Button iconLeft={<Plus size={15} />} onClick={() => router.push(withOrigin('/employer/jobs/new', NAV_ORIGINS.DASHBOARD))}>
           New posting

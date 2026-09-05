@@ -8,11 +8,10 @@ import type { AiDayUsage, AiModelUsage, AiTier, AiTierUsage } from '@/types/admi
 import { TIER_COLOR, TIERS, compactNumber, tierForModel, shortDate } from './ai-usage-format';
 
 const CARD = {
-  background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14,
+  background: 'var(--glass-card)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', boxShadow: 'inset 0 1px 0 var(--glass-sheen), var(--shadow-sm)', border: '1px solid var(--border)', borderRadius: 12, padding: 14,
 } as const;
 const TH = {
-  textAlign: 'left', fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.04em',
-  textTransform: 'uppercase', color: 'var(--ink-faint)', padding: '6px 10px',
+  textAlign: 'left', fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace', fontSize: 10, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)', padding: '6px 10px',
 } as const;
 const TD = { padding: '8px 10px', fontSize: '0.85rem', color: 'var(--ink)' } as const;
 

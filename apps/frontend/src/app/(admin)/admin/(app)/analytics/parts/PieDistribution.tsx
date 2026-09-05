@@ -7,12 +7,13 @@ import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recha
 interface Slice { name: string; value: number }
 
 // A small, theme-neutral categorical palette (distinct hues, readable in both themes).
-const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#a855f7', '#94a3b8'];
+// Categorical series — the theme's --cat-* palette, so charts follow dark/light.
+const COLORS = ['var(--cat-indigo)', 'var(--cat-green)', 'var(--cat-amber)', 'var(--cat-red)', 'var(--cat-blue)', 'var(--cat-purple)', 'var(--ink-faint)'];
 
 export default function PieDistribution({ title, data }: { title: string; data: Slice[] }) {
   const nonEmpty = data.filter((d) => d.value > 0);
   return (
-    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '16px 18px' }}>
+    <div style={{ background: 'var(--glass-card)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', boxShadow: 'inset 0 1px 0 var(--glass-sheen), var(--shadow-sm)', border: '1px solid var(--border)', borderRadius: 12, padding: '16px 18px' }}>
       <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--ink)', marginBottom: 8 }}>{title}</div>
       {nonEmpty.length === 0 ? (
         <div style={{ fontSize: '0.8rem', color: 'var(--ink-faint)' }}>No data</div>
@@ -23,7 +24,7 @@ export default function PieDistribution({ title, data }: { title: string; data: 
               {nonEmpty.map((_, index) => <Cell key={index} fill={COLORS[index % COLORS.length]} />)}
             </Pie>
             <Tooltip
-              contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, fontSize: '0.78rem' }}
+              contentStyle={{ background: 'var(--glass-card)', backdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', WebkitBackdropFilter: 'blur(var(--glass-blur)) saturate(var(--glass-sat))', boxShadow: 'inset 0 1px 0 var(--glass-sheen), var(--shadow-sm)', border: '1px solid var(--border)', borderRadius: 8, fontSize: '0.78rem' }}
             />
             <Legend wrapperStyle={{ fontSize: '0.78rem', color: 'var(--ink-muted)' }} />
           </PieChart>
