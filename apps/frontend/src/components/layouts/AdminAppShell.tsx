@@ -36,7 +36,7 @@ export default function AdminAppShell({ children }: { children: ReactNode }) {
   return (
     <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
       {/* Ambient washes behind every app page so glass surfaces have depth to blur. */}
-      <div className="app-ambient" aria-hidden />
+      <div className="app-ambient app-ambient--quiet" aria-hidden />
       <AdminTopNav
         isCompact={isCompact}
         currentUser={navUser}

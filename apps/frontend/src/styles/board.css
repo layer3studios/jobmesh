@@ -36,6 +36,14 @@ button:not(:disabled):active, [role="button"]:not([aria-disabled="true"]):active
     radial-gradient(40% 35% at 70% 20%, color-mix(in srgb, var(--thread-indigo) 8%, transparent), transparent 70%),
     radial-gradient(45% 40% at 20% 85%, color-mix(in srgb, var(--thread-amber) 7%, transparent), transparent 70%);
 }
+/* Employer, admin and apply are glass end to end, so the same washes read far
+   stronger there than on the seeker board (whose job cards are opaque). The
+   quiet variant is the seeker's effective intensity. */
+.app-ambient--quiet {
+  background:
+    radial-gradient(60% 50% at 12% 0%, color-mix(in srgb, var(--thread-amber) 8%, transparent), transparent 70%),
+    radial-gradient(55% 45% at 90% 100%, color-mix(in srgb, var(--thread-indigo) 10%, transparent), transparent 70%);
+}
 /* The glass recipe, for anything that is not a Card: a translucent fill, a
    deep blur with lifted saturation so the ambient colour bleeds through, a
    sheen along the top edge and a faint light caught at the top of the pane. */

@@ -13,7 +13,7 @@ const MONO = 'var(--font-jetbrains-mono), ui-monospace, monospace';
 export default function ApplyLayout({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
-      <div className="app-ambient" aria-hidden />
+      <div className="app-ambient app-ambient--quiet" aria-hidden />
       <header
         className="an-nav"
         style={{
