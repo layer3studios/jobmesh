@@ -23,7 +23,6 @@ const EMPLOYER = {
     ['/employer', 'Dashboard'],
     ['/employer/jobs', 'Postings'],
     ['/employer/assignments', 'Assignments'],
-    ['/employer/settings/personal', 'Personal settings'],
   ] as FooterLink[],
 } as const;
 
