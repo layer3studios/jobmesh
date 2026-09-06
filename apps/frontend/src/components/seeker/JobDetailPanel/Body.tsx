@@ -1,12 +1,15 @@
 'use client';
 // FILE: src/components/seeker/JobDetailPanel/Body.tsx
-// Scrolling body: TECH STACK (mono chips), COMPENSATION (hairline block),
-// the description, then similar roles. Sections are mono-labelled and
-// separated by hairlines — no tinted blocks.
+// Scrolling body: the Overview table, the tech stack (chips the seeker
+// already has are marked), then the description as structured prose, then
+// similar roles. While a row's full document is still on its way, the
+// description slot shows a skeleton of itself — never a spinner.
 import { useState, useMemo, useEffect } from 'react';
 import type { IJob } from '../../../types';
 import SimilarJobs from '../SimilarJobs';
-import { getAutoTags, stripHtmlText, BOILERPLATE_REGEX, sectionLabel, MONO } from './job-detail-helpers';
+import { useSeeker } from '../../../context/seeker/SeekerContext';
+import { getAutoTags, stripHtmlText, BOILERPLATE_REGEX } from './job-detail-helpers';
+import Overview from './Overview';
 
 interface Props {
   job: IJob;
@@ -14,62 +17,58 @@ interface Props {
   onSelectJob?: (job: IJob) => void;
 }
 
-function salaryText(job: IJob): string | null {
-  if (job.SalaryInfo) return job.SalaryInfo;
-  if (!job.SalaryMin) return null;
-  return `${job.SalaryMin}${job.SalaryMax ? ` – ${job.SalaryMax}` : ''} ${job.SalaryCurrency || ''}`.trim();
-}
-
 export default function Body({ job, mobileMode, onSelectJob }: Props) {
   const [boilerplateOpen, setBoilerplateOpen] = useState(false);
   useEffect(() => { setBoilerplateOpen(false); }, [job._id]);
+  const { userSkills } = useSeeker();
+  const mine = useMemo(() => new Set(userSkills.map(s => s.toLowerCase())), [userSkills]);
 
   const auto = getAutoTags(job);
   const html = useMemo(() => job.DescriptionCleaned || job.Description || '', [job]);
-  const salary = salaryText(job);
+  // Feed rows arrive without a body; the orchestrator tops them up by id.
+  const bodyPending = job.Description === undefined && !job.DescriptionCleaned;
 
   return (
-    <div className="thin-scroll" style={{
-      flex: 1, overflowY: 'auto',
-      padding: mobileMode ? '16px 16px 80px' : '20px 24px 28px',
-    }}>
+    <div className={`jb-detail__scroll${mobileMode ? '' : ' panel-scroll'}`}>
+      <Overview job={job} />
+
       {auto.techStack && auto.techStack.length > 0 && (
-        <section style={{ marginBottom: 20 }}>
-          <p style={sectionLabel}>Tech stack</p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {auto.techStack.slice(0, 12).map(t => (
-              <span key={t} style={{
-                fontFamily: MONO, fontSize: 12, padding: '4px 10px', borderRadius: 8,
-                background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--ink-2)',
-              }}>{t}</span>
+        <section className="jb-section">
+          <p className="jb-section__label">Tech stack</p>
+          <div className="jb-stack">
+            {auto.techStack.slice(0, 14).map(t => (
+              <span key={t} className={`jb-stack__chip${mine.has(t.toLowerCase()) ? ' jb-stack__chip--mine' : ''}`} title={mine.has(t.toLowerCase()) ? 'On your profile' : undefined}>
+                {t}
+              </span>
             ))}
           </div>
         </section>
       )}
 
-      {salary && (
-        <section style={{
-          marginBottom: 20, padding: '14px 0',
-          borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)',
-        }}>
-          <p style={{ ...sectionLabel, marginBottom: 6 }}>Compensation</p>
-          <p style={{ fontSize: 17, fontWeight: 500, color: 'var(--ink)', letterSpacing: '-0.01em' }}>{salary}</p>
-        </section>
-      )}
-
-      {html && (
-        <>
-          <p style={sectionLabel}>About the role</p>
-          <div className="job-description-html" style={{ fontSize: 14, lineHeight: 1.65, color: 'var(--ink-2)' }}
-            dangerouslySetInnerHTML={{ __html: html }} />
-        </>
-      )}
-
-      {html && BOILERPLATE_REGEX.test(stripHtmlText(html)) && !boilerplateOpen && (
-        <button className="jd-boilerplate-toggle" onClick={() => setBoilerplateOpen(true)}>
-          Show benefits & EEO statement
-        </button>
-      )}
+      <section className="jb-section">
+        <p className="jb-section__label">About the role</p>
+        {bodyPending ? (
+          <div aria-busy="true" aria-label="Loading description" style={{ display: 'grid', gap: 10 }}>
+            <div className="skeleton" style={{ height: 14, width: '92%' }} />
+            <div className="skeleton" style={{ height: 14, width: '98%' }} />
+            <div className="skeleton" style={{ height: 14, width: '85%' }} />
+            <div className="skeleton" style={{ height: 14, width: '40%', marginTop: 10 }} />
+            <div className="skeleton" style={{ height: 14, width: '90%' }} />
+            <div className="skeleton" style={{ height: 14, width: '76%' }} />
+          </div>
+        ) : html ? (
+          <div className="jd-prose" dangerouslySetInnerHTML={{ __html: html }} />
+        ) : (
+          <p className="jb-detail__empty" style={{ padding: '18px 0', textAlign: 'left' }}>
+            This listing didn’t include a description. The full posting is on the company’s site — use Apply above.
+          </p>
+        )}
+        {html && !bodyPending && BOILERPLATE_REGEX.test(stripHtmlText(html)) && !boilerplateOpen && (
+          <button className="jd-boilerplate-toggle press" onClick={() => setBoilerplateOpen(true)}>
+            Show benefits & EEO statement
+          </button>
+        )}
+      </section>
 
       {onSelectJob && <SimilarJobs jobId={job._id} onSelect={onSelectJob} />}
     </div>

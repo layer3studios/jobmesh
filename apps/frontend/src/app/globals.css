@@ -20,6 +20,9 @@
 @import "../styles/discover.css";
 @import "../styles/public-profile.css";
 @import "../styles/board.css";
+@import "../styles/jobs-board.css";
+@import "../styles/workspace.css";
+@import "../styles/profile-editor.css";
 @import "../styles/auth.css";
 
 /* Tailwind v4 CSS-first tokens (R7). Mapped from frontend/src/theme/tokens.ts +

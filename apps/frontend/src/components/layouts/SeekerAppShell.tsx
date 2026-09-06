@@ -8,7 +8,7 @@
 // SeekerContext + ThemeProvider + useViewport here.
 import { useEffect, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
-import { Briefcase, Building2, Home as HomeIcon, BarChart3, FileText, User } from 'lucide-react';
+import { Briefcase, Building2, Home as HomeIcon, User } from 'lucide-react';
 import { useTheme } from '../../context/theme/ThemeProvider';
 import { useSeeker } from '../../context/seeker/SeekerContext';
 import SkillsEditor from '../seeker/SkillsEditor';
@@ -45,8 +45,6 @@ export default function SeekerAppShell({ children }: { children: ReactNode }) {
     { to: '/jobs', label: 'Jobs', icon: <Briefcase size={18} /> },
     { to: '/today', label: 'Today', icon: <HomeIcon size={18} /> },
     { to: '/directory', label: 'Companies', icon: <Building2 size={18} /> },
-    { to: '/progress', label: 'Progress', icon: <BarChart3 size={18} /> },
-    { to: '/resume', label: 'Resume', icon: <FileText size={18} /> },
     { to: '/profile', label: 'Profile', icon: <User size={18} /> },
   ] : [
     { to: '/', label: 'Home', icon: <HomeIcon size={18} /> },

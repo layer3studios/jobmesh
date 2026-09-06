@@ -42,15 +42,17 @@ export function Checkbox({
         />
         <span
           aria-hidden
+          className="ui-check"
+          data-checked={checked || undefined}
           style={{
             position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
             border: `1px solid ${borderColor}`, borderRadius: RADIUS.xs,
             background: checked ? 'var(--thread-indigo)' : 'transparent',
-            transition: 'all 150ms ease', pointerEvents: 'none',
+            pointerEvents: 'none',
             boxShadow: focused ? SHADOW.focus : 'none',
           }}
         >
-          {checked && <Check size={13} strokeWidth={3} color="var(--on-indigo)" />}
+          {checked && <Check size={13} strokeWidth={3} color="var(--on-indigo)" className="ui-check__mark" />}
         </span>
       </span>
       {label}

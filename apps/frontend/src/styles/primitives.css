@@ -45,6 +45,51 @@
   }
 }
 
+/* ── Press, shake, rise: the three micro-interactions everything shares ──
+   `.press` is the click: 0.97 on :active, released faster than it was
+   pressed. Hover lift is gated to a real pointer so touch never gets a
+   phantom hover. `.ui-btn` is the Button primitive's class (its colours are
+   inline, so only transform lives here). `.shake` is the error nudge, once.
+   `.rise` is a list item entering, staggered by --i. */
+.press, .ui-btn {
+  transition: transform var(--m-press) var(--ease-out);
+  will-change: transform;
+}
+.press:active, .ui-btn:active:not(:disabled) { transform: scale(var(--press-scale)); transition-duration: 80ms; }
+.press--sm:active { transform: scale(var(--press-scale-sm)); }
+@media (hover: hover) and (pointer: fine) {
+  .ui-btn:hover:not(:disabled) { transform: translateY(-1px); }
+  .ui-btn:active:not(:disabled) { transform: translateY(0) scale(var(--press-scale)); }
+}
+.ui-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Checkbox: the box tints, the mark draws in with a small overshoot. */
+.ui-check { transition: background-color var(--m-press) var(--ease-out), border-color var(--m-press) var(--ease-out), transform var(--m-press) var(--ease-out); }
+.ui-check[data-checked] { transform: scale(1); }
+label:active .ui-check { transform: scale(0.9); }
+@keyframes check-in { from { transform: scale(0.4); opacity: 0; } 60% { transform: scale(1.15); opacity: 1; } to { transform: scale(1); } }
+.ui-check__mark { animation: check-in 240ms var(--ease-out) both; }
+@media (prefers-reduced-motion: reduce) { .ui-check__mark { animation: none; } .ui-check { transition: none; } }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+.shake { animation: shake 320ms var(--ease-out) both; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.rise { animation: rise 360ms var(--ease-out) both; animation-delay: calc(var(--i, 0) * var(--stagger)); }
+
+@media (prefers-reduced-motion: reduce) {
+  .press, .ui-btn { transition: none; }
+  .press:active, .ui-btn:active:not(:disabled), .ui-btn:hover:not(:disabled) { transform: none; }
+  .shake { animation: none; }
+  .rise { animation: none; opacity: 1; transform: none; }
+}
+
 .skeleton {
   background: linear-gradient(90deg, var(--paper-2) 0%, var(--paper-3) 40%, var(--paper-2) 80%);
   background-size: 800px 100%;

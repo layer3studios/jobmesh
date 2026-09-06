@@ -1,5 +1,6 @@
 // FILE: src/components/seeker/JobDetailPanel/index.tsx
-// Orchestrator. Composes Header + Actions + Body.
+// Orchestrator. Composes Header + Actions + Body. Keyed by job id so a new
+// selection crossfades in (jobs-board.css .jb-swap) instead of snapping.
 
 import type { IJob } from '../../../types';
 import Header from './Header';
@@ -30,15 +31,8 @@ export default function JobDetailPanel({
   const note = comeBackMap[job._id] || '';
 
   return (
-    <div style={{
-      display: 'flex', flexDirection: 'column', height: '100%',
-      background: 'transparent', overflow: 'hidden',
-    }}>
-      <div style={{
-        padding: mobileMode ? '16px 16px 12px' : '20px 22px 14px',
-        borderBottom: '1px solid var(--border)',
-        flexShrink: 0,
-      }}>
+    <div key={job._id} className={`jb-detail__inner jb-swap${mobileMode ? ' jb-detail--mobile' : ''}`}>
+      <div className="jb-detail__head">
         <Header job={job} domain={domain} mobileMode={mobileMode} />
         <Actions
           job={job}

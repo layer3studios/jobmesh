@@ -1,11 +1,9 @@
-'use client';
+// FILE: src/app/(seeker)/resume/page.tsx
+// /resume retired as a page: the resume is uploaded from the profile, where
+// the result lands. Old links open the profile with the upload sheet already
+// open.
+import { redirect } from 'next/navigation';
 
-import { useSeeker } from '../../../context/seeker/SeekerContext';
-import LoginScreen from '../../../components/seeker/LoginScreen';
-import ResumeUpload from '../../../components/seeker/resume/ResumeUpload';
-
-export default function Page() {
-  const { currentUser } = useSeeker();
-  if (!currentUser) return <LoginScreen />;
-  return <ResumeUpload />;
+export default function ResumeRedirect() {
+  redirect('/profile?upload=1');
 }

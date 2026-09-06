@@ -62,6 +62,20 @@ export function inferWorkplace(job: IJob): string | null {
   return null;
 }
 
+/** "₹12L – ₹18L" from the numeric fields, or the listing's own salary text. */
+export function salaryText(job: IJob): string | null {
+  if (job.SalaryInfo) return job.SalaryInfo;
+  if (!job.SalaryMin && !job.SalaryMax) return null;
+  const inr = job.SalaryCurrency === 'INR' || !job.SalaryCurrency;
+  const fmt = (n: number) => inr && n >= 100000 ? `${(n / 100000).toFixed(n % 100000 === 0 ? 0 : 1)}L` : n >= 1000 ? `${Math.round(n / 1000)}K` : String(n);
+  const curr = inr ? '₹' : job.SalaryCurrency === 'USD' ? '$' : `${job.SalaryCurrency} `;
+  const lo = job.SalaryMin ? `${curr}${fmt(job.SalaryMin)}` : null;
+  const hi = job.SalaryMax ? `${curr}${fmt(job.SalaryMax)}` : null;
+  const range = lo && hi ? `${lo} – ${hi}` : lo ?? hi ?? '';
+  const per = job.SalaryInterval ? ` / ${job.SalaryInterval.toLowerCase().replace(/ly$/, '')}` : '';
+  return range ? `${range}${per}` : null;
+}
+
 // Boilerplate detection — chunks that talk about company benefits / EEO
 export const BOILERPLATE_REGEX = /\b(equal\s+opportunity|EEO|diversity|inclusion|benefits|perks|why\s+work|about\s+(us|the\s+company)|our\s+mission|our\s+values)/i;
 

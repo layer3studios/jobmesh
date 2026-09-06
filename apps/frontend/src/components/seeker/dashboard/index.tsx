@@ -34,7 +34,7 @@ export default function Dashboard() {
   const { comeBackMap, toggle: handleToggleComeBack, remove: handleRemoveComeBack } = useComeBack(currentUser);
 
   const {
-    jobs, totalJobs, totalPages, currentPage, loading, loadingMore, fetchJobs,
+    jobs, totalJobs, totalPages, currentPage, loading, loadingMore, error, retry, fetchJobs,
   } = useDashboardJobs({
     sel: f.sel,
     roleCategoryFilter: f.roleCategoryFilter,
@@ -169,6 +169,8 @@ export default function Dashboard() {
       finalJobs={finalJobs}
       totalJobs={totalJobs}
       loading={loading}
+      error={error}
+      onRetry={retry}
       loadingMore={loadingMore}
       currentPage={currentPage}
       totalPages={totalPages}

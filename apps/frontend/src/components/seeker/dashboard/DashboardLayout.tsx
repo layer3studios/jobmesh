@@ -36,6 +36,8 @@ export interface DashboardLayoutProps {
   finalJobs: IJob[];
   totalJobs: number;
   loading: boolean;
+  error: string | null;
+  onRetry: () => void;
   loadingMore: boolean;
   currentPage: number;
   totalPages: number;
@@ -76,7 +78,7 @@ export default function DashboardLayout(p: DashboardLayoutProps) {
         fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase',
         color: 'var(--ink-muted)', marginBottom: 12,
       }}>
-        {COPY.jobs.pageLabel} · {p.loading ? 'Loading…' : `${p.totalJobs.toLocaleString()} ${COPY.jobs.rolesAvailable}`}
+        {COPY.jobs.pageLabel} · {p.loading && p.jobs.length === 0 ? 'Loading…' : <span className="jb-count">{p.totalJobs.toLocaleString()} {COPY.jobs.rolesAvailable}</span>}
       </p>
 
       <DashboardControls
@@ -106,7 +108,7 @@ export default function DashboardLayout(p: DashboardLayoutProps) {
       />
 
       <DashboardBody
-        loading={p.loading} jobs={p.jobs} finalJobs={p.finalJobs}
+        loading={p.loading} error={p.error} onRetry={p.onRetry} jobs={p.jobs} finalJobs={p.finalJobs}
         useSplit={p.useSplit}
         selectedJob={p.selectedJob}
         companyDomainMap={p.companyDomainMap}

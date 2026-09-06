@@ -13,10 +13,10 @@ describe('UserMenu', () => {
   it('renders the menu items when open', () => {
     render(<UserMenu user={user} open onToggle={() => {}} onClose={() => {}} onOpenSkillsEditor={() => {}} onLogout={() => {}} />);
     expect(screen.getByText('My skills')).toBeTruthy();
-    expect(screen.getByText('My progress')).toBeTruthy();
+    expect(screen.getByText('My pipeline')).toBeTruthy();
     expect(screen.getByText('Sign out')).toBeTruthy();
-    const progress = screen.getByText('My progress').closest('a') as HTMLAnchorElement;
-    expect(progress.getAttribute('href')).toBe('/progress');
+    const progress = screen.getByText('My pipeline').closest('a') as HTMLAnchorElement;
+    expect(progress.getAttribute('href')).toBe('/today#pipeline');
   });
 
   it('fires onLogout (and onClose) when Sign out is clicked', () => {

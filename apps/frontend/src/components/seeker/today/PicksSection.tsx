@@ -1,58 +1,78 @@
 'use client';
 // FILE: src/components/seeker/today/PicksSection.tsx
+// Four roles that match the seeker's skills, as the same rows the board uses.
+// Selecting one opens it on /jobs with the detail pane already on it.
 import { Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import type { IJob } from '../../../types';
-import JobCard from '../JobCard';
-import { SectionHead } from './shared';
+import JobListItem from '../JobListItem';
+import { Button } from '../../ui';
+import { getAutoTags, relTime } from '../JobDetailPanel';
+import { compactJobBadges } from '../dashboard/job-badges';
+import { ListSkeleton } from '../dashboard/DashboardBody';
+import { Section } from './shared';
 
 interface Props {
   picks: IJob[];
   loading: boolean;
   userSkillsLength: number;
+  skillRe: RegExp | null;
+  appliedJobIds: Set<string>;
   onOpenSkillsEditor: () => void;
 }
 
-export default function PicksSection({ picks, loading, userSkillsLength, onOpenSkillsEditor }: Props) {
+export default function PicksSection({ picks, loading, userSkillsLength, skillRe, appliedJobIds, onOpenSkillsEditor }: Props) {
+  const router = useRouter();
   return (
-    <section>
-      <SectionHead
-        eyebrow={userSkillsLength > 0 ? `${userSkillsLength} skills` : 'Add your skills'}
-        title="Picks for you"
-        linkLabel="All jobs"
-        linkTo="/jobs"
-      />
+    <Section
+      label={userSkillsLength > 0 ? `Picks for you · ${userSkillsLength} skills` : 'Picks for you'}
+      sub="Roles that match what you know, freshest first."
+      linkLabel="All roles" linkTo="/jobs"
+      className="td-picks"
+    >
       {userSkillsLength === 0 && (
-        <div style={{
-          marginBottom: 12, padding: '11px 14px',
-          background: 'var(--accent-soft)',
-          border: '1px solid var(--accent-mid)', borderRadius: 11,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          gap: 10, flexWrap: 'wrap',
-        }}>
-          <span style={{ fontSize: '0.875rem', color: 'var(--accent)', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            <Sparkles size={13} /> Add skills to get better matches in the feed
+        <div className="td-nudge rise">
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <Sparkles size={13} /> Add your skills and these picks get personal.
           </span>
-          <button onClick={onOpenSkillsEditor} style={{
-            padding: '6px 13px', borderRadius: 8,
-            background: 'var(--ink)', color: 'var(--paper)',
-            border: 'none', cursor: 'pointer',
-            fontFamily: 'inherit', fontSize: '0.82rem', fontWeight: 500,
-          }}>Add skills</button>
+          <Button size="sm" onClick={onOpenSkillsEditor}>Add skills</Button>
         </div>
       )}
-      <div className="stagger" style={{ display: 'grid', gap: 10 }}>
-        {loading ? (
-          Array(4).fill(0).map((_, i) => (
-            <div key={i} className="skeleton" style={{ height: 88, borderRadius: 12 }} />
-          ))
-        ) : picks.length === 0 ? (
-          <p style={{ color: 'var(--ink-muted)', fontSize: '0.875rem', padding: 16, textAlign: 'center' }}>
-            No jobs available right now.
-          </p>
-        ) : (
-          picks.map(j => <JobCard key={j._id} job={j} />)
-        )}
-      </div>
-    </section>
+      {loading ? (
+        <ListSkeleton rows={4} />
+      ) : picks.length === 0 ? (
+        <p style={{ color: 'var(--ink-muted)', fontSize: 13.5, padding: 16, textAlign: 'center' }}>No roles right now — check back in a few hours.</p>
+      ) : (
+        <div className="jb-list">
+          {picks.map((j, i) => {
+            const auto = getAutoTags(j);
+            const matched = skillRe
+              ? Array.from(new Set((`${j.JobTitle} ${j.DescriptionPlain || ''} ${(auto.techStack || []).join(' ')}`).match(skillRe) || [])).length
+              : 0;
+            const pct = userSkillsLength > 0 ? Math.round((matched / userSkillsLength) * 100) : 0;
+            const rt = relTime(j.PostedDate || j.createdAt || j.scrapedAt || null);
+            return (
+              <div key={j._id} className="rise" style={{ '--i': i } as React.CSSProperties}>
+                <JobListItem
+                  job={j}
+                  isSelected={false}
+                  isApplied={appliedJobIds.has(j._id)}
+                  isComeBack={false}
+                  comeBackNote=""
+                  isNew={rt === 'Today' || rt === '1d ago'}
+                  relativeTime={rt}
+                  visibleBadges={compactJobBadges(j)}
+                  showSkillMatch={matched > 0}
+                  skillMatchText={`${pct}% match`}
+                  skillMatchBg="var(--accent-soft)"
+                  skillMatchColor="var(--accent)"
+                  onSelect={job => router.push(`/jobs?selectedJob=${encodeURIComponent(job._id)}`)}
+                />
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </Section>
   );
 }

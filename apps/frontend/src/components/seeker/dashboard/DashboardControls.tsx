@@ -78,13 +78,12 @@ export default function DashboardControls(p: Props) {
           experienceBandFilter={p.experienceBandFilter}
           workplaceFilter={p.workplaceFilter}
           dateFilter={p.dateFilter}
-          sel={p.sel} cos="" roleOptions={ROLE_OPTIONS} experienceOptions={EXPERIENCE_OPTIONS}
+          roleOptions={ROLE_OPTIONS} experienceOptions={EXPERIENCE_OPTIONS}
           desktopSelectStyle={desktopSelectStyle}
           setRoleCategoryFilter={p.setRoleCategoryFilter}
           setExperienceBandFilter={p.setExperienceBandFilter}
           setWorkplaceFilter={p.setWorkplaceFilter}
           setDateFilter={p.setDateFilter}
-          setSel={() => { }} setCos={() => { }}
           setSp={p.setSp}
           facets={p.facets}
           locationsFilter={p.locationsFilter}
@@ -94,6 +93,10 @@ export default function DashboardControls(p: Props) {
           salaryMinFilter={p.salaryMinFilter}
           salaryMaxFilter={p.salaryMaxFilter}
           setSalaryFilter={p.setSalaryFilter}
+          showNewOnly={p.showNewOnly} setShowNewOnly={p.setShowNewOnly}
+          hideApplied={p.hideApplied} setHideApplied={p.setHideApplied}
+          entryLevelFilter={p.entryLevelFilter} setEntryLevelFilter={p.setEntryLevelFilter}
+          newJobsCount={p.newJobsCount}
         />
       )}
       <ActiveChips filters={p.activeFilters} onClearAll={p.onClearAllFilters} />

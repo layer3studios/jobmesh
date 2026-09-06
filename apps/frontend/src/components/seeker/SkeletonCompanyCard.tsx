@@ -1,24 +1,23 @@
 // FILE: src/components/seeker/SkeletonCompanyCard.tsx
+// The directory card's own shape while it loads: logo tile, two lines, the
+// big number and the cities.
 export default function SkeletonCompanyCard() {
   return (
-    <div style={{
-      background: 'var(--surface)',
-      border: '1px solid var(--border)',
-      borderRadius: 12,
-      padding: 16,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 12,
-    }}>
-      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-        <div className="skeleton" style={{ width: 40, height: 40, borderRadius: 10 }} />
-        <div style={{ flex: 1, display: 'grid', gap: 6 }}>
-          <div className="skeleton" style={{ height: 12, width: '70%', borderRadius: 4 }} />
-          <div className="skeleton" style={{ height: 10, width: '45%', borderRadius: 4 }} />
+    <div className="glass dir-card" aria-hidden>
+      <div className="dir-card__top">
+        <div className="skeleton" style={{ width: 44, height: 44, borderRadius: 11 }} />
+        <div style={{ flex: 1, display: 'grid', gap: 7 }}>
+          <div className="skeleton" style={{ height: 13, width: '68%' }} />
+          <div className="skeleton" style={{ height: 11, width: '42%' }} />
         </div>
       </div>
-      <div className="skeleton" style={{ height: 10, width: '90%', borderRadius: 4 }} />
-      <div className="skeleton" style={{ height: 10, width: '60%', borderRadius: 4 }} />
+      <div className="dir-card__foot">
+        <div style={{ display: 'grid', gap: 6 }}>
+          <div className="skeleton" style={{ height: 24, width: 34 }} />
+          <div className="skeleton" style={{ height: 9, width: 70 }} />
+        </div>
+        <div className="skeleton" style={{ height: 10, width: 110 }} />
+      </div>
     </div>
   );
 }

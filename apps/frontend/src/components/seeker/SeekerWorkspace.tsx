@@ -16,8 +16,6 @@ const MONO = 'var(--font-jetbrains-mono), ui-monospace, monospace';
 
 const SECTIONS = [
   { to: '/today', label: 'Today' },
-  { to: '/progress', label: 'Progress' },
-  { to: '/resume', label: 'Resume' },
   { to: '/profile', label: 'Profile' },
 ] as const;
 
@@ -111,7 +109,7 @@ export default function SeekerWorkspace({ children, label, title, actions }: {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
             <div>
               {label && <p style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)', marginBottom: 8 }}>{label}</p>}
-              {title && <h1 className="font-display" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 400, letterSpacing: '-0.04em', lineHeight: 1.05, color: 'var(--ink)' }}>{title}</h1>}
+              {title && <h1 className="font-display" style={{ fontSize: 'clamp(28px, 3vw, 40px)', fontWeight: 400, letterSpacing: '-0.03em', lineHeight: 1.05, textWrap: 'balance', color: 'var(--ink)' }}>{title}</h1>}
             </div>
             {actions && <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{actions}</div>}
           </div>
