@@ -2,8 +2,8 @@
 // FILE: src/components/layouts/SeekerAppShell.tsx
 // Client shell for the seeker audience — verbatim adaptation of the Vite
 // AppLayoutModern. The (seeker) server layout seeds SeekerProvider and wraps its
-// children in this shell, which renders TopNav + BottomNav (mobile) + Footer
-// (desktop) + the SkillsEditor overlay. Nav prop wiring stays identical to the Vite
+// children in this shell, which renders TopNav + Footer + BottomNav (mobile)
+// + the SkillsEditor overlay. Nav prop wiring stays identical to the Vite
 // version (D_gap_1): TopNav is a stateless presentational component fed from
 // SeekerContext + ThemeProvider + useViewport here.
 import { useEffect, type ReactNode } from 'react';
@@ -53,11 +53,11 @@ export default function SeekerAppShell({ children }: { children: ReactNode }) {
   ];
 
   return (
-    <div style={{
-      minHeight: '100dvh',
-      display: 'flex',
-      flexDirection: 'column',
-    }}>
+    <div
+      // The fixed BottomNav needs room below the footer, not just the page.
+      className={isMobile && !isLanding ? 'has-bottom-nav' : undefined}
+      style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}
+    >
       {/* Ambient washes behind every app page so glass surfaces have depth to blur. */}
       {!isLanding && <div className="app-ambient" aria-hidden />}
       {!isLanding && <TopNav
@@ -73,10 +73,7 @@ export default function SeekerAppShell({ children }: { children: ReactNode }) {
         onLogout={logout}
       />}
 
-      <main
-        className={isMobile && !isLanding ? 'has-bottom-nav' : ''}
-        style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
-      >
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {/* key by path forces a clean unmount/remount per route — prevents the
             previous page's nodes from lingering/overlapping during navigation. */}
         <div key={pathname} className={isLanding ? undefined : 'page-enter'} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -84,7 +81,7 @@ export default function SeekerAppShell({ children }: { children: ReactNode }) {
         </div>
       </main>
 
-      {!isLanding && !isMobile && <Footer />}
+      {!isLanding && <Footer />}
       {!isLanding && isMobile && <BottomNav items={navItems} />}
 
       {skillsEditorOpen && <SkillsEditor onClose={closeSkillsEditor} />}
