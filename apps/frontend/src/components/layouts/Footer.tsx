@@ -18,7 +18,7 @@ const MONO = 'var(--font-jetbrains-mono), ui-monospace, monospace';
 
 const EMPLOYER = {
   description: 'Post once. Rank every applicant. Hire from one list.',
-  disclaimer: 'Applicant data is kept on the retention schedule you set in Settings, and candidates can request or erase it at any time.',
+  disclaimer: 'Applicant data follows your retention schedule — candidates can request or erase it any time.',
   navigate: [
     ['/employer', 'Dashboard'],
     ['/employer/jobs', 'Postings'],
