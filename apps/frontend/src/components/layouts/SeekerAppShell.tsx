@@ -36,8 +36,10 @@ export default function SeekerAppShell({ children }: { children: ReactNode }) {
   // The guest landing page brings its own nav and footer (monochrome, scoped
   // tokens — see components/seeker/home/HomeClient). The shared chrome would
   // paint in the app palette above it, so the shell steps aside on "/".
+  // Sign-in is a full-screen split with its own wordmark (LoginScreen), so it
+  // goes without the chrome too — the same as the employer and admin logins.
   const isLanding = pathname === '/' || pathname === '/hire'
-    || pathname === '/find-work' || pathname === '/companies';
+    || pathname === '/find-work' || pathname === '/companies' || pathname === '/login';
 
   const navItems: NavItem[] = currentUser ? [
     { to: '/jobs', label: 'Jobs', icon: <Briefcase size={18} /> },
