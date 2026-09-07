@@ -39,8 +39,7 @@ export default function ProfilePreview({ profile, settings, avatarUrl, githubUse
   const name = profile.fullName || 'Your name';
   const headline = settings?.settings.headline || [profile.seniorityLevel, profile.domain].filter(Boolean).join(' ') || 'Add a headline';
   const location = [profile.currentLocation?.city, profile.currentLocation?.state].filter(Boolean).join(', ');
-  const isPublic = !!settings?.profilePublic;
-  const url = isPublic ? settings?.profileUrl ?? null : null;
+  const url = settings?.profilePublic ? settings.profileUrl ?? null : null;
   const initial = (profile.fullName || '?').trim().charAt(0).toUpperCase();
 
   const view = () => {
@@ -57,12 +56,9 @@ export default function ProfilePreview({ profile, settings, avatarUrl, githubUse
   return (
     <aside className="glass pf-pane pf-preview" aria-label="Live preview">
       <div className="pf-pane__head">
-        <div>
-          <span className="ws-section__label">Live preview</span>
-          <span className="ws-section__sub" style={{ display: 'block' }}>{isPublic ? 'Live at your link' : 'Private until you turn it on'}</span>
-        </div>
+        <span className="ws-section__label">Live preview</span>
         <div style={{ display: 'flex', gap: 8 }}>
-          <Button variant="ghost" size="sm" onClick={view} iconLeft={<ExternalLink size={13} />}>View</Button>
+          <Button variant="secondary" size="sm" onClick={view} iconLeft={<ExternalLink size={13} />}>View</Button>
           <Button variant="secondary" size="sm" onClick={() => void share()} iconLeft={<Share2 size={13} />}>Share</Button>
         </div>
       </div>

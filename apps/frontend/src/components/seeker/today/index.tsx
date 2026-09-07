@@ -57,7 +57,7 @@ export default function Today() {
 
   return (
     <main className="daily">
-      <div className="rise" style={{ '--i': 0 } as React.CSSProperties}>
+      <div style={{ '--i': 0 } as React.CSSProperties}>
         <Hero
           firstName={firstName}
           todayCount={todayCount}
@@ -68,7 +68,7 @@ export default function Today() {
         />
       </div>
 
-      <section className="daily__board rise" style={{ '--i': 1 } as React.CSSProperties} aria-label="This week">
+      <section className="daily__board" style={{ '--i': 1 } as React.CSSProperties} aria-label="This week">
         <p className="ed__kicker"><span className="ed__num">This week</span>one tile per application, today on the right</p>
         <WeekBoard appliedJobs={appliedJobs} dailyGoal={dailyGoal} onGoalChange={saveDailyGoal} />
         <p className="daily__tally">
@@ -80,7 +80,7 @@ export default function Today() {
         </p>
       </section>
 
-      <div className="rise" style={{ '--i': 2 } as React.CSSProperties}>
+      <div style={{ '--i': 2 } as React.CSSProperties}>
         <PicksSection
           picks={picks}
           loading={loading}
@@ -92,8 +92,8 @@ export default function Today() {
           onOpenSkillsEditor={openSkillsEditor}
         />
       </div>
-      {hasHistory && <div className="rise" style={{ '--i': 3 } as React.CSSProperties}><SearchSection /></div>}
-      <div className="rise" style={{ '--i': hasHistory ? 4 : 3 } as React.CSSProperties}><NewsSection number={hasHistory ? '03' : '02'} /></div>
+      {hasHistory && <div style={{ '--i': 3 } as React.CSSProperties}><SearchSection /></div>}
+      <div style={{ '--i': hasHistory ? 4 : 3 } as React.CSSProperties}><NewsSection number={hasHistory ? '03' : '02'} /></div>
     </main>
   );
 }

@@ -59,8 +59,8 @@ export default function LinkedInConnect({ profile, onSaved }: { profile: ParsedP
       connected={!!current && !editing}
       busy={busy}
       onRefresh={current ? () => setEditing(true) : undefined}
+      refreshLabel="Edit"
       onDisconnect={current ? () => void save(null) : undefined}
-      disconnectLabel="Remove"
     >
       {current && !editing ? (
         <div className="pf-conn__row">

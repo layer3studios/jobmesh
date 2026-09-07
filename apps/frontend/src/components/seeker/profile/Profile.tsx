@@ -262,12 +262,7 @@ export default function Profile() {
         { value: profile.education.length, label: 'education' },
         { value: `${done.met}/${checks.length}`, label: 'complete' },
       ]}
-      actions={
-        <>
-          <Button variant="secondary" iconLeft={<ExternalLink size={14} />} onClick={viewPublic}>{publicUrl ? 'View public page' : 'Preview is private'}</Button>
-          <Button variant="primary" iconLeft={<Upload size={14} />} onClick={() => setUploadOpen(true)}>Upload resume</Button>
-        </>
-      }
+      actions={<Button variant="primary" iconLeft={<Upload size={14} />} onClick={() => setUploadOpen(true)}>Upload resume</Button>}
     >
       <ResumeSheet isOpen={uploadOpen} onClose={() => setUploadOpen(false)} onParsed={() => void load()} />
 
@@ -301,7 +296,7 @@ export default function Profile() {
 
       <div className="pf-body">
         <section id="pf-panel" role="tabpanel" aria-labelledby={`pf-tab-${tab}`} className="glass pf-pane pf-editor--flat">
-          <div key={tab} className="jb-swap">{pane}</div>
+          <div key={tab} className="pf-swap-in">{pane}</div>
         </section>
         <ProfilePreview profile={previewProfile} settings={previewSettings} avatarUrl={currentUser?.picture} githubUser={proof.github} leetcodeUser={proof.leetcode} onJump={go} />
       </div>

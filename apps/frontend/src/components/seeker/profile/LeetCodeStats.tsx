@@ -96,16 +96,10 @@ export default function LeetCodeStats({ data }: { data: LeetCodeProfile }) {
       {data.topSkills.length > 0 && (
         <section>
           <h4 className="lc-section-heading">Strongest topics</h4>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          <div className="pf-topics">
             {data.topSkills.map((skill) => (
-              <span
-                key={skill.name}
-                style={{
-                  padding: '3px 9px', borderRadius: 999, fontSize: '0.75rem',
-                  background: 'var(--surface-sunken)', color: 'var(--ink-muted)',
-                }}
-              >
-                {skill.name} <span style={{ color: 'var(--ink-faint)' }}>{skill.count}</span>
+              <span key={skill.name} className="pf-topic">
+                {skill.name} <span className="pf-topic__n">{skill.count}</span>
               </span>
             ))}
           </div>

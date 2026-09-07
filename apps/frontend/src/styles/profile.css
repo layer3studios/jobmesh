@@ -69,7 +69,93 @@ a.pf-conn__handle:hover { color: var(--hue); }
 }
 .pf-conn[data-connected="true"] .lc-stat-value--accent { color: var(--hue); }
 
+
+/* Topic chips, shared by the stat panels. */
+.pf-topics { display: flex; flex-wrap: wrap; gap: 6px; }
+.pf-topic { padding: 4px 10px; border-radius: 999px; font-size: 0.75rem; background: var(--surface-sunken); border: 1px solid transparent; color: var(--ink-muted); }
+.pf-topic__n { color: var(--ink-faint); }
+
+/* ── Warmth: the connected panels read as one colourful system ───────────
+   The stat tiles, difficulty bars, topic chips and language bar all borrow
+   the connection's hue, so a live GitHub or LeetCode card feels like the
+   service rather than a grey table with three coloured bars in it. */
+.pf-conn[data-connected="true"] .lc-stat {
+  background: linear-gradient(160deg, color-mix(in srgb, var(--hue) 14%, transparent), color-mix(in srgb, var(--hue) 5%, transparent));
+  border: 1px solid color-mix(in srgb, var(--hue) 22%, transparent);
+  transition: transform var(--m-ui) var(--ease-out), border-color var(--m-ui) var(--ease-out), box-shadow var(--m-ui) var(--ease-out);
+}
+.pf-conn[data-connected="true"] .lc-stat:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--hue) 45%, transparent);
+  box-shadow: 0 12px 28px -16px color-mix(in srgb, var(--hue) 70%, transparent);
+}
+.pf-conn[data-connected="true"] .lc-stat-value { color: var(--ink); }
+.pf-conn[data-connected="true"] .lc-stat-label { color: color-mix(in srgb, var(--hue) 60%, var(--ink-muted)); }
+.pf-conn[data-connected="true"] .lc-section-heading { color: color-mix(in srgb, var(--hue) 55%, var(--ink-muted)); }
+
+/* Difficulty and language bars: a soft glow under each fill, and a track
+   that is tinted rather than grey. */
+.pf-conn[data-connected="true"] .lc-bar-track { background: color-mix(in srgb, var(--hue) 8%, var(--surface-sunken)); }
+.pf-conn[data-connected="true"] .lc-bar-fill { box-shadow: 0 0 18px -4px currentColor; filter: saturate(1.15); }
+.pf-conn[data-connected="true"] .lc-lang-bar { background: color-mix(in srgb, var(--hue) 8%, var(--surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hue) 16%, transparent); }
+.pf-conn[data-connected="true"] .lc-lang-bar > * { filter: saturate(1.2); }
+.pf-conn[data-connected="true"] .lc-lang-swatch { box-shadow: 0 0 10px -2px currentColor; }
+
+/* Topic chips: tinted, and they lift on hover so the panel feels alive. */
+.pf-conn[data-connected="true"] .lc-skill-chip,
+.pf-conn[data-connected="true"] [class*="skill"] {
+  transition: transform var(--m-press) var(--ease-out), border-color var(--m-ui) var(--ease-out), background-color var(--m-ui) var(--ease-out);
+}
+.pf-conn[data-connected="true"] .pf-topic {
+  background: color-mix(in srgb, var(--hue) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--hue) 20%, transparent);
+  color: var(--ink);
+}
+.pf-conn[data-connected="true"] .pf-topic:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--hue) 45%, transparent); }
+
+/* The contribution heatmap picks up the hue instead of the mono accent. */
+.pf-conn[data-connected="true"] .lc-heatmap-svg rect[fill="var(--accent)"] { fill: var(--hue); }
+
 @media (prefers-reduced-motion: reduce) {
   .pf-conn, .pf-conn__head, .pfx-link { transition: none; }
   .pf-conn__status[data-on="true"] .pf-conn__dot, .pf-spin { animation: none; }
+  .pf-conn[data-connected="true"] .lc-stat:hover, .pf-conn[data-connected="true"] .pf-topic:hover { transform: none; }
+}
+
+/* ── Smoothness pass: the signed-in seeker pages ─────────────────────────
+   One vocabulary of motion across Today, Pipeline and Profile, so moving
+   between them feels like one product: sections rise once on entry, tabs and
+   rows settle rather than snap, and everything that can be pressed presses.
+   Every rule here animates transform / opacity / colour only, and every one
+   of them is dropped under reduced motion at the bottom of this file. */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+
+  /* Sections arrive once, staggered, instead of appearing all at once. */
+  .daily > * { animation: rise 420ms var(--ease-out) both; animation-delay: calc(var(--i, 0) * 70ms); }
+
+  /* The profile tab bar: the pane cross-fades and the tab itself settles. */
+  .pf-tab { transition: color var(--m-ui) var(--ease-out), background-color var(--m-ui) var(--ease-out), transform var(--m-press) var(--ease-out); }
+  .pf-tab:active { transform: scale(var(--press-scale)); }
+  .pf-swap-in { animation: jb-swap 260ms var(--ease-out) both; }
+
+  /* Panes and cards lift a hair on hover so the page answers the pointer. */
+  .pf-conn { will-change: transform; }
+  .pf-pane, .pf-conn { transition: border-color var(--m-ui) var(--ease-out), box-shadow 400ms var(--ease-out), transform 400ms var(--ease-out); }
+
+  /* Inputs and pills settle instead of snapping. */
+  .pf-input, .pf-pill, .pf-tag, .pf-seg__btn, .pfx-link, .ui-btn { will-change: transform; }
+}
+
+/* Buttons everywhere in the workspace get the same press. */
+.pf-seg__btn, .pf-tab, .wb__btn, .gp__link { -webkit-tap-highlight-color: transparent; }
+
+/* Focus is always visible and always the same shape. */
+.pf-tab:focus-visible, .pf-seg__btn:focus-visible, .pf-pill:focus-visible, .pfx-link:focus-visible, .pf-conn__link:focus-visible {
+  outline: none; box-shadow: var(--focus-ring); border-radius: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .daily > *, .pf-swap-in { animation: none; }
+  .pf-tab, .pf-pane, .pf-conn, .pf-input, .pf-pill, .pfx-link { transition: none; }
 }

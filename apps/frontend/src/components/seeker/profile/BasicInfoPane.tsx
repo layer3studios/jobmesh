@@ -1,11 +1,11 @@
 'use client';
 // FILE: src/components/seeker/profile/BasicInfoPane.tsx
-// Who you are: name, headline, where you are, the two-line About, the domains
-// you work in, and how to reach you. Visibility lives in Public profile and
-// LinkedIn lives in Proof of work, so nothing here is asked twice. One Save;
-// the preview follows the keyboard.
+// Who you are: name, who can see the page, headline, where you are, the
+// two-line About, the domains you work in, and how to reach you. LinkedIn
+// lives in Proof of work, so nothing here is asked twice. One Save; the
+// preview follows the keyboard.
 import { useEffect, useState } from 'react';
-import { Zap, Palette, Boxes, LineChart, Megaphone, Cloud, Shield, Smartphone, Database, Bug } from 'lucide-react';
+import { Globe, Lock, Zap, Palette, Boxes, LineChart, Megaphone, Cloud, Shield, Smartphone, Database, Bug } from 'lucide-react';
 import type { ParsedProfile } from '../../../types/seeker-profile';
 import type { PublicProfileSettingsState } from '../../../types/public-profile';
 import { patchProfile, SeekerApiError } from '../../../api/seeker-api';
@@ -39,6 +39,7 @@ function fromProfile(p: ParsedProfile, s: PublicProfileSettingsState | null) {
     summary: p.summary ?? '',
     headline: s?.settings.headline ?? '',
     domains: [p.domain, p.subDomain].filter((d): d is string => !!d),
+    isPublic: !!s?.profilePublic,
   };
 }
 
@@ -64,8 +65,8 @@ export default function BasicInfoPane({ profile, settings, avatar, onSaved, onSe
         domain: form.domains[0] ?? null, subDomain: form.domains[1] ?? null,
       });
       onSaved(next);
-      if (settings && form.headline !== (settings.settings.headline ?? '')) {
-        onSettings(await patchProfileSettings({ profileSettings: { headline: form.headline } }));
+      if (settings && (form.headline !== (settings.settings.headline ?? '') || form.isPublic !== settings.profilePublic)) {
+        onSettings(await patchProfileSettings({ profilePublic: form.isPublic, profileSettings: { headline: form.headline } }));
       }
       setSavedAt(Date.now());
     } catch (err) {
@@ -86,6 +87,14 @@ export default function BasicInfoPane({ profile, settings, avatar, onSaved, onSe
           </div>
           <Field label="Full name"><TextInput value={form.fullName} onChange={e => set('fullName', e.target.value)} placeholder="Your name as it should appear" autoComplete="name" /></Field>
         </div>
+
+        <Field label="Who can see this">
+          <div className="pf-seg" role="radiogroup" aria-label="Profile visibility">
+            <button type="button" role="radio" aria-checked={form.isPublic} className="pf-seg__btn" onClick={() => set('isPublic', true)}><Globe size={13} /> Public</button>
+            <button type="button" role="radio" aria-checked={!form.isPublic} className="pf-seg__btn" onClick={() => set('isPublic', false)}><Lock size={13} /> Only me</button>
+          </div>
+          <span className="pf-field__hint">{form.isPublic ? 'Recruiters with your link can read it. Contact details stay hidden unless you turn them on in Public profile.' : 'Nobody sees it. Turn it on when it reads the way you want.'}</span>
+        </Field>
 
         <Field label="Headline" count={`${form.headline.length}/${HEADLINE_MAX}`} hint="One line under your name. Say what you do, not your job title.">
           <TextInput value={form.headline} maxLength={HEADLINE_MAX} onChange={e => set('headline', e.target.value)} placeholder="Backend engineer who ships payments at scale" />

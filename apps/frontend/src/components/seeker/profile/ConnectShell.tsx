@@ -5,10 +5,10 @@
 // and two boxed actions that look the same so neither reads as an afterthought.
 // The connected state opens a vibrant palette for the stats inside it.
 import type { ReactNode } from 'react';
-import { RefreshCw, Unplug, ExternalLink } from 'lucide-react';
+import { RefreshCw, Unplug, ExternalLink, Pencil } from 'lucide-react';
 import { Button } from '../../ui';
 
-export function ConnectShell({ icon, name, handle, href, connected, busy, onRefresh, onDisconnect, disconnectLabel = 'Disconnect', children, tone }: {
+export function ConnectShell({ icon, name, handle, href, connected, busy, onRefresh, refreshLabel = 'Refresh', onDisconnect, children, tone }: {
   icon: ReactNode;
   name: string;
   handle?: string | null;
@@ -17,8 +17,9 @@ export function ConnectShell({ icon, name, handle, href, connected, busy, onRefr
   connected: boolean;
   busy?: boolean;
   onRefresh?: () => void;
+  /** What the secondary action does: 'Refresh' pulls new data, 'Edit' opens the form. */
+  refreshLabel?: 'Refresh' | 'Edit';
   onDisconnect?: () => void;
-  disconnectLabel?: string;
   children: ReactNode;
   /** The hue the connected state glows with. */
   tone: 'github' | 'leetcode' | 'linkedin';
@@ -40,8 +41,12 @@ export function ConnectShell({ icon, name, handle, href, connected, busy, onRefr
         </span>
         {connected && (onRefresh || onDisconnect) && (
           <div className="pf-conn__actions">
-            {onRefresh && <Button variant="secondary" size="sm" disabled={busy} onClick={onRefresh} iconLeft={<RefreshCw size={13} className={busy ? 'pf-spin' : undefined} />}>{busy ? 'Refreshing' : 'Refresh'}</Button>}
-            {onDisconnect && <Button variant="secondary" size="sm" disabled={busy} onClick={onDisconnect} iconLeft={<Unplug size={13} />} className="pf-conn__off">{disconnectLabel}</Button>}
+            {onRefresh && (
+              refreshLabel === 'Edit'
+                ? <Button variant="secondary" size="sm" disabled={busy} onClick={onRefresh} iconLeft={<Pencil size={13} />}>Edit</Button>
+                : <Button variant="secondary" size="sm" disabled={busy} onClick={onRefresh} iconLeft={<RefreshCw size={13} className={busy ? 'pf-spin' : undefined} />}>{busy ? 'Refreshing' : 'Refresh'}</Button>
+            )}
+            {onDisconnect && <Button variant="secondary" size="sm" disabled={busy} onClick={onDisconnect} iconLeft={<Unplug size={13} />} className="pf-conn__off">Disconnect</Button>}
           </div>
         )}
       </header>
