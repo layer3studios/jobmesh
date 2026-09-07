@@ -28,12 +28,14 @@ function Stat({ value, label }: { value: ReactNode; label: string }) {
   );
 }
 
-export default function SeekerWorkspace({ children, label, title, actions }: {
+export default function SeekerWorkspace({ children, label, title, actions, panel }: {
   children: ReactNode;
   /** Mono eyebrow above the page title. */
   label?: string;
   title?: ReactNode;
   actions?: ReactNode;
+  /** Replaces the three mono stats in the sidebar (Today passes the goal ring). */
+  panel?: ReactNode;
 }) {
   const pathname = usePathname();
   const { currentUser, todayCount, streak, appliedJobs } = useSeeker();
@@ -47,7 +49,7 @@ export default function SeekerWorkspace({ children, label, title, actions }: {
         <Link
           key={s.to}
           href={s.to}
-          className="ws-link"
+          className="ws-link press"
           aria-current={isActive(s.to) ? 'page' : undefined}
           style={{
             display: 'inline-flex', alignItems: 'center',
@@ -91,17 +93,24 @@ export default function SeekerWorkspace({ children, label, title, actions }: {
           </div>
         )}
 
-        {!stacked && (
+        {!stacked && !panel && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, paddingTop: 18, borderTop: '1px solid var(--border)' }}>
             <Stat value={todayCount} label="Today" />
             <Stat value={streak} label="Streak" />
             <Stat value={appliedJobs.length} label="Applied" />
           </div>
         )}
+        {!stacked && panel && (
+          <div style={{ paddingTop: 18, borderTop: '1px solid var(--border)' }}>{panel}</div>
+        )}
 
         <div style={{ paddingTop: stacked ? 0 : 18, borderTop: stacked ? 'none' : '1px solid var(--border)', marginLeft: stacked ? 'auto' : 0 }}>
           {nav}
         </div>
+
+        {stacked && panel && (
+          <div style={{ flexBasis: '100%', paddingTop: 14, borderTop: '1px solid var(--border)' }}>{panel}</div>
+        )}
       </aside>
 
       <section style={{ minWidth: 0 }}>

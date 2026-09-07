@@ -2,7 +2,7 @@
 // FILE: src/components/seeker/today/PicksSection.tsx
 // Four roles that match the seeker's skills, as the same rows the board uses.
 // Selecting one opens it on /jobs with the detail pane already on it.
-import { Sparkles } from 'lucide-react';
+import { Sparkles, RefreshCw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { IJob } from '../../../types';
 import JobListItem from '../JobListItem';
@@ -15,13 +15,15 @@ import { Section } from './shared';
 interface Props {
   picks: IJob[];
   loading: boolean;
+  error: string | null;
+  onRetry: () => void;
   userSkillsLength: number;
   skillRe: RegExp | null;
   appliedJobIds: Set<string>;
   onOpenSkillsEditor: () => void;
 }
 
-export default function PicksSection({ picks, loading, userSkillsLength, skillRe, appliedJobIds, onOpenSkillsEditor }: Props) {
+export default function PicksSection({ picks, loading, error, onRetry, userSkillsLength, skillRe, appliedJobIds, onOpenSkillsEditor }: Props) {
   const router = useRouter();
   return (
     <Section
@@ -40,6 +42,12 @@ export default function PicksSection({ picks, loading, userSkillsLength, skillRe
       )}
       {loading ? (
         <ListSkeleton rows={4} />
+      ) : error ? (
+        <div className="jb-error rise td-error" role="alert">
+          <p className="jb-error__title">Picks are taking a moment</p>
+          <p className="jb-error__body">{error}</p>
+          <Button variant="secondary" size="sm" onClick={onRetry} iconLeft={<RefreshCw size={13} />}>Try again</Button>
+        </div>
       ) : picks.length === 0 ? (
         <p style={{ color: 'var(--ink-muted)', fontSize: 13.5, padding: 16, textAlign: 'center' }}>No roles right now — check back in a few hours.</p>
       ) : (
