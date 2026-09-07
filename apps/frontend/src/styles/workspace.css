@@ -26,18 +26,6 @@
 .td-anchor { scroll-margin-top: 90px; }
 .td-error { min-height: 180px; justify-content: center; }
 
-/* ── Loading frame for the account pages (sidebar + column) ────────────── */
-.td-skel { width: 100%; max-width: 1440px; margin: 0 auto; padding: 16px 16px 80px; display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
-.td-skel__side { border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 18px; }
-.td-skel__rule { height: 1px; background: var(--border); }
-@media (min-width: 1024px) {
-  .td-skel { padding: 24px var(--margin-page) 48px; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); gap: 32px; }
-}
-
-/* ── Workspace frame: goal card beside the content ─────────────────────── */
-.ws-frame { width: 100%; max-width: 1440px; margin: 0 auto; padding: 16px 16px 80px; display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
-@media (min-width: 1024px) { .ws-frame { padding: 24px var(--margin-page) 48px; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); gap: 32px; } }
-
 /* ── Profile ───────────────────────────────────────────────────────────── */
 .pf-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
 .pf-complete {

@@ -144,11 +144,11 @@ export default function Profile() {
   const previewSettings = useMemo(() => settings && draft ? { ...settings, settings: { ...settings.settings, headline: draft.headline } } : settings, [settings, draft]);
 
   if (loadState === 'loading') {
-    return <SeekerWorkspace title="Your profile"><ProfileSkeleton /></SeekerWorkspace>;
+    return <SeekerWorkspace label="Your profile" title="Loading"><ProfileSkeleton /></SeekerWorkspace>;
   }
   if (loadState === 'error') {
     return (
-      <SeekerWorkspace title="Your profile">
+      <SeekerWorkspace label="Your profile" title="Could not load">
         <div className="jb-error rise" role="alert">
           <p className="jb-error__title">Couldn’t load your profile</p>
           <p className="jb-error__body">{error}</p>
@@ -159,7 +159,7 @@ export default function Profile() {
   }
   if (loadState === 'empty' || !profile || !previewProfile) {
     return (
-      <SeekerWorkspace title="Your profile">
+      <SeekerWorkspace label="Your profile" title="Start with your resume" lede="Upload it once. We turn it into a profile that recruiters read in one link.">
         <EmptyState
           title="Start with your resume"
           description="Upload it once. We turn it into a profile — skills, experience, education — that you edit here and recruiters read in one link."
@@ -219,8 +219,15 @@ export default function Profile() {
 
   return (
     <SeekerWorkspace
-      label={`Parsed ${relTime(profile.parsedAt)}`}
-      title="Your profile"
+      label={`Your profile · parsed ${relTime(profile.parsedAt)}`}
+      title={done.pct >= 100 ? 'Ready to be read' : `${done.pct}% of the way there`}
+      lede={done.pct >= 100 ? 'Everything a recruiter needs is here. Keep it current.' : `${done.next[0]?.action ?? 'Fill the gaps'} and this reads like a finished profile.`}
+      tally={[
+        { value: profile.skills.length, label: profile.skills.length === 1 ? 'skill' : 'skills' },
+        { value: profile.experience.length, label: profile.experience.length === 1 ? 'role' : 'roles' },
+        { value: profile.education.length, label: 'education' },
+        { value: `${done.met}/${checks.length}`, label: 'complete' },
+      ]}
       actions={<Button variant="secondary" iconLeft={<Upload size={14} />} onClick={() => setUploadOpen(true)}>Upload resume</Button>}
     >
       <ResumeSheet isOpen={uploadOpen} onClose={() => setUploadOpen(false)} onParsed={() => void load()} />

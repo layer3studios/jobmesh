@@ -1,47 +1,53 @@
 'use client';
 // FILE: src/components/seeker/SeekerWorkspace.tsx
-// The frame for Pipeline and Profile (reference DESIGN.md): the week board as a
-// 280px sticky sidebar, with the amber→indigo seam on its right edge, and a
-// fluid content column. Today has its own full-width editorial layout. The card carries today's numbers
-// and quiet links to the other two pages; identity lives in the top nav.
-// Under 1024px the card sits above the content.
+// The frame for the seeker's account pages (Pipeline, Profile), set like
+// Today: full width, no sidebar, a masthead with a mono kicker, the title in
+// the serif, an optional tally line of numbers, and the page's actions on the
+// right. Sections below use the same hairline grammar (EdSection).
 import type { ReactNode } from 'react';
-import { useSeeker } from '../../context/seeker/SeekerContext';
-import GoalPanel from './today/GoalPanel';
 
-const MONO = 'var(--font-jetbrains-mono), ui-monospace, monospace';
+export interface TallyItem { value: ReactNode; label: string }
 
-export default function SeekerWorkspace({ children, label, title, actions }: {
+export function Tally({ items, small }: { items: TallyItem[]; small?: boolean }) {
+  return (
+    <p className={`daily__tally${small ? ' daily__tally--sm' : ''}`}>
+      {items.map((t, i) => (
+        <span key={t.label} style={{ display: 'contents' }}>
+          {i > 0 && <span className="daily__tally-sep" aria-hidden>/</span>}
+          <span><b>{t.value}</b> {t.label}</span>
+        </span>
+      ))}
+    </p>
+  );
+}
+
+export default function SeekerWorkspace({ children, label, title, lede, tally, actions }: {
   children: ReactNode;
-  /** Mono eyebrow above the page title. */
+  /** Mono kicker above the title. */
   label?: string;
   title?: ReactNode;
+  /** One sentence under the title, in the voice of the page. */
+  lede?: ReactNode;
+  /** Mono numbers along the bottom of the masthead. */
+  tally?: TallyItem[];
   actions?: ReactNode;
 }) {
-  const { todayCount, dailyGoal, streak, appliedJobs, saveDailyGoal } = useSeeker();
-
   return (
-    <div className="ws-frame">
-      <GoalPanel
-        appliedJobs={appliedJobs}
-        todayCount={todayCount}
-        dailyGoal={dailyGoal}
-        streak={streak}
-        onGoalChange={saveDailyGoal}
-      />
-
-      <section style={{ minWidth: 0 }}>
-        {(title || label) && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
-            <div>
-              {label && <p style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-muted)', marginBottom: 8 }}>{label}</p>}
-              {title && <h1 className="font-display" style={{ fontSize: 'clamp(28px, 3vw, 40px)', fontWeight: 400, letterSpacing: '-0.03em', lineHeight: 1.05, textWrap: 'balance', color: 'var(--ink)' }}>{title}</h1>}
+    <main className="daily">
+      {(title || label) && (
+        <header className="mh ws-mast rise" style={{ '--i': 0 } as React.CSSProperties}>
+          {label && <p className="mh__dateline"><span>{label}</span></p>}
+          <div className="mh__row">
+            <div className="ws-mast__main">
+              {title && <h1 className="font-display ws-mast__title">{title}</h1>}
+              {lede && <p className="mh__line">{lede}</p>}
             </div>
-            {actions && <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{actions}</div>}
+            {actions && <div className="ws-mast__actions">{actions}</div>}
           </div>
-        )}
-        {children}
-      </section>
-    </div>
+          {tally && tally.length > 0 && <div className="ws-mast__tally"><Tally items={tally} /></div>}
+        </header>
+      )}
+      <div className="ws-body rise" style={{ '--i': 1 } as React.CSSProperties}>{children}</div>
+    </main>
   );
 }
