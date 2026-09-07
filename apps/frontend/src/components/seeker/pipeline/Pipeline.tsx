@@ -53,7 +53,7 @@ export default function Pipeline() {
     : 'Every role you have applied to, with its stage.';
 
   return (
-    <SeekerWorkspace label="Seeker" title="Your pipeline">
+    <SeekerWorkspace title="Your pipeline">
       {appliedJobs.length === 0 && !loading ? (
         <EmptyState
           icon={<Briefcase size={28} />}

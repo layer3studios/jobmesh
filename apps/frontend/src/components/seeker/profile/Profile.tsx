@@ -144,11 +144,11 @@ export default function Profile() {
   const previewSettings = useMemo(() => settings && draft ? { ...settings, settings: { ...settings.settings, headline: draft.headline } } : settings, [settings, draft]);
 
   if (loadState === 'loading') {
-    return <SeekerWorkspace label="Seeker" title="Your profile"><ProfileSkeleton /></SeekerWorkspace>;
+    return <SeekerWorkspace title="Your profile"><ProfileSkeleton /></SeekerWorkspace>;
   }
   if (loadState === 'error') {
     return (
-      <SeekerWorkspace label="Seeker" title="Your profile">
+      <SeekerWorkspace title="Your profile">
         <div className="jb-error rise" role="alert">
           <p className="jb-error__title">Couldn’t load your profile</p>
           <p className="jb-error__body">{error}</p>
@@ -159,7 +159,7 @@ export default function Profile() {
   }
   if (loadState === 'empty' || !profile || !previewProfile) {
     return (
-      <SeekerWorkspace label="Seeker" title="Your profile">
+      <SeekerWorkspace title="Your profile">
         <EmptyState
           title="Start with your resume"
           description="Upload it once. We turn it into a profile — skills, experience, education — that you edit here and recruiters read in one link."
@@ -219,7 +219,7 @@ export default function Profile() {
 
   return (
     <SeekerWorkspace
-      label={`Seeker · parsed ${relTime(profile.parsedAt)}`}
+      label={`Parsed ${relTime(profile.parsedAt)}`}
       title="Your profile"
       actions={<Button variant="secondary" iconLeft={<Upload size={14} />} onClick={() => setUploadOpen(true)}>Upload resume</Button>}
     >
