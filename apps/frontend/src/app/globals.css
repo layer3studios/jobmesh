@@ -25,6 +25,7 @@
 @import "../styles/today.css";
 @import "../styles/profile-editor.css";
 @import "../styles/profile.css";
+@import "../styles/seeker-mobile.css";
 @import "../styles/auth.css";
 
 /* Tailwind v4 CSS-first tokens (R7). Mapped from frontend/src/theme/tokens.ts +

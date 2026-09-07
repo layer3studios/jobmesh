@@ -1,0 +1,197 @@
+/* FILE: src/styles/seeker-mobile.css
+   The signed-in seeker pages on a phone: Today, Pipeline, Profile.
+
+   TWO JOBS. First, the notch and the home bar. The document already opts into
+   viewport-fit=cover and the two navs pad themselves by their own safe-area
+   inset, so this file handles what is left: the LEFT and RIGHT insets, which
+   only bite in landscape on a notched iPhone and would otherwise slide a
+   headline under the island, and the bottom inset under scrollable content.
+
+   Second, density. Every rule here is a max-width query, so the desktop layout
+   is untouched: type comes down a step, multi-column grids collapse, anything
+   that can be tapped clears 44px, and the two horizontal strips (the profile
+   tabs, the stage strip) scroll with momentum instead of wrapping into a wall.
+
+   Loaded after today.css and profile.css, so it wins on equal specificity. */
+
+/* ── Safe areas ──────────────────────────────────────────────────────────
+   A single gutter variable every page container adds to its own padding, so
+   nothing is ever flush against a rounded corner or the island. */
+:root {
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+
+.daily,
+.pfx,
+.td-skel {
+  padding-left: calc(16px + var(--safe-l));
+  padding-right: calc(16px + var(--safe-r));
+}
+@media (min-width: 1024px) {
+  .daily, .td-skel {
+    padding-left: calc(var(--margin-page) + var(--safe-l));
+    padding-right: calc(var(--margin-page) + var(--safe-r));
+  }
+  .pfx { padding-left: 0; padding-right: 0; }
+}
+
+/* The bottom nav is fixed and the shell already reserves its height; this is
+   the extra room a phone with a home bar needs under the last section. */
+@media (max-width: 767px) {
+  .daily { padding-bottom: calc(96px + var(--safe-b)); }
+}
+
+/* iOS momentum, and no rubber-banding sideways when a row is a hair too wide. */
+@media (max-width: 767px) {
+  html, body { overscroll-behavior-x: none; }
+  .pf-tabs, .stg, .nw, .pk { -webkit-overflow-scrolling: touch; }
+}
+
+/* ── Today ───────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .daily { gap: 34px; padding-top: 18px; }
+
+  /* The date is the masthead; it stays large but stops pushing the page wide. */
+  .mh__date { font-size: clamp(34px, 12vw, 52px); }
+  .mh { padding-bottom: 18px; }
+  .mh__row { gap: 18px; }
+  .mh__aside { max-width: none; width: 100%; }
+  .mh__aside .ui-btn { width: 100%; justify-content: center; min-height: 46px; }
+  .mh__line { font-size: 15px; }
+
+  /* Seven columns still fit at 320px once the tiles give up a little height. */
+  .wb { --tile: 15px; --gap: 4px; --colgap: 6px; }
+  .wb__day { font-size: 9px; letter-spacing: 0.02em; }
+  .wb__goal-label { font-size: 10px; }
+  .wb__btn { width: 32px; height: 32px; }
+  .daily__tally { gap: 8px; font-size: 11px; }
+  .daily__tally b { font-size: 19px; margin-right: 4px; }
+
+  .ed__head { grid-template-columns: 1fr; grid-template-areas: "kicker" "title" "more"; gap: 8px; }
+  .ed__more { justify-self: start; padding-bottom: 0; min-height: 32px; align-items: center; }
+  .ed__title { font-size: clamp(21px, 6vw, 26px); }
+
+  /* A pick row drops its running number: the logo already anchors the row, and
+     the title needs the width more than the index does. */
+  .pk__row { grid-template-columns: 36px minmax(0, 1fr) 24px; gap: 12px; padding: 15px 8px; }
+  .pk__num { display: none; }
+  .pk__title { font-size: 17px; -webkit-line-clamp: 3; }
+  .pk__meta { font-size: 12px; gap: 6px; }
+  .pk__tags { font-size: 10px; }
+  .pk__arrow { width: 24px; height: 24px; }
+
+  .nw__row { padding: 14px 0; }
+  .nw__headline { font-size: 17px; }
+  .nw__row:hover { box-shadow: none; }
+}
+
+/* ── Pipeline ────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .ws-mast__title { font-size: clamp(30px, 9vw, 44px); }
+  .ws-mast__actions { width: 100%; }
+  .ws-mast__actions .ui-btn { flex: 1 1 auto; justify-content: center; min-height: 46px; }
+  .ws-mast__tally { margin-top: 16px; padding-top: 14px; }
+  .ws-sections { gap: 40px; }
+
+  /* Two stages per row rather than seven columns of nothing. */
+  .stg { grid-template-columns: 1fr 1fr; }
+  .stg__item { margin-right: 0; padding-right: 12px; }
+  .stg__count { font-size: clamp(28px, 9vw, 40px); }
+}
+
+/* ── Profile ─────────────────────────────────────────────────────────── */
+@media (max-width: 1023px) {
+  /* The editor and the preview stack; the preview stops being sticky so it
+     does not pin itself over the fields being typed into. */
+  .pf-body { grid-template-columns: 1fr; }
+  .pf-preview { position: static; }
+}
+
+@media (max-width: 767px) {
+  /* The section bar scrolls sideways under the thumb instead of wrapping to
+     three rows and pushing the editor off the first screen. */
+  .pf-bar { flex-wrap: nowrap; align-items: center; gap: 10px; overflow: visible; }
+  .pf-tabs {
+    flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
+    scroll-snap-type: x proximity; padding-bottom: 2px; margin: 0 -16px; padding-left: 16px; padding-right: 16px;
+  }
+  .pf-tabs::-webkit-scrollbar { display: none; }
+  .pf-tab { flex: 0 0 auto; scroll-snap-align: start; min-height: 40px; }
+  .pf-complete { flex: 0 0 auto; min-height: 40px; }
+
+  .pf-pane__head, .pfx-sec__head { padding: 12px 14px; }
+  .pfx-sec__body { padding: 14px; gap: 14px; }
+  .pf-row { grid-template-columns: 1fr; }
+
+  /* Inputs at 16px so iOS does not zoom the page when one takes focus. */
+  .pf-input { font-size: 16px; padding: 12px; }
+  .pf-input--area { min-height: 120px; }
+
+  .pf-pill, .pf-seg__btn, .pf-vis__trigger, .pf-av__revert, .pfx-link, .gp__link {
+    min-height: 40px;
+  }
+  .pf-tag { min-height: 34px; }
+  .pf-tag__x { width: 22px; height: 22px; }
+
+  /* The menu is as wide as the field rather than a fixed 280px that can hang
+     off the right edge of a 320px screen. */
+  .pf-vis__menu { min-width: 0; width: min(320px, calc(100vw - 32px - var(--safe-l) - var(--safe-r))); }
+
+  .pf-av { gap: 14px; }
+  .pf-av__side { padding-top: 0; }
+
+  /* Connection cards: the header stacks so the two actions keep full targets. */
+  .pf-conn__head { gap: 10px; }
+  .pf-conn__actions { margin-left: 0; width: 100%; }
+  .pf-conn__actions .ui-btn { flex: 1 1 0; justify-content: center; min-height: 42px; }
+  .pf-conn__body { padding: 14px; }
+  .pf-conn__inline { flex-direction: column; align-items: stretch; }
+  .pf-conn__inline .ui-btn { min-height: 46px; justify-content: center; }
+
+  /* Four stat tiles across is unreadable on a phone; two is. */
+  .lc-stat-row { grid-template-columns: 1fr 1fr; }
+
+  .pfx-preview, .pf-preview { margin-top: 4px; }
+}
+
+/* ── Very narrow (iPhone SE and down) ────────────────────────────────── */
+@media (max-width: 380px) {
+  .wb { --tile: 13px; --gap: 3px; --colgap: 4px; }
+  .wb__day { font-size: 8px; }
+  .daily__tally { font-size: 10px; }
+  .pk__row { grid-template-columns: 32px minmax(0, 1fr); }
+  .pk__arrow { display: none; }
+  .stg { grid-template-columns: 1fr; }
+}
+
+/* ── Landscape on a short screen ─────────────────────────────────────── */
+@media (max-height: 460px) and (orientation: landscape) {
+  .mh__date { font-size: clamp(28px, 7vh, 40px); }
+  .daily { gap: 26px; }
+}
+
+/* ── Tap targets that the layout rules above do not reach ────────────────
+   Small buttons (Save, View, Share), the goal steppers and footer links are
+   comfortable with a mouse and marginal with a thumb. The Button and Footer
+   primitives set their heights as INLINE styles, which a stylesheet cannot
+   outrank, so these carry !important. Scoped to a phone; desktop is untouched. */
+@media (max-width: 767px) {
+  .pf-pane__head .ui-btn,
+  .pfx-sec__head .ui-btn,
+  .pf-conn__actions .ui-btn { min-height: 40px !important; }
+
+  /* The footer root carries no class of its own, so its controls are reached
+     by element: every link and button in it, including the bottom row. */
+  footer a,
+  footer button { display: inline-flex !important; align-items: center; min-height: 40px !important; }
+
+  .an-util, .um-avatar { min-height: 40px; min-width: 40px; }
+
+  /* The goal steppers sit on a dashed line and are the only control on it. */
+  .wb__btn { width: 38px; height: 38px; }
+
+  .ed__more { min-height: 40px; }
+  .ed__note-btn { min-height: 40px; padding: 10px 14px; }
+}
