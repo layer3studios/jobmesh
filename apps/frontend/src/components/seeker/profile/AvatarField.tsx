@@ -82,7 +82,6 @@ export default function AvatarField() {
       />
 
       <div className="pf-av__side">
-        <p className="pf-field__hint">A square image looks best. It shows on your profile, in the nav and on your public page.</p>
         {uploaded && (
           <button type="button" className="pf-av__revert press" onClick={() => void revert()} disabled={busy}>
             <Undo2 size={12} aria-hidden /> Use my Google photo

@@ -23,9 +23,16 @@ import { HttpError } from '../../middleware/error-handler-middleware.js';
 const VALID_STAGES = ['applied', 'screening', 'interview', 'offer', 'accepted', 'rejected', 'ghosted'];
 const router = Router();
 
-/** The public read URL for a seeker's uploaded photo. */
-function seekerAvatarUrl(userId) {
-  return `/api/public/seeker-avatar/${String(userId)}`;
+/**
+ * The public read URL for a seeker's uploaded photo.
+ *
+ * The path is keyed by user id, so replacing a photo does not change it and a
+ * browser would keep showing the previous one for the length of the read route's
+ * cache header. The upload time rides along as a query parameter purely to break
+ * that: a new photo is a new URL, an unchanged one still hits cache.
+ */
+function seekerAvatarUrl(userId, uploadedAt) {
+  return `/api/public/seeker-avatar/${String(userId)}?v=${uploadedAt.getTime()}`;
 }
 
 // Memory storage, never disk: the buffer is type- and size-checked before the
@@ -81,12 +88,13 @@ router.post('/avatar', asyncHandler(async (req, res) => {
   if (!req.file?.buffer) throw new HttpError(400, 'An image file is required.', 'NO_FILE');
 
   const stored = storeAvatarFile(req.file.buffer, req.file.mimetype);
-  const url = seekerAvatarUrl(req.user.userId);
+  const uploadedAt = new Date();
+  const url = seekerAvatarUrl(req.user.userId, uploadedAt);
   const previous = await setSeekerAvatar(req.user.userId, {
     storagePath: stored.storagePath,
     sizeBytes: stored.sizeBytes,
     url,
-    uploadedAt: new Date(),
+    uploadedAt,
   });
   // Replacing retires the old file, and only AFTER the row points at the new one:
   // an orphaned file is recoverable, a row pointing at a deleted file is a broken
