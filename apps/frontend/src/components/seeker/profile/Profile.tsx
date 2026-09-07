@@ -48,7 +48,7 @@ function CompletePill({ pct, onClick }: { pct: number; onClick: () => void }) {
         <circle className="pf-complete__track" cx="11" cy="11" r={r} />
         <circle className="pf-complete__fill" cx="11" cy="11" r={r} strokeDasharray={c} strokeDashoffset={c - (pct / 100) * c} />
       </svg>
-      <span className="jb-count">{pct}% complete</span>
+      <span className="jb-count">{pct >= 100 ? "Complete" : "What's next"}</span>
     </button>
   );
 }
