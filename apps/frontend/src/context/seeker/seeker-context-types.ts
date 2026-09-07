@@ -4,7 +4,10 @@ import type { AppliedJobEntry } from '../../types';
 export interface AppUser {
   name: string;
   email: string;
+  /** The photo to show: their upload when there is one, else the one from Google. */
   picture: string;
+  /** True when `picture` is their own upload rather than Google's. */
+  hasUploadedAvatar?: boolean;
   slug: string;
 }
 
@@ -26,6 +29,8 @@ export interface UserCtx {
   closeSkillsEditor: () => void;
   saveSkills: (skills: string[]) => Promise<void>;
   saveDailyGoal: (goal: number) => Promise<void>;
+  /** Swap the photo everywhere after an upload or a revert. */
+  setAvatar: (picture: string | null, uploaded: boolean) => void;
   toggleApplied: (jobId: string) => Promise<void>;
   toggleDismissed: (jobId: string) => Promise<void>;
   logout: () => void;

@@ -10,7 +10,7 @@ import type { AppUser } from '../../context/seeker/seeker-context-types';
 export default async function SeekerLayout({ children }: { children: React.ReactNode }) {
   const me = await getSeekerMeServer();
   const initialUser: AppUser | null = me
-    ? { name: me.name, email: me.email, picture: me.picture, slug: me.slug }
+    ? { name: me.name, email: me.email, picture: me.picture, hasUploadedAvatar: me.hasUploadedAvatar, slug: me.slug }
     : null;
 
   return (

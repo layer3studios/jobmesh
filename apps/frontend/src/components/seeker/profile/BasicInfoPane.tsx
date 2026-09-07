@@ -10,7 +10,7 @@ import type { ParsedProfile } from '../../../types/seeker-profile';
 import type { PublicProfileSettingsState, ProfileVisibility } from '../../../types/public-profile';
 import { patchProfile, SeekerApiError } from '../../../api/seeker-api';
 import { patchProfileSettings, PublicProfileApiError } from '../../../api/public-profile-api';
-import { Avatar } from '../../ui/Avatar';
+import AvatarField from './AvatarField';
 import { Field, TextInput, TextArea, Pills, PaneHead, PaneError, useDirty } from './editor';
 import VisibilityMenu from './VisibilityMenu';
 
@@ -26,7 +26,6 @@ const HEADLINE_MAX = 120;
 interface Props {
   profile: ParsedProfile;
   settings: PublicProfileSettingsState | null;
-  avatar?: { name: string; picture?: string };
   onSaved: (p: ParsedProfile) => void;
   onSettings: (s: PublicProfileSettingsState) => void;
   /** Live edits, so the preview follows the keyboard. */
@@ -44,7 +43,7 @@ function fromProfile(p: ParsedProfile, s: PublicProfileSettingsState | null) {
   };
 }
 
-export default function BasicInfoPane({ profile, settings, avatar, onSaved, onSettings, onDraft }: Props) {
+export default function BasicInfoPane({ profile, settings, onSaved, onSettings, onDraft }: Props) {
   const saved = fromProfile(profile, settings);
   const [form, setForm] = useState(saved);
   const [saving, setSaving] = useState(false);
@@ -81,13 +80,9 @@ export default function BasicInfoPane({ profile, settings, avatar, onSaved, onSe
       <div className="pfx-sec__body">
         {error && <PaneError message={error} onDismiss={() => setError(null)} />}
 
-        <div className="pf-row pf-row--id">
-          <div className="pf-avatar-edit">
-            {avatar ? <Avatar name={avatar.name} src={avatar.picture} size="lg" /> : null}
-            <span className="pf-field__hint">Your photo comes from Google. Change it there and it changes here.</span>
-          </div>
-          <Field label="Full name"><TextInput value={form.fullName} onChange={e => set('fullName', e.target.value)} placeholder="Your name as it should appear" autoComplete="name" /></Field>
-        </div>
+        <Field label="Photo"><AvatarField /></Field>
+
+        <Field label="Full name"><TextInput value={form.fullName} onChange={e => set('fullName', e.target.value)} placeholder="Your name as it should appear" autoComplete="name" /></Field>
 
         <Field label="Profile visibility" hint="Contact details stay hidden either way, unless you turn them on in Public profile.">
           <VisibilityMenu value={form.visibility} onChange={v => set('visibility', v)} />

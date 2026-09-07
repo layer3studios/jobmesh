@@ -62,6 +62,7 @@ import publicInterviewRouter from './api/public/public-interview-routes.js';
 import publicInviteRouter from './api/public/public-invite-routes.js';
 import publicDpdpExportRouter from './api/public/public-dpdp-export-routes.js';
 import employerAvatarRouter from './api/public/employer-avatar-route.js';
+import seekerAvatarRouter from './api/public/seeker-avatar-route.js';
 import resumeDownloadRouter from './api/public/resume-download-route.js';
 import companyLogoRouter from './api/public/company-logo-route.js';
 import culturePhotoRouter from './api/public/culture-photo-route.js';
@@ -187,6 +188,7 @@ export function registerRoutes(app) {
   app.use('/api/public/company-logo', companyLogoRouter); // unauthenticated careers-page logo (before the apply catch-all)
   app.use('/api/public/culture-photo', culturePhotoRouter); // unauthenticated careers-page photos (before the apply catch-all)
   app.use('/api/public/avatar', employerAvatarRouter); // unauthenticated interviewer photo (before the apply catch-all)
+  app.use('/api/public/seeker-avatar', seekerAvatarRouter); // unauthenticated seeker photo (before the apply catch-all)
   app.use('/api/public/invites', publicInviteRouter); // unauthenticated invite preview (before the apply catch-all)
   // DPDP right of access. Unauthenticated by necessity — the emailed one-time token
   // is the credential. Mounted before the apply catch-all.

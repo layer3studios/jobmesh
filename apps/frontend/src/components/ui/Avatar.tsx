@@ -1,12 +1,16 @@
 'use client';
 // FILE: src/components/ui/Avatar.tsx
-// Circular avatar with image + initials fallback.
+// Rounded-square avatar with image + initials fallback. Square rather than a
+// circle so a photo keeps its corners and reads as a profile tile, matching the
+// account menu and the profile preview.
 import { useState } from 'react';
 import type { CSSProperties } from 'react';
 
 type AvatarSize = 'sm' | 'md' | 'lg';
 
 const PX: Record<AvatarSize, number> = { sm: 28, md: 36, lg: 48 };
+/** Corner radius scales with the tile so all three read as the same shape. */
+const RADIUS: Record<AvatarSize, number> = { sm: 8, md: 10, lg: 14 };
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -37,7 +41,7 @@ export function Avatar({
       title={name}
       style={{
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        width: px, height: px, borderRadius: '50%', overflow: 'hidden',
+        width: px, height: px, borderRadius: RADIUS[size], overflow: 'hidden',
         background: 'var(--accent-soft)', color: 'var(--accent)',
         fontWeight: 600, fontSize: px * 0.4, flexShrink: 0,
         border: '1px solid var(--border)', ...style,

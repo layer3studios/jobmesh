@@ -1,5 +1,6 @@
 // FILE: src/api/seeker/seeker-auth-routes.js
 import { Router } from 'express';
+import { avatarUrlForUser } from '../../models/seeker/seeker-avatar-model.js';
 import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
 import { GOOGLE_CLIENT_ID, JWT_SECRET } from '../../env.js';
@@ -17,7 +18,8 @@ function publicUser(user) {
   return {
     name: user.name,
     email: user.email,
-    picture: user.picture,
+    picture: avatarUrlForUser(user),
+    hasUploadedAvatar: Boolean(user.seekerAvatar?.storagePath),
     slug: user.slug,
     skills: Array.isArray(user.skills) ? user.skills : [],
     dailyGoal: typeof user.dailyGoal === 'number' ? user.dailyGoal : 5,

@@ -201,7 +201,6 @@ export default function Profile() {
       case 'basic': return (
         <BasicInfoPane
           profile={profile} settings={settings}
-          avatar={currentUser ? { name: currentUser.name, picture: currentUser.picture } : undefined}
           onSaved={setProfile} onSettings={setSettings} onDraft={onDraft}
         />
       );

@@ -188,3 +188,30 @@ export async function refreshGitHub(): Promise<GitHubProfile> {
   });
   return body.data;
 }
+
+// ─── Avatar ───────────────────────────────────────────────────────────
+// The photo on the account. Multipart, so these two do not go through the JSON
+// `request` helper; the error shape is the same.
+
+interface AvatarResponse { picture: string | null; hasUploadedAvatar: boolean }
+
+async function avatarRequest(init: RequestInit): Promise<AvatarResponse> {
+  const response = await fetch(apiUrl('/seeker/me/avatar'), { credentials: 'include', ...init });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new SeekerApiError(response.status, body?.code ?? null, body?.error ?? 'Could not update your photo.');
+  }
+  return { picture: body?.picture ?? null, hasUploadedAvatar: Boolean(body?.hasUploadedAvatar) };
+}
+
+/** Upload or replace the caller's photo. */
+export function uploadSeekerAvatar(file: File): Promise<AvatarResponse> {
+  const form = new FormData();
+  form.append('avatar', file);
+  return avatarRequest({ method: 'POST', body: form });
+}
+
+/** Clear the upload and fall back to the photo Google gave us. */
+export function removeSeekerAvatar(): Promise<AvatarResponse> {
+  return avatarRequest({ method: 'DELETE' });
+}
