@@ -16,6 +16,7 @@ const MONO = 'var(--font-jetbrains-mono), ui-monospace, monospace';
 
 const SECTIONS = [
   { to: '/today', label: 'Today' },
+  { to: '/pipeline', label: 'Pipeline' },
   { to: '/profile', label: 'Profile' },
 ] as const;
 
