@@ -1,13 +1,13 @@
 'use client';
 // FILE: src/components/seeker/profile/Profile.tsx
-// Seeker profile (/profile), set like the other account pages: a masthead
-// that says how complete it is, then three columns at width. Left, the
-// section index with what still needs doing. Middle, the editor for the open
-// section: hairline sections, one Save each. Right, the live preview of the
-// public page, whose links are real and whose gaps jump you to the field.
+// Seeker profile (/profile): a masthead that says how complete it is, a
+// completeness pill that names the next thing to do, a tab bar of sections,
+// and two glass panes: the editor for the open section on the left, the live
+// preview of the public page on the right. Every link in the preview is real
+// when the data exists and jumps to the field when it does not.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Upload, RefreshCw, ExternalLink, ArrowRight, Check } from 'lucide-react';
+import { Upload, RefreshCw, ExternalLink } from 'lucide-react';
 import { Button, EmptyState, useToast } from '../../ui';
 import SeekerWorkspace from '../SeekerWorkspace';
 import { useSeeker } from '../../../context/seeker/SeekerContext';
@@ -42,20 +42,39 @@ function relTime(iso: string | null): string {
   return `${days} days ago`;
 }
 
-/** Placeholder while the profile loads: the same three columns. */
+function CompletePill({ pct, onClick, open }: { pct: number; onClick: () => void; open: boolean }) {
+  const r = 9, c = 2 * Math.PI * r;
+  return (
+    <button type="button" className="pf-complete" data-done={pct >= 100} aria-expanded={open} onClick={onClick} aria-label={`Profile ${pct}% complete. See what is next`}>
+      <svg className="pf-complete__ring" viewBox="0 0 22 22" aria-hidden>
+        <circle className="pf-complete__track" cx="11" cy="11" r={r} />
+        <circle className="pf-complete__fill" cx="11" cy="11" r={r} strokeDasharray={c} strokeDashoffset={c - (pct / 100) * c} />
+      </svg>
+      <span className="jb-count">{pct >= 100 ? 'Complete' : 'What is next'}</span>
+    </button>
+  );
+}
+
+/** Pane-shaped placeholder while the profile loads. */
 function ProfileSkeleton() {
   return (
-    <div className="pfx" aria-busy="true" aria-label="Loading your profile">
-      <div className="pfx__nav">{Array.from({ length: 7 }).map((_, i) => <div key={i} className="skeleton" style={{ height: 36, width: 120, borderRadius: 9, opacity: 1 - i * 0.1 }} />)}</div>
-      <div className="pfx__editor">
-        <div className="pfx-sec__head"><div className="skeleton" style={{ height: 30, width: 220 }} /><div className="skeleton" style={{ height: 30, width: 110, borderRadius: 10 }} /></div>
+    <div className="pf-body" aria-busy="true" aria-label="Loading your profile">
+      <div className="glass pf-pane">
+        <div className="pf-pane__head"><div className="skeleton" style={{ height: 11, width: 120 }} /><div className="skeleton" style={{ height: 30, width: 110, borderRadius: 10 }} /></div>
         <div className="pfx-sec__body">
           <div className="pf-row"><div className="skeleton" style={{ height: 42, borderRadius: 10 }} /><div className="skeleton" style={{ height: 42, borderRadius: 10 }} /></div>
           <div className="skeleton" style={{ height: 96, borderRadius: 10 }} />
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>{[80, 64, 92, 70, 58].map((w, i) => <div key={i} className="skeleton" style={{ height: 30, width: w, borderRadius: 999 }} />)}</div>
         </div>
       </div>
-      <div className="skeleton" style={{ height: 420, borderRadius: 14 }} />
+      <div className="glass pf-pane">
+        <div className="skeleton" style={{ height: 120, borderRadius: 0 }} />
+        <div style={{ padding: 18, display: 'grid', gap: 10 }}>
+          <div className="skeleton" style={{ width: 64, height: 64, borderRadius: 16, marginTop: -48 }} />
+          <div className="skeleton" style={{ height: 26, width: '60%' }} />
+          <div className="skeleton" style={{ height: 12, width: '80%' }} />
+        </div>
+      </div>
     </div>
   );
 }
@@ -71,6 +90,7 @@ export default function Profile() {
   const [settings, setSettings] = useState<PublicProfileSettingsState | null>(null);
   const [proof, setProof] = useState<{ github: string | null; leetcode: string | null }>({ github: null, leetcode: null });
   const [tab, setTab] = useState<ProfileTab>('basic');
+  const [showNext, setShowNext] = useState(false);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [draftSkills, setDraftSkills] = useState<string[] | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -117,7 +137,8 @@ export default function Profile() {
   }, []);
   const go = useCallback((t: ProfileTab) => {
     setTab(t); history.replaceState(null, '', `#${t}`); setDraft(null); setDraftSkills(null);
-    document.getElementById('pfx-editor')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    setShowNext(false);
+    document.getElementById('pf-panel')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, []);
 
   const onDraft = useCallback((d: Draft) => setDraft(d), []);
@@ -174,7 +195,6 @@ export default function Profile() {
     experience: profile.experience.length, education: profile.education.length, skills: profile.skills.length,
   };
   const unmetTabs = new Set(checks.filter(c => !c.met).map(c => c.tab));
-  const doneTabs = new Set(PROFILE_TABS.filter(t => checks.some(c => c.tab === t.id) && !unmetTabs.has(t.id)).map(t => t.id));
 
   const pane = (() => {
     switch (tab) {
@@ -251,37 +271,38 @@ export default function Profile() {
     >
       <ResumeSheet isOpen={uploadOpen} onClose={() => setUploadOpen(false)} onParsed={() => void load()} />
 
-      <div className="pfx">
-        <nav className="pfx__nav" role="tablist" aria-label="Profile sections">
-          {PROFILE_TABS.map((t, i) => (
+      <div className="pf-bar">
+        <CompletePill pct={done.pct} open={showNext} onClick={() => setShowNext(v => !v)} />
+        <div className="pf-tabs" role="tablist" aria-label="Profile sections">
+          {PROFILE_TABS.map(t => (
             <button
-              key={t.id} type="button" role="tab" id={`pf-tab-${t.id}`} aria-selected={tab === t.id} aria-controls="pfx-editor"
-              className="pfx__tab" onClick={() => go(t.id)}
+              key={t.id} type="button" role="tab" id={`pf-tab-${t.id}`} aria-selected={tab === t.id} aria-controls="pf-panel"
+              className="pf-tab" onClick={() => go(t.id)}
             >
-              <span className="pfx__tab-num">{String(i + 1).padStart(2, '0')}</span>
               {t.label}
-              <span className="pfx__tab-state">
-                {counts[t.id] ? counts[t.id] : null}
-                {unmetTabs.has(t.id) ? <span className="pfx__tab-dot" aria-label="Needs attention" /> : doneTabs.has(t.id) ? <Check size={12} className="pfx__tab-done" aria-label="Done" /> : null}
-              </span>
+              {counts[t.id] ? <span className="pf-tab__count">{counts[t.id]}</span> : unmetTabs.has(t.id) && <span className="pf-tab__dot" aria-label="Needs attention" />}
             </button>
           ))}
-          {done.next.length > 0 && (
-            <div className="pfx__next" role="status">
-              <p className="pfx__next-title">{done.met} of {checks.length} done · next</p>
-              {done.next.map(c => (
-                <button key={c.key} type="button" className="pfx__next-item" onClick={() => go(c.tab)}>
-                  {c.action} <ArrowRight size={12} aria-hidden />
-                </button>
-              ))}
+        </div>
+      </div>
+
+      {showNext && done.next.length > 0 && (
+        <div className="pf-next rise" role="status">
+          <p className="pf-next__title">{done.met} of {checks.length} done. Next:</p>
+          {done.next.map(c => (
+            <div key={c.key} className="pf-next__item">
+              <span className="pf-next__dot" aria-hidden />
+              {c.action}
+              <Button size="sm" variant="ghost" onClick={() => go(c.tab)}>Go</Button>
             </div>
-          )}
-        </nav>
+          ))}
+        </div>
+      )}
 
-        <section id="pfx-editor" role="tabpanel" aria-labelledby={`pf-tab-${tab}`} className="pfx__editor">
-          <div key={tab} className="jb-swap pfx-sec">{pane}</div>
+      <div className="pf-body">
+        <section id="pf-panel" role="tabpanel" aria-labelledby={`pf-tab-${tab}`} className="glass pf-pane pf-editor--flat">
+          <div key={tab} className="jb-swap">{pane}</div>
         </section>
-
         <ProfilePreview profile={previewProfile} settings={previewSettings} avatarUrl={currentUser?.picture} githubUser={proof.github} leetcodeUser={proof.leetcode} onJump={go} />
       </div>
     </SeekerWorkspace>

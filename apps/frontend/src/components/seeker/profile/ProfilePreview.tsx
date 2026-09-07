@@ -1,11 +1,11 @@
 'use client';
 // FILE: src/components/seeker/profile/ProfilePreview.tsx
-// The live preview beside the editor: the public page at /u/{slug}, at
-// reading size. It re-renders from the same profile object the editor saves,
-// so a change on the left is on the right the moment it lands. Every link in
-// it is real when the data exists; when it does not, the same button jumps to
-// the section that fills it in.
-import { Briefcase, MapPin, ExternalLink, Share2, Linkedin, Github, Code2, Mail, Plus } from 'lucide-react';
+// The live preview beside the editor: what a recruiter opens at /u/{slug}.
+// It re-renders from the same profile object the editor saves, so a change
+// on the left is on the right the moment it lands. Every link in it is real
+// when the data exists; when it does not, the same chip jumps to the section
+// that fills it in.
+import { Briefcase, MapPin, AtSign, ExternalLink, Share2, Linkedin, Github, Code2, Mail, Plus } from 'lucide-react';
 import { Button, useToast } from '../../ui';
 import type { ParsedProfile } from '../../../types/seeker-profile';
 import type { PublicProfileSettingsState } from '../../../types/public-profile';
@@ -55,52 +55,60 @@ export default function ProfilePreview({ profile, settings, avatarUrl, githubUse
   };
 
   return (
-    <aside className="pfx-preview" aria-label="Live preview">
-      <div className="pfx-preview__bar">
-        <span className="ed__kicker"><span className="ed__num">Preview</span>{isPublic ? 'live at your link' : 'private'}</span>
-        <div style={{ display: 'flex', gap: 6 }}>
+    <aside className="glass pf-pane pf-preview" aria-label="Live preview">
+      <div className="pf-pane__head">
+        <div>
+          <span className="ws-section__label">Live preview</span>
+          <span className="ws-section__sub" style={{ display: 'block' }}>{isPublic ? 'Live at your link' : 'Private until you turn it on'}</span>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
           <Button variant="ghost" size="sm" onClick={view} iconLeft={<ExternalLink size={13} />}>View</Button>
           <Button variant="secondary" size="sm" onClick={() => void share()} iconLeft={<Share2 size={13} />}>Share</Button>
         </div>
       </div>
 
-      <div className="pfx-page">
-        <div className="pfx-page__id">
-          <div className="pfx-page__avatar">{avatarUrl ? <img src={avatarUrl} alt="" /> : initial}</div>
-          <div style={{ minWidth: 0 }}>
-            <h2 className="font-display pfx-page__name">{name}</h2>
-            <p className="pfx-page__headline"><Briefcase size={12} aria-hidden />{headline}</p>
-            <p className="pfx-page__meta">
-              {location && <span><MapPin size={12} aria-hidden />{location}</span>}
-              {settings?.settings.openToWork && <span className="pfx-page__open">Open to work</span>}
-            </p>
+      <div className="pf-card">
+        <div className="pf-card__banner" aria-hidden />
+        <div className="pf-card__id">
+          <div className="pf-card__avatar">
+            {avatarUrl ? <img src={avatarUrl} alt="" /> : initial}
+          </div>
+          <h2 className="font-display pf-card__name">{name}</h2>
+          <div className="pf-card__meta">
+            <span><Briefcase size={12} />{headline}</span>
+            {settings?.profileSlug && <span><AtSign size={12} />{settings.profileSlug}</span>}
+            {location && <span><MapPin size={12} />{location}</span>}
+          </div>
+          {settings?.settings.openToWork && <p className="pf-card__open" style={{ marginTop: 10 }}>Open to work</p>}
+        </div>
+
+        <div className="pf-block">
+          <p className="pf-block__title">Links</p>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            <LinkChip href={profile.linkedinUrl} label="LinkedIn" icon={<Linkedin size={13} />} missingTab="proof" onJump={onJump} />
+            <LinkChip href={githubUser ? `https://github.com/${githubUser}` : null} label="GitHub" icon={<Github size={13} />} missingTab="proof" onJump={onJump} />
+            <LinkChip href={leetcodeUser ? `https://leetcode.com/u/${leetcodeUser}` : null} label="LeetCode" icon={<Code2 size={13} />} missingTab="proof" onJump={onJump} />
+            <LinkChip href={profile.email && settings?.settings.showEmail ? `mailto:${profile.email}` : null} label="Email" icon={<Mail size={13} />} missingTab={profile.email ? 'settings' : 'basic'} onJump={onJump} />
           </div>
         </div>
 
-        <div className="pfx-page__links">
-          <LinkChip href={profile.linkedinUrl} label="LinkedIn" icon={<Linkedin size={13} />} missingTab="proof" onJump={onJump} />
-          <LinkChip href={githubUser ? `https://github.com/${githubUser}` : null} label="GitHub" icon={<Github size={13} />} missingTab="proof" onJump={onJump} />
-          <LinkChip href={leetcodeUser ? `https://leetcode.com/u/${leetcodeUser}` : null} label="LeetCode" icon={<Code2 size={13} />} missingTab="proof" onJump={onJump} />
-          <LinkChip href={profile.email && settings?.settings.showEmail ? `mailto:${profile.email}` : null} label="Email" icon={<Mail size={13} />} missingTab={profile.email ? 'settings' : 'basic'} onJump={onJump} />
-        </div>
-
-        <div className="pfx-page__block">
-          <p className="pfx-page__label">About</p>
+        <div className="pf-block">
+          <p className="pf-block__title">About</p>
           {profile.summary
-            ? <p className="pfx-page__text">{profile.summary}</p>
-            : <button type="button" className="pfx-page__empty press" onClick={() => onJump('basic')}>Two lines about what you build and what you want next. <Plus size={11} aria-hidden /></button>}
+            ? <p className="pf-block__text">{profile.summary}</p>
+            : <button type="button" className="pf-block__empty--btn press" onClick={() => onJump('basic')}>Two lines about what you build and what you want next. <Plus size={11} aria-hidden /></button>}
         </div>
 
-        <div className="pfx-page__block">
-          <p className="pfx-page__label">Skills</p>
+        <div className="pf-block">
+          <p className="pf-block__title">Skills</p>
           {profile.skills.length > 0
             ? <div className="pf-chips">{profile.skills.slice(0, 14).map(s => <span key={s.name} className="pf-chip">{s.name}</span>)}{profile.skills.length > 14 && <span className="pf-chip">+{profile.skills.length - 14}</span>}</div>
-            : <button type="button" className="pfx-page__empty press" onClick={() => onJump('skills')}>No skills yet. <Plus size={11} aria-hidden /></button>}
+            : <button type="button" className="pf-block__empty--btn press" onClick={() => onJump('skills')}>No skills yet. <Plus size={11} aria-hidden /></button>}
         </div>
 
         {profile.experience.length > 0 && (
-          <div className="pfx-page__block">
-            <p className="pfx-page__label">Experience</p>
+          <div className="pf-block">
+            <p className="pf-block__title">Experience</p>
             <div className="pf-timeline">
               {profile.experience.slice(0, 3).map((e, i) => (
                 <div key={`${e.company}-${i}`} className="pf-tl">
@@ -111,8 +119,8 @@ export default function ProfilePreview({ profile, settings, avatarUrl, githubUse
                   </div>
                 </div>
               ))}
-              {profile.experience.length > 3 && <p className="pfx-page__more">+{profile.experience.length - 3} more on the page</p>}
             </div>
+            {profile.experience.length > 3 && <p className="pf-block__more">+{profile.experience.length - 3} more on the page</p>}
           </div>
         )}
       </div>

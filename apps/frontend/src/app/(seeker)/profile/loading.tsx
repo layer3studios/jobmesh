@@ -13,8 +13,10 @@ export default function ProfileLoading() {
         <SkeletonLine width="300px" height={22} style={{ marginTop: 20 }} />
       </div>
       <div>
-        <div className="pfx">
-          <div className="pfx__nav">{Array.from({ length: 7 }).map((_, i) => <SkeletonLine key={i} width="120px" height={36} style={{ borderRadius: 9, opacity: 1 - i * 0.1 }} />)}</div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+          {Array.from({ length: 7 }).map((_, i) => <SkeletonLine key={i} width="90px" height={34} style={{ borderRadius: 8 }} />)}
+        </div>
+        <div className="pf-body">
           <div style={{ display: 'grid', gap: 16 }}>
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i}>

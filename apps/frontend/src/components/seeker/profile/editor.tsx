@@ -75,7 +75,7 @@ export function PaneHead({ title, sub, dirty, saving, savedAt, onSave, right }: 
   return (
     <div className="pfx-sec__head">
       <div>
-        <h2 className="font-display pfx-sec__title">{title}</h2>
+        <span className="pfx-sec__title">{title}</span>
         {sub && <p className="pfx-sec__sub">{sub}</p>}
       </div>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -97,7 +97,7 @@ export function SectionHead({ title, sub, right }: { title: string; sub?: string
   return (
     <div className="pfx-sec__head">
       <div>
-        <h2 className="font-display pfx-sec__title">{title}</h2>
+        <span className="pfx-sec__title">{title}</span>
         {sub && <p className="pfx-sec__sub">{sub}</p>}
       </div>
       {right}
