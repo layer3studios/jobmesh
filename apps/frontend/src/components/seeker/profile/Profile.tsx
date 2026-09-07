@@ -1,14 +1,14 @@
 'use client';
 // FILE: src/components/seeker/profile/Profile.tsx
-// Seeker profile (/profile), laid out the way Rightfit lays it out: a
-// completeness pill that names the next thing to do, a tab bar of sections,
-// "Upload resume" top-right, and two panes — the editor for the open section
-// on the left, a live preview of the public profile on the right that follows
-// the keyboard. Each pane owns its own Save button and error.
+// Seeker profile (/profile), set like the other account pages: a masthead
+// that says how complete it is, then three columns at width. Left, the
+// section index with what still needs doing. Middle, the editor for the open
+// section: hairline sections, one Save each. Right, the live preview of the
+// public page, whose links are real and whose gaps jump you to the field.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Upload, RefreshCw } from 'lucide-react';
-import { Button, EmptyState } from '../../ui';
+import { Upload, RefreshCw, ExternalLink, ArrowRight, Check } from 'lucide-react';
+import { Button, EmptyState, useToast } from '../../ui';
 import SeekerWorkspace from '../SeekerWorkspace';
 import { useSeeker } from '../../../context/seeker/SeekerContext';
 import { fetchProfile, getGitHubProfile, getLeetCodeProfile, SeekerApiError } from '../../../api/seeker-api';
@@ -17,6 +17,7 @@ import type { ParsedProfile } from '../../../types/seeker-profile';
 import type { PublicProfileSettingsState } from '../../../types/public-profile';
 import LeetCodeConnect from './LeetCodeConnect';
 import GitHubConnect from './GitHubConnect';
+import LinkedInConnect from './LinkedInConnect';
 import ProfileSettingsCard from './ProfileSettingsCard';
 import { ProfileExperience, ProfileEducation } from './ProfileReadonly';
 import ProfileReviewCard from '../ProfileReviewCard';
@@ -26,6 +27,7 @@ import ResumeSheet from './ResumeSheet';
 import BasicInfoPane from './BasicInfoPane';
 import SkillsPane from './SkillsPane';
 import PreferencesPane from './PreferencesPane';
+import { SectionHead } from './editor';
 import { PROFILE_TABS, isProfileTab, type ProfileTab } from './tabs';
 import { profileChecks, completeness } from './completeness';
 
@@ -40,39 +42,20 @@ function relTime(iso: string | null): string {
   return `${days} days ago`;
 }
 
-function CompletePill({ pct, onClick }: { pct: number; onClick: () => void }) {
-  const r = 9, c = 2 * Math.PI * r;
-  return (
-    <button type="button" className="pf-complete" data-done={pct >= 100} onClick={onClick} aria-label={`Profile ${pct}% complete — see what is next`}>
-      <svg className="pf-complete__ring" viewBox="0 0 22 22" aria-hidden>
-        <circle className="pf-complete__track" cx="11" cy="11" r={r} />
-        <circle className="pf-complete__fill" cx="11" cy="11" r={r} strokeDasharray={c} strokeDashoffset={c - (pct / 100) * c} />
-      </svg>
-      <span className="jb-count">{pct >= 100 ? "Complete" : "What's next"}</span>
-    </button>
-  );
-}
-
-/** Pane-shaped placeholder while the profile loads. */
+/** Placeholder while the profile loads: the same three columns. */
 function ProfileSkeleton() {
   return (
-    <div className="pf-body" aria-busy="true" aria-label="Loading your profile">
-      <div className="glass pf-pane">
-        <div className="pf-pane__head"><div className="skeleton" style={{ height: 11, width: 120 }} /><div className="skeleton" style={{ height: 30, width: 110, borderRadius: 10 }} /></div>
-        <div className="pf-pane__body">
+    <div className="pfx" aria-busy="true" aria-label="Loading your profile">
+      <div className="pfx__nav">{Array.from({ length: 7 }).map((_, i) => <div key={i} className="skeleton" style={{ height: 36, width: 120, borderRadius: 9, opacity: 1 - i * 0.1 }} />)}</div>
+      <div className="pfx__editor">
+        <div className="pfx-sec__head"><div className="skeleton" style={{ height: 30, width: 220 }} /><div className="skeleton" style={{ height: 30, width: 110, borderRadius: 10 }} /></div>
+        <div className="pfx-sec__body">
           <div className="pf-row"><div className="skeleton" style={{ height: 42, borderRadius: 10 }} /><div className="skeleton" style={{ height: 42, borderRadius: 10 }} /></div>
           <div className="skeleton" style={{ height: 96, borderRadius: 10 }} />
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>{[80, 64, 92, 70, 58].map((w, i) => <div key={i} className="skeleton" style={{ height: 30, width: w, borderRadius: 999 }} />)}</div>
         </div>
       </div>
-      <div className="glass pf-pane">
-        <div className="skeleton" style={{ height: 120, borderRadius: 0 }} />
-        <div style={{ padding: 18, display: 'grid', gap: 10 }}>
-          <div className="skeleton" style={{ width: 64, height: 64, borderRadius: 16, marginTop: -48 }} />
-          <div className="skeleton" style={{ height: 26, width: '60%' }} />
-          <div className="skeleton" style={{ height: 12, width: '80%' }} />
-        </div>
-      </div>
+      <div className="skeleton" style={{ height: 420, borderRadius: 14 }} />
     </div>
   );
 }
@@ -81,13 +64,13 @@ type Draft = { fullName: string; summary: string; city: string; state: string; h
 
 export default function Profile() {
   const { currentUser } = useSeeker();
+  const { showToast } = useToast();
   const [profile, setProfile] = useState<ParsedProfile | null>(null);
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [error, setError] = useState('Could not load your profile.');
   const [settings, setSettings] = useState<PublicProfileSettingsState | null>(null);
-  const [proof, setProof] = useState<{ github: string | null; leetcode: boolean }>({ github: null, leetcode: false });
+  const [proof, setProof] = useState<{ github: string | null; leetcode: string | null }>({ github: null, leetcode: null });
   const [tab, setTab] = useState<ProfileTab>('basic');
-  const [showNext, setShowNext] = useState(false);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [draftSkills, setDraftSkills] = useState<string[] | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -112,25 +95,35 @@ export default function Profile() {
       history.replaceState(null, '', window.location.pathname + window.location.hash);
     }
   }, []);
+  const loadProof = useCallback(() => {
+    getGitHubProfile().then(r => setProof(p => ({ ...p, github: r.connected ? (r.data?.username ?? '') : null }))).catch(() => {});
+    getLeetCodeProfile().then(r => setProof(p => ({ ...p, leetcode: r.connected ? (r.data?.username ?? '') : null }))).catch(() => {});
+  }, []);
   useEffect(() => {
     fetchProfileSettings().then(setSettings).catch(() => setSettings(null));
-    getGitHubProfile().then(r => setProof(p => ({ ...p, github: r.connected ? (r.data?.username ?? '') : null }))).catch(() => {});
-    getLeetCodeProfile().then(r => setProof(p => ({ ...p, leetcode: r.connected }))).catch(() => {});
-  }, []);
+    loadProof();
+  }, [loadProof]);
+  // The proof section changes connections; re-read them when it is left.
+  useEffect(() => { if (tab !== 'proof') loadProof(); }, [tab, loadProof]);
+  // The settings section owns the public switch; re-read it when it is left.
+  useEffect(() => { if (tab !== 'settings') fetchProfileSettings().then(setSettings).catch(() => {}); }, [tab]);
 
-  // The open tab lives in the hash so a link can point at a section.
+  // The open section lives in the hash so a link can point at it.
   useEffect(() => {
     const fromHash = () => { const h = window.location.hash.slice(1); if (isProfileTab(h)) setTab(h); };
     fromHash();
     window.addEventListener('hashchange', fromHash);
     return () => window.removeEventListener('hashchange', fromHash);
   }, []);
-  const go = (t: ProfileTab) => { setTab(t); history.replaceState(null, '', `#${t}`); setDraft(null); setDraftSkills(null); };
+  const go = useCallback((t: ProfileTab) => {
+    setTab(t); history.replaceState(null, '', `#${t}`); setDraft(null); setDraftSkills(null);
+    document.getElementById('pfx-editor')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }, []);
 
   const onDraft = useCallback((d: Draft) => setDraft(d), []);
   const onDraftSkills = useCallback((s: string[]) => setDraftSkills(s), []);
 
-  const checks = useMemo(() => profile ? profileChecks(profile, { github: !!proof.github, leetcode: proof.leetcode, publicOn: settings?.profilePublic }) : [], [profile, proof, settings]);
+  const checks = useMemo(() => profile ? profileChecks(profile, { github: !!proof.github, leetcode: !!proof.leetcode, publicOn: settings?.profilePublic }) : [], [profile, proof, settings]);
   const done = useMemo(() => completeness(checks), [checks]);
 
   // What the preview shows: the saved profile, overlaid with whatever is being typed.
@@ -142,6 +135,13 @@ export default function Profile() {
     return p;
   }, [profile, draft, draftSkills]);
   const previewSettings = useMemo(() => settings && draft ? { ...settings, settings: { ...settings.settings, headline: draft.headline } } : settings, [settings, draft]);
+
+  const publicUrl = settings?.profilePublic ? settings.profileUrl : null;
+  const viewPublic = () => {
+    if (publicUrl) { window.open(publicUrl, '_blank', 'noopener,noreferrer'); return; }
+    showToast('info', 'Your page is private. Turn it on in Public profile and this opens it.');
+    go('settings');
+  };
 
   if (loadState === 'loading') {
     return <SeekerWorkspace label="Your profile" title="Loading"><ProfileSkeleton /></SeekerWorkspace>;
@@ -174,7 +174,7 @@ export default function Profile() {
     experience: profile.experience.length, education: profile.education.length, skills: profile.skills.length,
   };
   const unmetTabs = new Set(checks.filter(c => !c.met).map(c => c.tab));
-  const paneTitle = PROFILE_TABS.find(t => t.id === tab)?.label ?? '';
+  const doneTabs = new Set(PROFILE_TABS.filter(t => checks.some(c => c.tab === t.id) && !unmetTabs.has(t.id)).map(t => t.id));
 
   const pane = (() => {
     switch (tab) {
@@ -187,11 +187,16 @@ export default function Profile() {
       );
       case 'skills': return <SkillsPane profile={profile} onSaved={setProfile} onDraft={onDraftSkills} />;
       case 'preferences': return <PreferencesPane profile={profile} onSaved={setProfile} />;
-      case 'experience': return (<><div className="pf-pane__head"><span className="ws-section__label">Experience · {profile.experience.length}</span></div><div className="pf-pane__body"><ProfileExperience profile={profile} /></div></>);
+      case 'experience': return (
+        <>
+          <SectionHead title="Experience" sub={`${profile.experience.length} ${profile.experience.length === 1 ? 'role' : 'roles'} from your resume. Upload a newer one to change them.`} right={<Button variant="secondary" size="sm" iconLeft={<Upload size={13} />} onClick={() => setUploadOpen(true)}>Upload resume</Button>} />
+          <div className="pfx-sec__body"><ProfileExperience profile={profile} /></div>
+        </>
+      );
       case 'education': return (
         <>
-          <div className="pf-pane__head"><span className="ws-section__label">Education · {profile.education.length}</span></div>
-          <div className="pf-pane__body">
+          <SectionHead title="Education" sub={`${profile.education.length} from your resume.`} right={<Button variant="secondary" size="sm" iconLeft={<Upload size={13} />} onClick={() => setUploadOpen(true)}>Upload resume</Button>} />
+          <div className="pfx-sec__body">
             <ProfileEducation profile={profile} />
             {profile.certifications.length > 0 && (
               <div>
@@ -204,14 +209,23 @@ export default function Profile() {
       );
       case 'proof': return (
         <>
-          <div className="pf-pane__head"><span className="ws-section__label">Proof of work</span><span className="ws-section__sub">Claims get read. Evidence gets replies.</span></div>
-          <div className="pf-pane__body"><GitHubConnect /><LeetCodeConnect /><ProfileReviewCard profileUpdatedAt={(profile as ProfileWithMeta).profileUpdatedAt ?? profile.parsedAt} /><ProfileMarketCard /></div>
+          <SectionHead title="Proof of work" sub="Claims get read. Evidence gets replies. Each connection becomes a button on your public page." />
+          <div className="pfx-sec__body">
+            <GitHubConnect />
+            <LeetCodeConnect />
+            <LinkedInConnect profile={profile} onSaved={setProfile} />
+            <div className="pfx-sec__group">
+              <p className="pfx-sec__group-title">Read on your resume</p>
+              <ProfileReviewCard profileUpdatedAt={(profile as ProfileWithMeta).profileUpdatedAt ?? profile.parsedAt} />
+              <ProfileMarketCard />
+            </div>
+          </div>
         </>
       );
       case 'settings': return (
         <>
-          <div className="pf-pane__head"><span className="ws-section__label">{paneTitle}</span></div>
-          <div className="pf-pane__body"><ProfileSettingsCard /></div>
+          <SectionHead title="Public profile" sub="One link that replaces your resume for cold outreach." right={publicUrl ? <Button variant="secondary" size="sm" iconLeft={<ExternalLink size={13} />} onClick={viewPublic}>Open page</Button> : undefined} />
+          <div className="pfx-sec__body"><ProfileSettingsCard /></div>
         </>
       );
     }
@@ -228,42 +242,47 @@ export default function Profile() {
         { value: profile.education.length, label: 'education' },
         { value: `${done.met}/${checks.length}`, label: 'complete' },
       ]}
-      actions={<Button variant="secondary" iconLeft={<Upload size={14} />} onClick={() => setUploadOpen(true)}>Upload resume</Button>}
+      actions={
+        <>
+          <Button variant="secondary" iconLeft={<ExternalLink size={14} />} onClick={viewPublic}>{publicUrl ? 'View public page' : 'Preview is private'}</Button>
+          <Button variant="primary" iconLeft={<Upload size={14} />} onClick={() => setUploadOpen(true)}>Upload resume</Button>
+        </>
+      }
     >
       <ResumeSheet isOpen={uploadOpen} onClose={() => setUploadOpen(false)} onParsed={() => void load()} />
-      <div className="pf-bar">
-        <CompletePill pct={done.pct} onClick={() => setShowNext(v => !v)} />
-        <div className="pf-tabs" role="tablist" aria-label="Profile sections">
-          {PROFILE_TABS.map(t => (
+
+      <div className="pfx">
+        <nav className="pfx__nav" role="tablist" aria-label="Profile sections">
+          {PROFILE_TABS.map((t, i) => (
             <button
-              key={t.id} type="button" role="tab" id={`pf-tab-${t.id}`} aria-selected={tab === t.id} aria-controls="pf-panel"
-              className="pf-tab" onClick={() => go(t.id)}
+              key={t.id} type="button" role="tab" id={`pf-tab-${t.id}`} aria-selected={tab === t.id} aria-controls="pfx-editor"
+              className="pfx__tab" onClick={() => go(t.id)}
             >
+              <span className="pfx__tab-num">{String(i + 1).padStart(2, '0')}</span>
               {t.label}
-              {counts[t.id] ? <span className="pf-tab__count">{counts[t.id]}</span> : unmetTabs.has(t.id) && <span className="pf-tab__dot" aria-label="Needs attention" />}
+              <span className="pfx__tab-state">
+                {counts[t.id] ? counts[t.id] : null}
+                {unmetTabs.has(t.id) ? <span className="pfx__tab-dot" aria-label="Needs attention" /> : doneTabs.has(t.id) ? <Check size={12} className="pfx__tab-done" aria-label="Done" /> : null}
+              </span>
             </button>
           ))}
-        </div>
-      </div>
-
-      {showNext && done.next.length > 0 && (
-        <div className="pf-next rise" role="status">
-          <p className="pf-next__title">{done.met} of {checks.length} done. Next:</p>
-          {done.next.map(c => (
-            <div key={c.key} className="pf-next__item">
-              <span className="pf-next__dot" aria-hidden />
-              {c.action}
-              <Button size="sm" variant="ghost" onClick={() => { go(c.tab); setShowNext(false); }}>Go</Button>
+          {done.next.length > 0 && (
+            <div className="pfx__next" role="status">
+              <p className="pfx__next-title">{done.met} of {checks.length} done · next</p>
+              {done.next.map(c => (
+                <button key={c.key} type="button" className="pfx__next-item" onClick={() => go(c.tab)}>
+                  {c.action} <ArrowRight size={12} aria-hidden />
+                </button>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+          )}
+        </nav>
 
-      <div className="pf-body">
-        <section id="pf-panel" role="tabpanel" aria-labelledby={`pf-tab-${tab}`} className="glass pf-pane pf-editor--flat">
-          <div key={tab} className="jb-swap">{pane}</div>
+        <section id="pfx-editor" role="tabpanel" aria-labelledby={`pf-tab-${tab}`} className="pfx__editor">
+          <div key={tab} className="jb-swap pfx-sec">{pane}</div>
         </section>
-        <ProfilePreview profile={previewProfile} settings={previewSettings} avatarUrl={currentUser?.picture} githubUser={proof.github} />
+
+        <ProfilePreview profile={previewProfile} settings={previewSettings} avatarUrl={currentUser?.picture} githubUser={proof.github} leetcodeUser={proof.leetcode} onJump={go} />
       </div>
     </SeekerWorkspace>
   );

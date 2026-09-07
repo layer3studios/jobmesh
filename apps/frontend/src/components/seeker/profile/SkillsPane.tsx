@@ -46,8 +46,8 @@ export default function SkillsPane({ profile, onSaved, onDraft }: Props) {
 
   return (
     <>
-      <PaneHead title={`Skills · ${names.length}`} dirty={dirty} saving={saving} savedAt={savedAt} onSave={() => void save()} />
-      <div className="pf-pane__body">
+      <PaneHead title="Skills" sub="Every role on the board is scored against this list." dirty={dirty} saving={saving} savedAt={savedAt} onSave={() => void save()} />
+      <div className="pfx-sec__body">
         {error && <PaneError message={error} onDismiss={() => setError(null)} />}
         <Field label="Your skills" hint="Type and press Enter. Every role on the board is scored against this list — five or more makes the match meaningful.">
           <div className="pf-tags">

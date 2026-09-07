@@ -50,8 +50,8 @@ export default function PreferencesPane({ profile, onSaved }: Props) {
 
   return (
     <>
-      <PaneHead title="Preferences" dirty={dirty} saving={saving} savedAt={savedAt} onSave={() => void save()} />
-      <div className="pf-pane__body">
+      <PaneHead title="Preferences" sub="What you want next. Recruiters filter on this first." dirty={dirty} saving={saving} savedAt={savedAt} onSave={() => void save()} />
+      <div className="pfx-sec__body">
         {error && <PaneError message={error} onDismiss={() => setError(null)} />}
         <Field label="Notice period" hint="Recruiters filter on this first. 'Immediate' gets the most replies.">
           <Pills options={NOTICE} value={form.noticePeriod ? [form.noticePeriod] : []} onToggle={v => set('noticePeriod', form.noticePeriod === v ? '' : v)} />

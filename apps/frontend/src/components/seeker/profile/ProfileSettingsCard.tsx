@@ -6,13 +6,13 @@
 // THE SERVER'S ANSWER IS THE STATE. Every change PATCHes and the response
 // replaces local state, so the slug the backend generated, or the flag it
 // refused, is what the card shows — never an optimistic value that quietly
-// disagrees with the page a recruiter would load. Toggles and the headline are
-// debounced together (one second) so dragging through five checkboxes is one
-// request, not five.
+// disagrees with the page a recruiter would load. Toggles are debounced
+// (one second) so dragging through five checkboxes is one request, not five.
+// The headline is edited in Basic information, not here.
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Copy, ExternalLink } from 'lucide-react';
-import { Card, Button, Input, Switch, Alert, Stack, useToast } from '../../ui';
+import { Card, Button, Switch, Alert, Stack, useToast } from '../../ui';
 import {
   fetchProfileSettings, patchProfileSettings, PublicProfileApiError,
 } from '../../../api/public-profile-api';
@@ -25,7 +25,6 @@ import ProfileSlugField from './ProfileSlugField';
 import ProfileVisibilityToggles from './ProfileVisibilityToggles';
 
 const AUTOSAVE_MS = 1000;
-const HEADLINE_MAX_LENGTH = 120;
 
 export default function ProfileSettingsCard() {
   const { showToast } = useToast();
@@ -133,15 +132,6 @@ export default function ProfileSettingsCard() {
             <ProfileSlugField
               slug={state.profileSlug ?? ''}
               onCommit={(profileSlug) => void save({ profileSlug })}
-            />
-
-            <Input
-              label="How you want to be described"
-              placeholder="Full Stack Software Engineer"
-              maxLength={HEADLINE_MAX_LENGTH}
-              value={state.settings.headline ?? ''}
-              hint={`${(state.settings.headline ?? '').length}/${HEADLINE_MAX_LENGTH}`}
-              onChange={(event) => queueSettings({ headline: event.target.value })}
             />
 
             <Switch

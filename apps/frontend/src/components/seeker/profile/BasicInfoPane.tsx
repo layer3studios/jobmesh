@@ -1,10 +1,11 @@
 'use client';
 // FILE: src/components/seeker/profile/BasicInfoPane.tsx
-// Basic information, Rightfit-style: who you are and how you can be reached,
-// with the public switch up top because it decides who gets to read the
-// rest. One Save button; the preview on the right updates as you type.
+// Who you are: name, headline, where you are, the two-line About, the domains
+// you work in, and how to reach you. Visibility lives in Public profile and
+// LinkedIn lives in Proof of work, so nothing here is asked twice. One Save;
+// the preview follows the keyboard.
 import { useEffect, useState } from 'react';
-import { Globe, Lock, Zap, Palette, Boxes, LineChart, Megaphone, Cloud, Shield, Smartphone, Database, Bug } from 'lucide-react';
+import { Zap, Palette, Boxes, LineChart, Megaphone, Cloud, Shield, Smartphone, Database, Bug } from 'lucide-react';
 import type { ParsedProfile } from '../../../types/seeker-profile';
 import type { PublicProfileSettingsState } from '../../../types/public-profile';
 import { patchProfile, SeekerApiError } from '../../../api/seeker-api';
@@ -35,10 +36,9 @@ function fromProfile(p: ParsedProfile, s: PublicProfileSettingsState | null) {
   return {
     fullName: p.fullName ?? '', email: p.email ?? '', phone: p.phone ?? '',
     city: p.currentLocation?.city ?? '', state: p.currentLocation?.state ?? '',
-    linkedinUrl: p.linkedinUrl ?? '', summary: p.summary ?? '',
+    summary: p.summary ?? '',
     headline: s?.settings.headline ?? '',
     domains: [p.domain, p.subDomain].filter((d): d is string => !!d),
-    isPublic: !!s?.profilePublic,
   };
 }
 
@@ -60,12 +60,12 @@ export default function BasicInfoPane({ profile, settings, avatar, onSaved, onSe
       const next = await patchProfile({
         fullName: form.fullName || null, email: form.email || null, phone: form.phone || null,
         currentLocation: { city: form.city || null, state: form.state || null },
-        linkedinUrl: form.linkedinUrl || null, summary: form.summary || null,
+        summary: form.summary || null,
         domain: form.domains[0] ?? null, subDomain: form.domains[1] ?? null,
       });
       onSaved(next);
-      if (settings && (form.headline !== (settings.settings.headline ?? '') || form.isPublic !== settings.profilePublic)) {
-        onSettings(await patchProfileSettings({ profilePublic: form.isPublic, profileSettings: { headline: form.headline } }));
+      if (settings && form.headline !== (settings.settings.headline ?? '')) {
+        onSettings(await patchProfileSettings({ profileSettings: { headline: form.headline } }));
       }
       setSavedAt(Date.now());
     } catch (err) {
@@ -75,8 +75,8 @@ export default function BasicInfoPane({ profile, settings, avatar, onSaved, onSe
 
   return (
     <>
-      <PaneHead title="Basic information" dirty={dirty} saving={saving} savedAt={savedAt} onSave={() => void save()} />
-      <div className="pf-pane__body">
+      <PaneHead title="Basic information" sub="The first thing a recruiter reads." dirty={dirty} saving={saving} savedAt={savedAt} onSave={() => void save()} />
+      <div className="pfx-sec__body">
         {error && <PaneError message={error} onDismiss={() => setError(null)} />}
 
         <div className="pf-row pf-row--id">
@@ -84,41 +84,32 @@ export default function BasicInfoPane({ profile, settings, avatar, onSaved, onSe
             {avatar ? <Avatar name={avatar.name} src={avatar.picture} size="lg" /> : null}
             <span className="pf-field__hint">Your photo comes from Google. Change it there and it changes here.</span>
           </div>
-          <Field label="Who can see this">
-            <div className="pf-seg" role="radiogroup" aria-label="Profile visibility">
-              <button type="button" role="radio" aria-checked={form.isPublic} className="pf-seg__btn" onClick={() => set('isPublic', true)}><Globe size={13} /> Public</button>
-              <button type="button" role="radio" aria-checked={!form.isPublic} className="pf-seg__btn" onClick={() => set('isPublic', false)}><Lock size={13} /> Only me</button>
-            </div>
-            <span className="pf-field__hint">{form.isPublic ? 'Recruiters with your link can read it. Contact details stay hidden unless you turn them on in Public profile.' : 'Nobody sees it. Turn it on when it reads the way you want.'}</span>
-          </Field>
+          <Field label="Full name"><TextInput value={form.fullName} onChange={e => set('fullName', e.target.value)} placeholder="Your name as it should appear" autoComplete="name" /></Field>
         </div>
 
-        <div className="pf-row">
-          <Field label="Full name"><TextInput value={form.fullName} onChange={e => set('fullName', e.target.value)} placeholder="Your name as it should appear" autoComplete="name" /></Field>
-          <Field label="Headline" count={`${form.headline.length}/${HEADLINE_MAX}`} hint="One line under your name. Say what you do, not your job title.">
-            <TextInput value={form.headline} maxLength={HEADLINE_MAX} onChange={e => set('headline', e.target.value)} placeholder="Backend engineer who ships payments at scale" />
-          </Field>
-        </div>
+        <Field label="Headline" count={`${form.headline.length}/${HEADLINE_MAX}`} hint="One line under your name. Say what you do, not your job title.">
+          <TextInput value={form.headline} maxLength={HEADLINE_MAX} onChange={e => set('headline', e.target.value)} placeholder="Backend engineer who ships payments at scale" />
+        </Field>
+
+        <Field label="About" count={`${form.summary.length}/${ABOUT_MAX}`} hint="Two or three lines. What you build, what you are good at, what you want next.">
+          <TextArea rows={4} maxLength={ABOUT_MAX} value={form.summary} onChange={e => set('summary', e.target.value)} placeholder="I build the boring, load-bearing parts of products: auth, billing, queues. I like them to stay boring." />
+        </Field>
+
+        <Field label="Domains" hint="Up to two. A design engineer is both Design and Engineering. They decide which roles we match you to. With two chosen, tapping a third swaps out the oldest.">
+          <Pills options={DOMAINS} value={form.domains} max={2} icons={ICONS}
+            onToggle={d => set('domains', form.domains.includes(d) ? form.domains.filter(x => x !== d) : [...form.domains, d].slice(0, 2))}
+            onReplace={next => set('domains', next)} />
+        </Field>
 
         <div className="pf-row">
           <Field label="City"><TextInput value={form.city} onChange={e => set('city', e.target.value)} placeholder="Bengaluru" autoComplete="address-level2" /></Field>
           <Field label="State"><TextInput value={form.state} onChange={e => set('state', e.target.value)} placeholder="Karnataka" autoComplete="address-level1" /></Field>
         </div>
 
-        <Field label="About" count={`${form.summary.length}/${ABOUT_MAX}`} hint="Two or three lines. What you build, what you're good at, what you want next. Recruiters read this before anything else.">
-          <TextArea rows={4} maxLength={ABOUT_MAX} value={form.summary} onChange={e => set('summary', e.target.value)} placeholder="I build the boring, load-bearing parts of products — auth, billing, queues — and I like them to stay boring." />
-        </Field>
-
-        <Field label="Domains" hint="Pick up to two — a design engineer is both Design and Engineering. They drive which roles we match you to.">
-          <Pills options={DOMAINS} value={form.domains} max={2} icons={ICONS}
-            onToggle={d => set('domains', form.domains.includes(d) ? form.domains.filter(x => x !== d) : [...form.domains, d].slice(0, 2))} />
-        </Field>
-
         <div className="pf-row">
-          <Field label="Email" hint="Never shown unless you turn it on."><TextInput type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="you@example.com" autoComplete="email" /></Field>
-          <Field label="Phone" hint="Same — off by default."><TextInput value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="+91" autoComplete="tel" inputMode="tel" /></Field>
+          <Field label="Email" hint="Never shown unless you turn it on in Public profile."><TextInput type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="you@example.com" autoComplete="email" /></Field>
+          <Field label="Phone" hint="Same. Off by default."><TextInput value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="+91" autoComplete="tel" inputMode="tel" /></Field>
         </div>
-        <Field label="LinkedIn"><TextInput value={form.linkedinUrl} onChange={e => set('linkedinUrl', e.target.value)} placeholder="https://linkedin.com/in/you" inputMode="url" /></Field>
       </div>
     </>
   );

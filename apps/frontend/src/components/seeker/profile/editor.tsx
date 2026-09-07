@@ -1,9 +1,9 @@
 'use client';
 // FILE: src/components/seeker/profile/editor.tsx
-// The building blocks of the profile editor pane: a labelled field, a
-// pill-picker, and the pane header that carries the one Save button. The
-// Save button is the only way a change leaves the page, it is disabled until
-// something is dirty, and it pops a check for a beat when the server agrees.
+// The building blocks of the profile editor: a labelled field, a pill-picker,
+// the section header that carries the one Save button, and the error strip.
+// Save is the only way a change leaves the page; it is disabled until
+// something is dirty and pops a check for a beat when the server agrees.
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Check, Save } from 'lucide-react';
 import { Button } from '../../ui';
@@ -26,20 +26,32 @@ export function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement
   return <textarea {...props} className={`pf-input pf-input--area${props.className ? ` ${props.className}` : ''}`} />;
 }
 
-export function Pills({ options, value, onToggle, max, icons }: {
-  options: string[]; value: string[]; onToggle: (v: string) => void; max?: number; icons?: Record<string, ReactNode>;
+/**
+ * Pills. A value that is not in `options` (say, a domain the resume parser
+ * invented) is still shown, selected, so it can be turned off. When `max` is
+ * reached the others stay clickable: picking one swaps out the oldest choice.
+ */
+export function Pills({ options, value, onToggle, onReplace, max, icons }: {
+  options: string[]; value: string[]; onToggle: (v: string) => void; onReplace?: (next: string[]) => void; max?: number; icons?: Record<string, ReactNode>;
 }) {
   const full = !!max && value.length >= max;
+  const all = [...value.filter(v => !options.includes(v)), ...options];
   return (
     <div className="pf-pills" role="group">
-      {options.map((o, i) => {
+      {all.map((o, i) => {
         const on = value.includes(o);
+        const click = () => {
+          if (on || !full || !max) return onToggle(o);
+          if (onReplace) return onReplace([...value.slice(1), o]);
+          onToggle(o);
+        };
         return (
           <button
-            key={o} type="button" className="pf-pill" aria-pressed={on} disabled={!on && full}
-            onClick={() => onToggle(o)} style={{ '--i': Math.min(i, 12) } as React.CSSProperties}
+            key={o} type="button" className="pf-pill press" aria-pressed={on}
+            onClick={click} style={{ '--i': Math.min(i, 12) } as React.CSSProperties}
+            title={!on && full ? `Replaces ${value[0]}` : undefined}
           >
-            {icons?.[o]}{o}
+            {icons?.[o]}{o}{on && <Check size={11} className="pf-pill__check" aria-hidden />}
           </button>
         );
       })}
@@ -47,9 +59,9 @@ export function Pills({ options, value, onToggle, max, icons }: {
   );
 }
 
-/** Pane header with the Save button. `saved` flips true for a beat after a save lands. */
-export function PaneHead({ title, dirty, saving, savedAt, onSave, right }: {
-  title: string; dirty: boolean; saving: boolean; savedAt: number | null; onSave: () => void; right?: ReactNode;
+/** Section header with the Save button. `savedAt` flips a check for a beat after a save lands. */
+export function PaneHead({ title, sub, dirty, saving, savedAt, onSave, right }: {
+  title: string; sub?: string; dirty: boolean; saving: boolean; savedAt: number | null; onSave: () => void; right?: ReactNode;
 }) {
   const [flash, setFlash] = useState(false);
   const first = useRef(true);
@@ -61,8 +73,11 @@ export function PaneHead({ title, dirty, saving, savedAt, onSave, right }: {
     return () => clearTimeout(t);
   }, [savedAt]);
   return (
-    <div className="pf-pane__head">
-      <span className="ws-section__label">{title}</span>
+    <div className="pfx-sec__head">
+      <div>
+        <h2 className="font-display pfx-sec__title">{title}</h2>
+        {sub && <p className="pfx-sec__sub">{sub}</p>}
+      </div>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         {right}
         <Button
@@ -73,6 +88,19 @@ export function PaneHead({ title, dirty, saving, savedAt, onSave, right }: {
           {flash ? 'Saved' : dirty ? 'Save changes' : 'Saved'}
         </Button>
       </div>
+    </div>
+  );
+}
+
+/** A read-only section header (experience, education, proof). */
+export function SectionHead({ title, sub, right }: { title: string; sub?: string; right?: ReactNode }) {
+  return (
+    <div className="pfx-sec__head">
+      <div>
+        <h2 className="font-display pfx-sec__title">{title}</h2>
+        {sub && <p className="pfx-sec__sub">{sub}</p>}
+      </div>
+      {right}
     </div>
   );
 }
