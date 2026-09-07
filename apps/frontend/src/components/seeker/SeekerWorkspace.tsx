@@ -1,9 +1,8 @@
 'use client';
 // FILE: src/components/seeker/SeekerWorkspace.tsx
-// The signed-in seeker's frame (reference DESIGN.md): the goal card as a
+// The frame for Pipeline and Profile (reference DESIGN.md): the week board as a
 // 280px sticky sidebar, with the amber→indigo seam on its right edge, and a
-// fluid content column. Today, Pipeline and Profile all render inside it so
-// the account pages read as one workspace. The card carries today's numbers
+// fluid content column. Today has its own full-width editorial layout. The card carries today's numbers
 // and quiet links to the other two pages; identity lives in the top nav.
 // Under 1024px the card sits above the content.
 import type { ReactNode } from 'react';
@@ -24,10 +23,10 @@ export default function SeekerWorkspace({ children, label, title, actions }: {
   return (
     <div className="ws-frame">
       <GoalPanel
+        appliedJobs={appliedJobs}
         todayCount={todayCount}
         dailyGoal={dailyGoal}
         streak={streak}
-        totalApplied={appliedJobs.length}
         onGoalChange={saveDailyGoal}
       />
 

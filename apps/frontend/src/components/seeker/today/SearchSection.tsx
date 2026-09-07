@@ -11,7 +11,7 @@ import ActivityChart from '../ActivityChart';
 import HeatmapCalendar from '../HeatmapCalendar';
 import FunnelChart from '../FunnelChart';
 import type { AppliedJobDetail } from '../../../types';
-import { Section } from './shared';
+import { Section, EdSection } from './shared';
 
 export default function SearchSection() {
   const { currentUser, appliedJobs, dailyGoal } = useSeeker();
@@ -41,7 +41,8 @@ export default function SearchSection() {
   if (appliedJobs.length === 0) return null;
 
   return (
-    <div className="td-grid">
+    <EdSection id="search" number="02" kicker="Your search" title="The last seven days">
+    <div className="td-grid" style={{ paddingTop: 18 }}>
       <div className="td-col">
         <Section label="Last 7 days"><ActivityChart appliedJobs={appliedJobs} dailyGoal={dailyGoal} /></Section>
         <Section label="Funnel" sub={details.length ? `${details.length} tracked` : undefined}>
@@ -62,5 +63,6 @@ export default function SearchSection() {
         <Section label="Activity"><HeatmapCalendar appliedJobs={appliedJobs} dailyGoal={dailyGoal} /></Section>
       </div>
     </div>
+    </EdSection>
   );
 }

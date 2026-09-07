@@ -5,19 +5,12 @@ export default function PipelineLoading() {
   return (
     <div className="td-skel" aria-busy="true" aria-label="Loading pipeline">
       <aside className="glass td-skel__side">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <SkeletonLine width="108px" height={108} style={{ borderRadius: '50%', flexShrink: 0 }} />
-          <div style={{ flex: 1, display: 'grid', gap: 8 }}>
-            <SkeletonLine width="40%" height={10} />
-            <SkeletonLine width="70%" height={22} />
-            <SkeletonLine width="55%" height={24} style={{ borderRadius: 999 }} />
-          </div>
+        <SkeletonLine width="70px" height={10} />
+        <SkeletonLine width="60%" height={26} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6, alignItems: 'end', height: 80 }}>
+          {Array.from({ length: 7 }).map((_, i) => <SkeletonLine key={i} height={64} style={{ borderRadius: 3, opacity: i === 6 ? 0.8 : 0.4 }} />)}
         </div>
-        <SkeletonLine width="80%" height={12} />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          <SkeletonLine width="50%" height={26} />
-          <SkeletonLine width="50%" height={26} />
-        </div>
+        <SkeletonLine width="85%" height={12} />
         <div style={{ display: 'flex', gap: 6 }}>
           <SkeletonLine width="80px" height={30} style={{ borderRadius: 8 }} />
           <SkeletonLine width="80px" height={30} style={{ borderRadius: 8 }} />

@@ -1,28 +1,30 @@
 'use client';
 // FILE: src/components/seeker/today/index.tsx
-// The signed-in home. The sidebar carries today's numbers (goal ring, streak,
-// applied); the column carries the greeting, the four picks, *your search*
-// (7-day chart, funnel, pipeline) and the news. Nothing is said twice.
+// The signed-in home, set like a daily paper: a masthead with the date, the
+// week board (the goal as stacked tiles, today on the right), four numbered
+// picks, the search widgets once there is something to chart, and the news.
+// No sidebar on this page; the board is the number.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSeeker } from '../../../context/seeker/SeekerContext';
-import SeekerWorkspace from '../SeekerWorkspace';
 import type { IJob } from '../../../types';
 import { buildSkillsRegex } from '../JobDetailPanel';
 import { BRAND } from '../../../theme/brand';
 import Hero from './Hero';
+import WeekBoard from './WeekBoard';
 import PicksSection from './PicksSection';
 import NewsSection from './NewsSection';
 import SearchSection from './SearchSection';
 
 export default function Today() {
-  const { currentUser, userSkills, todayCount, dailyGoal, streak, appliedJobs, appliedJobIds, openSkillsEditor } = useSeeker();
+  const { currentUser, userSkills, todayCount, dailyGoal, streak, appliedJobs, appliedJobIds, openSkillsEditor, saveDailyGoal } = useSeeker();
   const [jobs, setJobs] = useState<IJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const [now, setNow] = useState<Date | null>(null);
 
-  useEffect(() => { document.title = `Today · ${BRAND.appName}`; }, []);
+  useEffect(() => { document.title = `Today · ${BRAND.appName}`; setNow(new Date()); }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,37 +53,47 @@ export default function Today() {
   }, [jobs, skillRe]);
 
   const firstName = currentUser?.name?.split(' ')[0] || 'there';
-  const h = new Date().getHours();
-  const greeting = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  const hasHistory = appliedJobs.length > 0;
 
   return (
-    <SeekerWorkspace>
+    <main className="daily">
       <div className="rise" style={{ '--i': 0 } as React.CSSProperties}>
         <Hero
-          greeting={greeting}
           firstName={firstName}
           todayCount={todayCount}
           dailyGoal={dailyGoal}
           streak={streak}
           totalApplied={appliedJobs.length}
+          now={now}
         />
       </div>
-      <div className="td-stack">
-        <div className="rise" style={{ '--i': 1 } as React.CSSProperties}>
-          <PicksSection
-            picks={picks}
-            loading={loading}
-            error={error}
-            onRetry={retry}
-            userSkillsLength={userSkills.length}
-            skillRe={skillRe}
-            appliedJobIds={appliedJobIds}
-            onOpenSkillsEditor={openSkillsEditor}
-          />
-        </div>
-        <div className="rise" style={{ '--i': 2 } as React.CSSProperties}><SearchSection /></div>
-        <div className="rise" style={{ '--i': 3 } as React.CSSProperties}><NewsSection /></div>
+
+      <section className="daily__board rise" style={{ '--i': 1 } as React.CSSProperties} aria-label="This week">
+        <p className="ed__kicker"><span className="ed__num">This week</span>one tile per application, today on the right</p>
+        <WeekBoard appliedJobs={appliedJobs} dailyGoal={dailyGoal} onGoalChange={saveDailyGoal} />
+        <p className="daily__tally">
+          <span><b>{todayCount}</b> today</span>
+          <span className="daily__tally-sep" aria-hidden>/</span>
+          <span><b>{streak}</b> day streak</span>
+          <span className="daily__tally-sep" aria-hidden>/</span>
+          <span><b>{appliedJobs.length}</b> applied all time</span>
+        </p>
+      </section>
+
+      <div className="rise" style={{ '--i': 2 } as React.CSSProperties}>
+        <PicksSection
+          picks={picks}
+          loading={loading}
+          error={error}
+          onRetry={retry}
+          userSkillsLength={userSkills.length}
+          skillRe={skillRe}
+          appliedJobIds={appliedJobIds}
+          onOpenSkillsEditor={openSkillsEditor}
+        />
       </div>
-    </SeekerWorkspace>
+      {hasHistory && <div className="rise" style={{ '--i': 3 } as React.CSSProperties}><SearchSection /></div>}
+      <div className="rise" style={{ '--i': hasHistory ? 4 : 3 } as React.CSSProperties}><NewsSection number={hasHistory ? '03' : '02'} /></div>
+    </main>
   );
 }

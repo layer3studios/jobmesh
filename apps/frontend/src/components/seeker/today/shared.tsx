@@ -1,5 +1,6 @@
 // FILE: src/components/seeker/today/shared.tsx
-// Shared styles and small leaf components used across the Today sections.
+// Shared styles and small leaf components used across the Today sections and
+// the other account pages.
 
 import type { CSSProperties, ReactNode } from 'react';
 import Link from 'next/link';
@@ -25,6 +26,26 @@ export function Section({ id, label, sub, linkLabel, linkTo, className, children
         </div>
         {linkLabel && linkTo && (
           <Link href={linkTo} className="ws-link-more">{linkLabel} <ArrowRight size={12} /></Link>
+        )}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+/** An editorial section for Today: a hairline rule, a mono kicker with a running number, a serif title. */
+export function EdSection({ id, number, kicker, title, link, children, className }: {
+  id?: string; number: string; kicker: string; title?: string; link?: { label: string; to: string; external?: boolean }; children: ReactNode; className?: string;
+}) {
+  return (
+    <section id={id} className={`ed${className ? ` ${className}` : ''}`} aria-labelledby={id ? `${id}-title` : undefined}>
+      <div className="ed__head">
+        <p className="ed__kicker"><span className="ed__num">{number}</span>{kicker}</p>
+        {title && <h2 id={id ? `${id}-title` : undefined} className="font-display ed__title">{title}</h2>}
+        {link && (
+          link.external
+            ? <a href={link.to} target="_blank" rel="noopener noreferrer" className="ed__more">{link.label} <ArrowRight size={12} /></a>
+            : <Link href={link.to} className="ed__more">{link.label} <ArrowRight size={12} /></Link>
         )}
       </div>
       {children}

@@ -1,22 +1,21 @@
 'use client';
 // FILE: src/components/seeker/today/Hero.tsx
-// The top of Today: the greeting in the serif voice, one line that speaks to
-// where the seeker is (never a number, the sidebar owns those), and a single
-// way forward. One action, not three.
+// The masthead. Today reads like a daily paper: the date set large in the
+// serif, a mono dateline with the greeting, one sentence for the moment the
+// seeker is in, and a single way forward. No numbers here; the board has them.
 import { ArrowRight } from 'lucide-react';
 import { Button } from '../../ui';
-import { eyebrowStyle } from './shared';
 
 interface Props {
-  greeting: string;
   firstName: string;
   todayCount: number;
   dailyGoal: number;
   streak: number;
   totalApplied: number;
+  now: Date | null;
 }
 
-/** One sentence for the moment the seeker is in. No counts: the ring already says them. */
+/** One sentence for the moment the seeker is in. Never a count: the board says those. */
 export function voiceLine({ todayCount, dailyGoal, streak, totalApplied, hour }: {
   todayCount: number; dailyGoal: number; streak: number; totalApplied: number; hour: number;
 }): string {
@@ -30,21 +29,33 @@ export function voiceLine({ todayCount, dailyGoal, streak, totalApplied, hour }:
   return 'Good pace. Keep it moving.';
 }
 
-export default function Hero({ greeting, firstName, todayCount, dailyGoal, streak, totalApplied }: Props) {
-  const line = voiceLine({ todayCount, dailyGoal, streak, totalApplied, hour: new Date().getHours() });
+export default function Hero({ firstName, todayCount, dailyGoal, streak, totalApplied, now }: Props) {
+  const hour = now ? now.getHours() : 12;
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const line = voiceLine({ todayCount, dailyGoal, streak, totalApplied, hour });
   const done = todayCount >= dailyGoal;
+  const weekday = now ? now.toLocaleDateString('en-IN', { weekday: 'long' }) : '';
+  const rest = now ? now.toLocaleDateString('en-IN', { day: 'numeric', month: 'long' }) : '';
+
   return (
-    <div className="td-hero">
-      <div className="td-hero__copy">
-        <p style={eyebrowStyle}>{greeting}</p>
-        <h1 className="font-display td-hero__title">{firstName}.</h1>
-        <p className="td-hero__lede">{line}</p>
+    <header className="mh">
+      <p className="mh__dateline">
+        <span>The daily</span>
+        <span className="mh__sep" aria-hidden>/</span>
+        <span>{greeting}, {firstName}</span>
+      </p>
+      <div className="mh__row">
+        <h1 className="font-display mh__date" aria-label={now ? `${weekday}, ${rest}` : 'Today'}>
+          <span className="mh__word">{weekday || 'Today'}</span>
+          {rest && <span className="mh__word mh__word--muted">{rest}</span>}
+        </h1>
+        <div className="mh__aside">
+          <p className="mh__line">{line}</p>
+          <Button as="a" href="/jobs" variant={done ? 'secondary' : 'primary'} size="md" iconRight={<ArrowRight size={14} />}>
+            {done ? 'Browse anyway' : 'Find a role'}
+          </Button>
+        </div>
       </div>
-      <div className="td-hero__cta">
-        <Button as="a" href="/jobs" variant={done ? 'secondary' : 'primary'} size="md" iconRight={<ArrowRight size={14} />}>
-          {done ? 'Browse anyway' : 'Find a role'}
-        </Button>
-      </div>
-    </div>
+    </header>
   );
 }

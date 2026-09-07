@@ -1,16 +1,15 @@
 'use client';
 // FILE: src/components/seeker/today/PicksSection.tsx
-// Four roles that match the seeker's skills, as the same rows the board uses.
-// Selecting one opens it on /jobs with the detail pane already on it.
-import { Sparkles, RefreshCw } from 'lucide-react';
+// Four roles that match the seeker's skills, set as a numbered editorial list:
+// hairline rows, the title in the serif, the facts in mono. Selecting one
+// opens it on /jobs with the detail pane already on it.
+import { RefreshCw, ArrowUpRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { IJob } from '../../../types';
-import JobListItem from '../JobListItem';
 import { Button } from '../../ui';
+import CompanyLogo from '../CompanyLogo';
 import { getAutoTags, relTime } from '../JobDetailPanel';
-import { compactJobBadges } from '../dashboard/job-badges';
-import { ListSkeleton } from '../dashboard/DashboardBody';
-import { Section } from './shared';
+import { EdSection } from './shared';
 
 interface Props {
   picks: IJob[];
@@ -26,22 +25,33 @@ interface Props {
 export default function PicksSection({ picks, loading, error, onRetry, userSkillsLength, skillRe, appliedJobIds, onOpenSkillsEditor }: Props) {
   const router = useRouter();
   return (
-    <Section
-      label={userSkillsLength > 0 ? `Picks for you · ${userSkillsLength} skills` : 'Picks for you'}
-      sub="Roles that match what you know, freshest first."
-      linkLabel="All roles" linkTo="/jobs"
-      className="td-picks"
+    <EdSection
+      id="picks"
+      number="01"
+      kicker={userSkillsLength > 0 ? `Picks for you · ${userSkillsLength} skills` : 'Picks for you'}
+      title="Four roles worth a look"
+      link={{ label: 'All roles', to: '/jobs' }}
     >
       {userSkillsLength === 0 && (
-        <div className="td-nudge rise">
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            <Sparkles size={13} /> Add your skills and these picks get personal.
-          </span>
-          <Button size="sm" onClick={onOpenSkillsEditor}>Add skills</Button>
-        </div>
+        <p className="ed__note rise">
+          These get personal once we know what you work with.
+          <button type="button" className="ed__note-btn press press--sm" onClick={onOpenSkillsEditor}>Add your skills</button>
+        </p>
       )}
+
       {loading ? (
-        <ListSkeleton rows={4} />
+        <ol className="pk" aria-busy="true" aria-label="Loading picks">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <li key={i} className="pk__row pk__row--skel" style={{ opacity: 1 - i * 0.18 }}>
+              <span className="pk__num skeleton" />
+              <span className="skeleton" style={{ width: 36, height: 36, borderRadius: 9 }} />
+              <span style={{ display: 'grid', gap: 8 }}>
+                <span className="skeleton" style={{ height: 18, width: `${52 + (i * 13) % 30}%` }} />
+                <span className="skeleton" style={{ height: 11, width: `${30 + (i * 9) % 20}%` }} />
+              </span>
+            </li>
+          ))}
+        </ol>
       ) : error ? (
         <div className="jb-error rise td-error" role="alert">
           <p className="jb-error__title">Picks are taking a moment</p>
@@ -49,9 +59,9 @@ export default function PicksSection({ picks, loading, error, onRetry, userSkill
           <Button variant="secondary" size="sm" onClick={onRetry} iconLeft={<RefreshCw size={13} />}>Try again</Button>
         </div>
       ) : picks.length === 0 ? (
-        <p style={{ color: 'var(--ink-muted)', fontSize: 13.5, padding: 16, textAlign: 'center' }}>No roles right now — check back in a few hours.</p>
+        <p className="ed__empty">No roles right now. Check back in a few hours.</p>
       ) : (
-        <div className="jb-list">
+        <ol className="pk">
           {picks.map((j, i) => {
             const auto = getAutoTags(j);
             const matched = skillRe
@@ -59,28 +69,33 @@ export default function PicksSection({ picks, loading, error, onRetry, userSkill
               : 0;
             const pct = userSkillsLength > 0 ? Math.round((matched / userSkillsLength) * 100) : 0;
             const rt = relTime(j.PostedDate || j.createdAt || j.scrapedAt || null);
+            const applied = appliedJobIds.has(j._id);
+            const tags = (auto.techStack || []).slice(0, 3);
+            const go = () => router.push(`/jobs?selectedJob=${encodeURIComponent(j._id)}`);
             return (
-              <div key={j._id} className="rise" style={{ '--i': i } as React.CSSProperties}>
-                <JobListItem
-                  job={j}
-                  isSelected={false}
-                  isApplied={appliedJobIds.has(j._id)}
-                  isComeBack={false}
-                  comeBackNote=""
-                  isNew={rt === 'Today' || rt === '1d ago'}
-                  relativeTime={rt}
-                  visibleBadges={compactJobBadges(j)}
-                  showSkillMatch={matched > 0}
-                  skillMatchText={`${pct}% match`}
-                  skillMatchBg="var(--accent-soft)"
-                  skillMatchColor="var(--accent)"
-                  onSelect={job => router.push(`/jobs?selectedJob=${encodeURIComponent(job._id)}`)}
-                />
-              </div>
+              <li key={j._id} className="rise" style={{ '--i': i } as React.CSSProperties}>
+                <button type="button" className="pk__row" onClick={go} data-applied={applied ? 'true' : 'false'}>
+                  <span className="pk__num">{String(i + 1).padStart(2, '0')}</span>
+                  <CompanyLogo name={j.Company} url={j.ApplicationURL} size={36} borderRadius={9} />
+                  <span className="pk__main">
+                    <span className="font-display pk__title">{j.JobTitle}</span>
+                    <span className="pk__meta">
+                      <span className="pk__co">{j.Company}</span>
+                      <span className="pk__dot" aria-hidden>·</span>
+                      <span>{j.Location}</span>
+                      {rt && <><span className="pk__dot" aria-hidden>·</span><span>{rt}</span></>}
+                      {matched > 0 && <><span className="pk__dot" aria-hidden>·</span><span className="pk__match">{pct}% match</span></>}
+                      {applied && <><span className="pk__dot" aria-hidden>·</span><span className="pk__applied">Applied</span></>}
+                    </span>
+                    {tags.length > 0 && <span className="pk__tags">{tags.join('  /  ')}</span>}
+                  </span>
+                  <span className="pk__arrow" aria-hidden><ArrowUpRight size={16} /></span>
+                </button>
+              </li>
             );
           })}
-        </div>
+        </ol>
       )}
-    </Section>
+    </EdSection>
   );
 }

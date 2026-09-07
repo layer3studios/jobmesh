@@ -1,44 +1,40 @@
-// FILE: /today loading. The same frame the page paints into: sidebar (goal
-// ring, two stats) beside the greeting and four pick rows. Same boxes,
-// same sizes, so nothing jumps when the data lands.
+// FILE: /today loading. The masthead, the week board and four pick rows at
+// the sizes the page paints, so nothing jumps when the data lands.
 import { SkeletonLine } from '../../../components/ui/Skeleton';
 
 export default function TodayLoading() {
   return (
-    <div className="td-skel" aria-busy="true" aria-label="Loading today">
-      <aside className="glass td-skel__side">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <SkeletonLine width="108px" height={108} style={{ borderRadius: '50%', flexShrink: 0 }} />
-          <div style={{ flex: 1, display: 'grid', gap: 8 }}>
-            <SkeletonLine width="40%" height={10} />
-            <SkeletonLine width="70%" height={22} />
-            <SkeletonLine width="55%" height={24} style={{ borderRadius: 999 }} />
-          </div>
+    <main className="daily" aria-busy="true" aria-label="Loading today">
+      <div style={{ paddingTop: 8 }}>
+        <SkeletonLine width="220px" height={11} style={{ marginBottom: 18 }} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 24, flexWrap: 'wrap' }}>
+          <SkeletonLine width="min(520px, 70%)" height={64} />
+          <SkeletonLine width="200px" height={40} style={{ borderRadius: 10 }} />
         </div>
-        <SkeletonLine width="80%" height={12} />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          <SkeletonLine width="50%" height={26} />
-          <SkeletonLine width="50%" height={26} />
-        </div>
-        <div style={{ display: 'flex', gap: 6 }}>
-          <SkeletonLine width="80px" height={30} style={{ borderRadius: 8 }} />
-          <SkeletonLine width="80px" height={30} style={{ borderRadius: 8 }} />
-        </div>
-      </aside>
-
-      <section style={{ minWidth: 0 }}>
-        <SkeletonLine width="90px" height={11} style={{ marginBottom: 12 }} />
-        <SkeletonLine width="min(260px, 50%)" height={44} style={{ marginBottom: 14 }} />
-        <SkeletonLine width="min(380px, 80%)" height={15} style={{ marginBottom: 20 }} />
-        <SkeletonLine width="120px" height={38} style={{ borderRadius: 10, marginBottom: 28 }} />
-        <div className="glass ws-section" style={{ display: 'grid', gap: 10 }}>
-          <SkeletonLine width="140px" height={11} />
-          <SkeletonLine width="220px" height={12} style={{ marginBottom: 6 }} />
-          {Array.from({ length: 4 }).map((_, i) => (
-            <SkeletonLine key={i} height={72} style={{ borderRadius: 12, opacity: 1 - i * 0.15 }} />
+      </div>
+      <div className="daily__board">
+        <SkeletonLine width="120px" height={11} style={{ marginBottom: 14 }} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 14, alignItems: 'end', height: 168 }}>
+          {Array.from({ length: 7 }).map((_, i) => (
+            <SkeletonLine key={i} height={120} style={{ borderRadius: 8, opacity: 0.35 + (i === 6 ? 0.4 : 0) }} />
           ))}
         </div>
-      </section>
-    </div>
+        <SkeletonLine width="260px" height={12} style={{ marginTop: 16 }} />
+      </div>
+      <div>
+        <SkeletonLine width="140px" height={11} style={{ marginBottom: 10 }} />
+        <SkeletonLine width="280px" height={28} style={{ marginBottom: 18 }} />
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} style={{ display: 'grid', gridTemplateColumns: '32px 36px 1fr', gap: 16, alignItems: 'center', padding: '16px 0', borderTop: '1px solid var(--border)', opacity: 1 - i * 0.18 }}>
+            <SkeletonLine width="20px" height={12} />
+            <SkeletonLine width="36px" height={36} style={{ borderRadius: 9 }} />
+            <div style={{ display: 'grid', gap: 8 }}>
+              <SkeletonLine width={`${52 + (i * 13) % 30}%`} height={18} />
+              <SkeletonLine width={`${30 + (i * 9) % 20}%`} height={11} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </main>
   );
 }
