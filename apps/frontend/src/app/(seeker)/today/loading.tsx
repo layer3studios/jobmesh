@@ -1,5 +1,5 @@
-// FILE: /today loading. The same frame the page paints into: sidebar (identity,
-// ring, two stats, nav) beside the greeting and four pick rows. Same boxes,
+// FILE: /today loading. The same frame the page paints into: sidebar (goal
+// ring, two stats) beside the greeting and four pick rows. Same boxes,
 // same sizes, so nothing jumps when the data lands.
 import { SkeletonLine } from '../../../components/ui/Skeleton';
 
@@ -7,16 +7,8 @@ export default function TodayLoading() {
   return (
     <div className="td-skel" aria-busy="true" aria-label="Loading today">
       <aside className="glass td-skel__side">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <SkeletonLine width="36px" height={36} style={{ borderRadius: '50%' }} />
-          <div style={{ flex: 1, display: 'grid', gap: 6 }}>
-            <SkeletonLine width="55%" height={14} />
-            <SkeletonLine width="80%" height={11} />
-          </div>
-        </div>
-        <div className="td-skel__rule" />
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <SkeletonLine width="104px" height={104} style={{ borderRadius: '50%', flexShrink: 0 }} />
+          <SkeletonLine width="108px" height={108} style={{ borderRadius: '50%', flexShrink: 0 }} />
           <div style={{ flex: 1, display: 'grid', gap: 8 }}>
             <SkeletonLine width="40%" height={10} />
             <SkeletonLine width="70%" height={22} />
@@ -27,9 +19,6 @@ export default function TodayLoading() {
           <SkeletonLine width="50%" height={26} />
           <SkeletonLine width="50%" height={26} />
         </div>
-        <div className="td-skel__rule" />
-        <SkeletonLine height={38} style={{ borderRadius: 8 }} />
-        <SkeletonLine height={38} style={{ borderRadius: 8, opacity: 0.6 }} />
       </aside>
 
       <section style={{ minWidth: 0 }}>

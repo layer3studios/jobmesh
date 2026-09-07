@@ -28,14 +28,16 @@ function Stat({ value, label }: { value: ReactNode; label: string }) {
   );
 }
 
-export default function SeekerWorkspace({ children, label, title, actions, panel }: {
+export default function SeekerWorkspace({ children, label, title, actions, panel, side }: {
   children: ReactNode;
   /** Mono eyebrow above the page title. */
   label?: string;
   title?: ReactNode;
   actions?: ReactNode;
-  /** Replaces the three mono stats in the sidebar (Today passes the goal ring). */
+  /** Replaces the three mono stats in the sidebar. */
   panel?: ReactNode;
+  /** Render `side` as the entire sidebar column: no identity row, no nav, no glass frame (Today's goal card). */
+  side?: ReactNode;
 }) {
   const pathname = usePathname();
   const { currentUser, todayCount, streak, appliedJobs } = useSeeker();
@@ -74,7 +76,7 @@ export default function SeekerWorkspace({ children, label, title, actions, panel
       gridTemplateColumns: stacked ? '1fr' : 'var(--sidebar-width) minmax(0, 1fr)',
       gap: stacked ? 16 : 32, alignItems: 'start',
     }}>
-      <aside
+      {side ? side : <aside
         className="glass ws-side"
         style={{
           position: stacked ? 'static' : 'sticky', top: 88,
@@ -111,7 +113,7 @@ export default function SeekerWorkspace({ children, label, title, actions, panel
         {stacked && panel && (
           <div style={{ flexBasis: '100%', paddingTop: 14, borderTop: '1px solid var(--border)' }}>{panel}</div>
         )}
-      </aside>
+      </aside>}
 
       <section style={{ minWidth: 0 }}>
         {(title || label) && (

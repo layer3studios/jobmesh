@@ -1,88 +1,71 @@
 'use client';
 // FILE: src/components/seeker/today/NewsSection.tsx
-// Tech & job news for the Today sidebar. Replaces the per-page repetition by
-// surfacing a few fresh stories from the public Hacker News API.
-import { ArrowRight, ArrowUpRight, Newspaper } from 'lucide-react';
+// Fresh tech and job news, as a run of tilting glass cards: a serif headline,
+// the source and age in mono, a running number, and an arrow that leans out
+// on hover. The first story runs wide. Loads from our own /api/seeker/news.
+import { ArrowUpRight, Newspaper, RefreshCw } from 'lucide-react';
 import { useTechNews } from '../../../hooks/seeker/useTechNews';
 import { formatAppliedRelativeTime } from '../../../utils/progress';
+import { Button } from '../../ui';
 import { eyebrowStyle } from './shared';
+import TiltCard from './TiltCard';
 
 export default function NewsSection() {
-  const { news, loading, error } = useTechNews(5);
+  const { news, loading, error, refetch } = useTechNews(5);
 
   return (
-    <section>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
+    <section className="nw" aria-labelledby="nw-title">
+      <div className="nw__head">
         <div>
           <p style={eyebrowStyle}>Fresh today</p>
-          <h2 className="font-display" style={{
-            fontSize: '1.25rem', fontWeight: 600, color: 'var(--ink)',
-            letterSpacing: '-0.02em',
-          }}>Tech &amp; job news</h2>
+          <h2 id="nw-title" className="font-display nw__title">What the industry is reading</h2>
         </div>
-        <a
-          href="https://news.ycombinator.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 4,
-            fontSize: '0.82rem', color: 'var(--ink-muted)',
-            textDecoration: 'none', fontWeight: 500,
-          }}
-        >See all <ArrowRight size={12} /></a>
+        <a href="https://news.ycombinator.com/" target="_blank" rel="noopener noreferrer" className="ws-link-more">
+          More on Hacker News <ArrowUpRight size={12} />
+        </a>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {loading ? (
-          Array(4).fill(0).map((_, i) => (
-            <div key={i} className="skeleton" style={{ height: 56, borderRadius: 11 }} />
-          ))
-        ) : error || news.length === 0 ? (
-          <div style={{
-            padding: '20px 14px', background: 'var(--glass-card)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-            border: '1px solid var(--border)', borderRadius: 12, textAlign: 'center',
-          }}>
-            <Newspaper size={20} style={{ color: 'var(--ink-faint)', marginBottom: 8 }} />
-            <p style={{ fontSize: '0.875rem', color: 'var(--ink-muted)' }}>
-              {error || 'No news right now. Check back later.'}
-            </p>
-          </div>
-        ) : (
-          news.map(n => (
-            <a
+      {loading ? (
+        <div className="nw__grid" aria-busy="true" aria-label="Loading news">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="nw__card nw__card--skel skeleton" style={{ opacity: 1 - i * 0.12 }} />
+          ))}
+        </div>
+      ) : error || news.length === 0 ? (
+        <div className="jb-error td-error glass ws-section" role={error ? 'alert' : undefined}>
+          <Newspaper size={22} style={{ color: 'var(--ink-faint)' }} />
+          <p className="jb-error__title">{error ? 'News is taking a moment' : 'Nothing new yet'}</p>
+          <p className="jb-error__body">{error || 'The feed refreshes every hour. Check back after your next application.'}</p>
+          {error && <Button variant="secondary" size="sm" onClick={refetch} iconLeft={<RefreshCw size={13} />}>Try again</Button>}
+        </div>
+      ) : (
+        <div className="nw__grid">
+          {news.map((n, i) => (
+            <TiltCard
               key={n.id}
+              as="a"
               href={n.url}
               target="_blank"
               rel="noopener noreferrer"
-              style={{
-                display: 'flex', alignItems: 'flex-start', gap: 10,
-                padding: '11px 12px', background: 'var(--glass-card)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-                border: '1px solid var(--border)', borderRadius: 11,
-                textDecoration: 'none', transition: 'border-color 160ms ease',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--border-strong)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}
+              max={5}
+              className={`nw__card rise${i === 0 ? ' nw__card--lead' : ''}`}
+              style={{ '--i': i } as React.CSSProperties}
             >
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{
-                  fontSize: '0.85rem', fontWeight: 500, color: 'var(--ink)', lineHeight: 1.35,
-                  overflow: 'hidden', textOverflow: 'ellipsis',
-                  display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-                }}>{n.title}</div>
-                <div style={{
-                  fontSize: '0.72rem', color: 'var(--ink-muted)', marginTop: 4,
-                  display: 'flex', alignItems: 'center', gap: 6,
-                }}>
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>{n.source}</span>
-                  <span style={{ flexShrink: 0 }}>·</span>
-                  <span style={{ flexShrink: 0 }}>{formatAppliedRelativeTime(n.postedAt)}</span>
-                </div>
+              <div className="nw__meta">
+                <span className="nw__index">{String(i + 1).padStart(2, '0')}</span>
+                <span className="nw__source">{n.source}</span>
+                <span className="nw__dot">·</span>
+                <span>{formatAppliedRelativeTime(n.postedAt)}</span>
               </div>
-              <ArrowUpRight size={13} style={{ color: 'var(--ink-faint)', flexShrink: 0, marginTop: 2 }} />
-            </a>
-          ))
-        )}
-      </div>
+              <h3 className="font-display nw__headline">{n.title}</h3>
+              <div className="nw__foot">
+                <span className="nw__points">{n.points} points · {n.comments} comments</span>
+                <span className="nw__arrow" aria-hidden><ArrowUpRight size={15} /></span>
+              </div>
+            </TiltCard>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

@@ -57,7 +57,7 @@ export default function Today() {
 
   return (
     <SeekerWorkspace
-      panel={
+      side={
         <GoalPanel
           todayCount={todayCount}
           dailyGoal={dailyGoal}
