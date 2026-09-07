@@ -97,7 +97,7 @@ export default function UserMenu({ user, open, onToggle, onClose, onOpenSkillsEd
           </div>
 
           <Link href="/profile" role="menuitem" className="um-item" onClick={onClose} style={{ '--i': 0 } as React.CSSProperties}>
-            <UserRound size={15} /> My profile <span className="um-item__hint">what recruiters see</span>
+            <UserRound size={15} /> My profile
           </Link>
           <Link href="/pipeline" role="menuitem" className="um-item" onClick={onClose} style={{ '--i': 1 } as React.CSSProperties}>
             <BarChart3 size={15} /> My pipeline

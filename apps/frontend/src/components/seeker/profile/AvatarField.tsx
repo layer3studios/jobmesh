@@ -58,19 +58,23 @@ export default function AvatarField() {
 
   return (
     <div className="pf-av">
-      <button
-        type="button" className="pf-av__tile press" disabled={busy}
-        onClick={() => inputRef.current?.click()}
-        aria-label={uploaded ? 'Change your avatar' : 'Upload an avatar'}
-      >
-        {src && !failed
-          ? <img className="pf-av__img" src={src} alt="" onError={() => setFailed(true)} />
-          : <span className="pf-av__initials" aria-hidden>{initials(name)}</span>}
-        <span className="pf-av__scrim">
-          {busy ? <Loader2 size={15} className="pf-spin" aria-hidden /> : <ImageUp size={15} aria-hidden />}
-          <span>{busy ? 'Uploading' : uploaded ? 'Change avatar' : 'Upload avatar'}</span>
-        </span>
-      </button>
+      <div className="pf-av__stack">
+        <span className="pf-av__cap">{uploaded ? 'Change avatar' : 'Upload avatar'}</span>
+        <button
+          type="button" className="pf-av__tile press" disabled={busy}
+          onClick={() => inputRef.current?.click()}
+          aria-label={uploaded ? 'Change your avatar' : 'Upload an avatar'}
+        >
+          {src && !failed
+            ? <img className="pf-av__img" src={src} alt="" onError={() => setFailed(true)} />
+            : <span className="pf-av__initials" aria-hidden>{initials(name)}</span>}
+          <span className="pf-av__scrim">
+            {busy ? <Loader2 size={14} className="pf-spin" aria-hidden /> : <ImageUp size={14} aria-hidden />}
+            <span>{busy ? 'Uploading' : 'Choose a file'}</span>
+          </span>
+        </button>
+        <span className="pf-field__hint">PNG, JPG or WebP up to 2 MB.</span>
+      </div>
 
       <input
         ref={inputRef} type="file" accept={ACCEPTED} hidden
@@ -78,7 +82,7 @@ export default function AvatarField() {
       />
 
       <div className="pf-av__side">
-        <p className="pf-field__hint">PNG, JPG or WebP up to 2 MB. A square image looks best.</p>
+        <p className="pf-field__hint">A square image looks best. It shows on your profile, in the nav and on your public page.</p>
         {uploaded && (
           <button type="button" className="pf-av__revert press" onClick={() => void revert()} disabled={busy}>
             <Undo2 size={12} aria-hidden /> Use my Google photo

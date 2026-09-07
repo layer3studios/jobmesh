@@ -1,6 +1,7 @@
 'use client';
 // FILE: src/components/seeker/profile/BasicInfoPane.tsx
-// Who you are: name, who can see the page, headline, where you are, the
+// Who you are: your photo, who can see the page, your name, headline, where
+// you are, the
 // two-line About, the domains you work in, and how to reach you. LinkedIn
 // lives in Proof of work, so nothing here is asked twice. One Save; the
 // preview follows the keyboard.
@@ -76,17 +77,17 @@ export default function BasicInfoPane({ profile, settings, onSaved, onSettings, 
 
   return (
     <>
-      <PaneHead title="Basic information" sub="The first thing a recruiter reads." dirty={dirty} saving={saving} savedAt={savedAt} onSave={() => void save()} />
+      <PaneHead title="Basic information" dirty={dirty} saving={saving} savedAt={savedAt} onSave={() => void save()} />
       <div className="pfx-sec__body">
         {error && <PaneError message={error} onDismiss={() => setError(null)} />}
 
         <Field label="Photo"><AvatarField /></Field>
 
-        <Field label="Full name"><TextInput value={form.fullName} onChange={e => set('fullName', e.target.value)} placeholder="Your name as it should appear" autoComplete="name" /></Field>
-
         <Field label="Profile visibility" hint="Contact details stay hidden either way, unless you turn them on in Public profile.">
           <VisibilityMenu value={form.visibility} onChange={v => set('visibility', v)} />
         </Field>
+
+        <Field label="Full name"><TextInput value={form.fullName} onChange={e => set('fullName', e.target.value)} placeholder="Your name as it should appear" autoComplete="name" /></Field>
 
         <Field label="Headline" count={`${form.headline.length}/${HEADLINE_MAX}`} hint="One line under your name. Say what you do, not your job title.">
           <TextInput value={form.headline} maxLength={HEADLINE_MAX} onChange={e => set('headline', e.target.value)} placeholder="Backend engineer who ships payments at scale" />
