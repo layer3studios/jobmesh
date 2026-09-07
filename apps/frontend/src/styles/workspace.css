@@ -159,6 +159,24 @@
   .gp__ring:hover svg { transform: rotate(-90deg); }
 }
 
+/* ── Workspace frame: goal card beside the content ─────────────────────── */
+.ws-frame { width: 100%; max-width: 1440px; margin: 0 auto; padding: 16px 16px 80px; display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
+@media (min-width: 1024px) { .ws-frame { padding: 24px var(--margin-page) 48px; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); gap: 32px; } }
+.gp__nav { display: flex; gap: 6px; flex-wrap: wrap; padding-top: 12px; border-top: 1px solid var(--border); }
+.gp__link {
+  display: inline-flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 8px; text-decoration: none;
+  font-size: 12.5px; font-weight: 500; color: var(--ink-muted); border: 1px solid var(--border); background: var(--glass-card);
+  transition: color var(--m-ui) var(--ease-out), border-color var(--m-ui) var(--ease-out), gap var(--m-ui) var(--ease-out), transform var(--m-press) var(--ease-out);
+}
+.gp__link:hover { color: var(--ink); border-color: var(--border-strong); gap: 8px; }
+.gp__link:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+@media (min-width: 1024px) { .gp-card { position: sticky; top: 88px; } }
+@media (max-width: 1023px) {
+  .gp-card { padding: 16px; }
+  .gp__top { gap: 16px; }
+  .gp__stats { grid-template-columns: repeat(2, minmax(0, 140px)); }
+}
+
 /* ── Profile ───────────────────────────────────────────────────────────── */
 .pf-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
 .pf-complete {

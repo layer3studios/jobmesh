@@ -1,12 +1,15 @@
 'use client';
 // FILE: src/components/seeker/today/GoalPanel.tsx
-// The whole Today sidebar: one tilting glass card that holds the goal ring,
-// the streak and the total applied. The ring is segmented, one arc per
-// application in the goal, so the shape itself says how far there is to go.
-// The goal editor unfolds from under the chip (transform + opacity only, the
-// drawer curve) and folds back on Set or Escape.
+// The seeker's sidebar on every account page: one tilting glass card that
+// holds the goal ring, the streak and the total applied, then quiet links to
+// the other account pages. The ring is segmented, one arc per application in
+// the goal, so the shape itself says how far there is to go. The goal editor
+// unfolds from under the chip (transform + opacity only, the drawer curve)
+// and folds back on Set or Escape. No name here: identity lives in the nav.
 import { useEffect, useId, useRef, useState } from 'react';
-import { Flame, Briefcase, Minus, Plus, Check, Pencil } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Flame, Briefcase, Minus, Plus, Check, Pencil, ArrowRight } from 'lucide-react';
 import TiltCard from './TiltCard';
 
 interface Props {
@@ -19,6 +22,12 @@ interface Props {
 
 const MIN_GOAL = 1;
 const MAX_GOAL = 30;
+
+const PAGES = [
+  { to: '/today', label: 'Today' },
+  { to: '/pipeline', label: 'Pipeline' },
+  { to: '/profile', label: 'Profile' },
+] as const;
 
 /** Counts a number to its new value; jumps straight there under reduced motion. */
 function useCountUp(target: number, ms = 700): number {
@@ -51,15 +60,27 @@ function headline(todayCount: number, dailyGoal: number): string {
   return `${left} to go`;
 }
 
-function hint(todayCount: number, dailyGoal: number, streak: number): string {
-  if (todayCount >= dailyGoal) return streak > 1 ? `${streak} days running. Keep the chain.` : 'Each arc is one application.';
-  if (todayCount === 0) return 'Each arc is one application. Light the first.';
-  return 'Each arc is one application.';
+/** One quiet line under the ring, tuned to the streak, the hour and how far along today is. */
+function hint(todayCount: number, dailyGoal: number, streak: number, totalApplied: number, hour: number): string {
+  const left = dailyGoal - todayCount;
+  if (left < 0) return 'Past the goal. Tomorrow starts ahead.';
+  if (left === 0) return streak > 1 ? `${streak} days running. Keep the chain.` : 'Done. Anything more is a bonus.';
+  if (totalApplied === 0) return 'Each arc is one application. Light the first.';
+  if (todayCount === 0 && streak > 0) return `${streak}-day streak on the line. One keeps it.`;
+  if (todayCount === 0) return hour >= 18 ? 'Still time for one before the day closes.' : 'Each arc is one application. Light the first.';
+  if (left === 1) return 'One more closes the loop.';
+  return 'Good pace. Keep it moving.';
+}
+
+function dateLabel(d: Date): string {
+  return d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
 }
 
 export default function GoalPanel({ todayCount, dailyGoal, streak, totalApplied, onGoalChange }: Props) {
+  const pathname = usePathname();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(dailyGoal);
+  const [now, setNow] = useState<Date | null>(null);
   const editorId = useId();
   const shown = useCountUp(todayCount);
   const isMet = todayCount >= dailyGoal;
@@ -72,6 +93,8 @@ export default function GoalPanel({ todayCount, dailyGoal, streak, totalApplied,
   const gap = n === 1 ? 0 : Math.min(6, circ / n * 0.18);
   const seg = circ / n - gap;
 
+  // The clock is client-only so the server and first client paint agree.
+  useEffect(() => { setNow(new Date()); }, []);
   useEffect(() => { if (!editing) setDraft(dailyGoal); }, [dailyGoal, editing]);
 
   useEffect(() => {
@@ -86,6 +109,9 @@ export default function GoalPanel({ todayCount, dailyGoal, streak, totalApplied,
     if (next !== dailyGoal) onGoalChange(next);
     setEditing(false);
   };
+
+  const isActive = (to: string) => pathname === to || pathname.startsWith(to + '/');
+  const others = PAGES.filter(p => !isActive(p.to));
 
   return (
     <TiltCard as="aside" className="ws-side gp-card" max={5}>
@@ -112,7 +138,7 @@ export default function GoalPanel({ todayCount, dailyGoal, streak, totalApplied,
           </div>
 
           <div className="gp__copy">
-            <p className="gp__eyebrow">Today</p>
+            <p className="gp__eyebrow">{now ? dateLabel(now) : 'Today'}</p>
             <p className="font-display gp__headline">{headline(todayCount, dailyGoal)}</p>
             <button
               type="button"
@@ -140,7 +166,7 @@ export default function GoalPanel({ todayCount, dailyGoal, streak, totalApplied,
           </div>
         </div>
 
-        <p className="gp__hint">{hint(todayCount, dailyGoal, streak)}</p>
+        <p className="gp__hint">{hint(todayCount, dailyGoal, streak, totalApplied, now ? now.getHours() : 12)}</p>
 
         <div className="gp__stats">
           <div className="gp__stat">
@@ -152,6 +178,14 @@ export default function GoalPanel({ todayCount, dailyGoal, streak, totalApplied,
             <span className="gp__stat-l">Applied</span>
           </div>
         </div>
+
+        <nav className="gp__nav" aria-label="Account">
+          {others.map(p => (
+            <Link key={p.to} href={p.to} className="gp__link press press--sm">
+              {p.label} <ArrowRight size={12} aria-hidden />
+            </Link>
+          ))}
+        </nav>
       </div>
     </TiltCard>
   );

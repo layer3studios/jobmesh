@@ -11,13 +11,12 @@ import type { IJob } from '../../../types';
 import { buildSkillsRegex } from '../JobDetailPanel';
 import { BRAND } from '../../../theme/brand';
 import Hero from './Hero';
-import GoalPanel from './GoalPanel';
 import PicksSection from './PicksSection';
 import NewsSection from './NewsSection';
 import SearchSection from './SearchSection';
 
 export default function Today() {
-  const { currentUser, userSkills, todayCount, dailyGoal, streak, appliedJobs, appliedJobIds, openSkillsEditor, saveDailyGoal } = useSeeker();
+  const { currentUser, userSkills, todayCount, dailyGoal, streak, appliedJobs, appliedJobIds, openSkillsEditor } = useSeeker();
   const [jobs, setJobs] = useState<IJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -56,17 +55,7 @@ export default function Today() {
   const greeting = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
 
   return (
-    <SeekerWorkspace
-      side={
-        <GoalPanel
-          todayCount={todayCount}
-          dailyGoal={dailyGoal}
-          streak={streak}
-          totalApplied={appliedJobs.length}
-          onGoalChange={saveDailyGoal}
-        />
-      }
-    >
+    <SeekerWorkspace>
       <div className="rise" style={{ '--i': 0 } as React.CSSProperties}>
         <Hero
           greeting={greeting}
