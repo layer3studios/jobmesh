@@ -8,7 +8,7 @@
 
 import { apiUrl } from '../lib/api-base';
 import type {
-  PublicProfileSettingsState, ProfileVisibilitySettings, SlugAvailability,
+  PublicProfileSettingsState, ProfileVisibilitySettings, ProfileVisibility, SlugAvailability,
 } from '../types/public-profile';
 
 export class PublicProfileApiError extends Error {
@@ -69,6 +69,8 @@ export function fetchProfileSettings(): Promise<PublicProfileSettingsState> {
 }
 
 export interface ProfileSettingsPatch {
+  profileVisibility?: ProfileVisibility;
+  /** Legacy: prefer profileVisibility. Kept because the server still accepts it. */
   profilePublic?: boolean;
   profileSlug?: string;
   profileSettings?: Partial<ProfileVisibilitySettings>;

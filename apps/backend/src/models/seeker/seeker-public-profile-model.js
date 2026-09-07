@@ -30,6 +30,24 @@ export const PROFILE_SETTING_DEFAULTS = Object.freeze({
 
 export const HEADLINE_MAX_LENGTH = 120;
 
+/**
+ * Who may read /u/{slug}.
+ *   public     — anyone with the link.
+ *   recruiters — only a signed-in employer. Everyone else gets the same 404 a
+ *                private profile gets, so the two are indistinguishable.
+ *   private    — nobody.
+ * profilePublic stays the stored source of "has an address at all": it is kept
+ * in sync (true for public and recruiters) so slug uniqueness, the sitemap query
+ * and every older reader keep working without a migration.
+ */
+export const PROFILE_VISIBILITIES = Object.freeze(['public', 'recruiters', 'private']);
+
+/** A doc's visibility. Legacy docs have no field: fall back to the boolean. */
+export function visibilityOf(user) {
+  if (PROFILE_VISIBILITIES.includes(user?.profileVisibility)) return user.profileVisibility;
+  return user?.profilePublic ? 'public' : 'private';
+}
+
 const BOOLEAN_SETTING_KEYS = Object.keys(PROFILE_SETTING_DEFAULTS)
   .filter((key) => typeof PROFILE_SETTING_DEFAULTS[key] === 'boolean');
 
@@ -85,7 +103,7 @@ export function validateSettingsPatch(patch) {
 
 const PUBLIC_PROFILE_PROJECTION = {
   name: 1, email: 1, picture: 1, parsedProfile: 1,
-  profileSlug: 1, profilePublic: 1, profileSettings: 1, profileViewCount: 1,
+  profileSlug: 1, profilePublic: 1, profileVisibility: 1, profileSettings: 1, profileViewCount: 1,
   leetcodeUsername: 1, githubUsername: 1, seekerResumeFile: 1,
 };
 
@@ -115,6 +133,7 @@ export function toState(user) {
     userId: String(user._id),
     profileSlug: user.profileSlug ?? null,
     profilePublic: Boolean(user.profilePublic),
+    profileVisibility: visibilityOf(user),
     profileViewCount: user.profileViewCount ?? 0,
     settings: withSettingDefaults(user.profileSettings),
     hasResume: Boolean(user.seekerResumeFile?.storagePath),
@@ -131,7 +150,15 @@ export function toState(user) {
 export async function listPublishedProfileSlugs(limit = 5000) {
   const collection = await usersCol();
   const rows = await collection
-    .find({ profilePublic: true, profileSlug: { $type: 'string' } }, { projection: { profileSlug: 1 } })
+    .find(
+      {
+        profilePublic: true,
+        profileSlug: { $type: 'string' },
+        // A recruiters-only page must never be advertised to a crawler.
+        profileVisibility: { $ne: 'recruiters' },
+      },
+      { projection: { profileSlug: 1 } },
+    )
     .limit(limit)
     .toArray();
   return rows.map((row) => row.profileSlug).filter(Boolean);
@@ -141,11 +168,19 @@ export async function listPublishedProfileSlugs(limit = 5000) {
  * Apply a validated patch. `$set` only the keys present, so toggling one flag can
  * never reset another. Returns the updated state.
  */
-export async function updatePublicProfileState(userId, { profilePublic, profileSlug, settings }) {
+export async function updatePublicProfileState(userId, {
+  profilePublic, profileVisibility, profileSlug, settings,
+}) {
   const oid = toOid(userId);
   if (!oid) return null;
   const setOps = {};
   if (typeof profilePublic === 'boolean') setOps.profilePublic = profilePublic;
+  // Visibility wins when both arrive, and always rewrites the boolean with it, so
+  // the two can never disagree about whether the page has an address.
+  if (PROFILE_VISIBILITIES.includes(profileVisibility)) {
+    setOps.profileVisibility = profileVisibility;
+    setOps.profilePublic = profileVisibility !== 'private';
+  }
   if (typeof profileSlug === 'string') setOps.profileSlug = profileSlug;
   for (const [key, value] of Object.entries(settings ?? {})) {
     setOps[`profileSettings.${key}`] = value;

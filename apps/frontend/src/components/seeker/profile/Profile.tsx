@@ -144,7 +144,7 @@ export default function Profile() {
   const onDraft = useCallback((d: Draft) => setDraft(d), []);
   const onDraftSkills = useCallback((s: string[]) => setDraftSkills(s), []);
 
-  const checks = useMemo(() => profile ? profileChecks(profile, { github: !!proof.github, leetcode: !!proof.leetcode, publicOn: settings?.profilePublic }) : [], [profile, proof, settings]);
+  const checks = useMemo(() => profile ? profileChecks(profile, { github: !!proof.github, leetcode: !!proof.leetcode, publicOn: settings ? settings.profileVisibility !== 'private' : false }) : [], [profile, proof, settings]);
   const done = useMemo(() => completeness(checks), [checks]);
 
   // What the preview shows: the saved profile, overlaid with whatever is being typed.

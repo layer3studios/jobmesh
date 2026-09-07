@@ -13,6 +13,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Copy, ExternalLink } from 'lucide-react';
 import { Card, Button, Switch, Alert, Stack, useToast } from '../../ui';
+import VisibilityMenu from './VisibilityMenu';
 import {
   fetchProfileSettings, patchProfileSettings, PublicProfileApiError,
 } from '../../../api/public-profile-api';
@@ -95,10 +96,9 @@ export default function ProfileSettingsCard() {
               One link that replaces your resume for cold outreach.
             </p>
           </div>
-          <Switch
-            label="Public profile"
-            checked={state.profilePublic}
-            onChange={(checked) => void save({ profilePublic: checked })}
+          <VisibilityMenu
+            value={state.profileVisibility}
+            onChange={(profileVisibility) => void save({ profileVisibility })}
           />
         </Stack>
 
@@ -106,7 +106,7 @@ export default function ProfileSettingsCard() {
 
         {!state.profilePublic ? (
           <p style={{ fontSize: '0.875rem', color: 'var(--ink-muted)' }}>
-            Your profile is private. Turn it on to get a shareable link.
+            Your profile is private. Set it to public or recruiters-only to get a shareable link.
           </p>
         ) : (
           <Stack gap={16}>
@@ -145,6 +145,13 @@ export default function ProfileSettingsCard() {
               available={state}
               onChange={queueSettings}
             />
+
+            {state.profileVisibility === 'recruiters' && (
+              <p style={{ fontSize: '0.8125rem', color: 'var(--ink-muted)', margin: 0 }}>
+                Anyone who is not a signed-in employer sees nothing at this link, the same
+                as if the page did not exist. It is also kept out of search engines.
+              </p>
+            )}
 
             <p style={{ fontSize: '0.8125rem', color: 'var(--ink-muted)', margin: 0 }}>
               {state.profileViewCount === 0

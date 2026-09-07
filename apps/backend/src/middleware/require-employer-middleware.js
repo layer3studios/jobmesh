@@ -21,4 +21,21 @@ export function requireEmployer(req, _res, next) {
   }
 }
 
+/**
+ * Attaches req.employerUser when a valid employer cookie is present and does
+ * nothing otherwise. For routes that are readable by anyone but show more to a
+ * signed-in recruiter — the recruiters-only public profile is the only one today.
+ */
+export function optionalEmployer(req, _res, next) {
+  const token = req.cookies?.[EMPLOYER_COOKIE_NAME];
+  if (!token) return next();
+  try {
+    const decoded = jwt.verify(token, EMPLOYER_JWT_SECRET);
+    if (decoded?.employerUserId) {
+      req.employerUser = { employerUserId: decoded.employerUserId, email: decoded.email };
+    }
+  } catch { /* an invalid cookie is simply not a recruiter */ }
+  next();
+}
+
 export default requireEmployer;

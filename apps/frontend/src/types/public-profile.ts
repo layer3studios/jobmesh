@@ -66,9 +66,14 @@ export interface ProfileVisibilitySettings {
   openToWork: boolean;
 }
 
+/** Who may open /u/{slug}. `recruiters` is readable only by a signed-in employer. */
+export type ProfileVisibility = 'public' | 'recruiters' | 'private';
+
 export interface PublicProfileSettingsState {
   profileSlug: string | null;
+  /** True for public and recruiters-only: the page has an address. */
   profilePublic: boolean;
+  profileVisibility: ProfileVisibility;
   profileViewCount: number;
   settings: ProfileVisibilitySettings;
   hasResume: boolean;

@@ -5,13 +5,14 @@
 // lives in Proof of work, so nothing here is asked twice. One Save; the
 // preview follows the keyboard.
 import { useEffect, useState } from 'react';
-import { Globe, Lock, Zap, Palette, Boxes, LineChart, Megaphone, Cloud, Shield, Smartphone, Database, Bug } from 'lucide-react';
+import { Zap, Palette, Boxes, LineChart, Megaphone, Cloud, Shield, Smartphone, Database, Bug } from 'lucide-react';
 import type { ParsedProfile } from '../../../types/seeker-profile';
-import type { PublicProfileSettingsState } from '../../../types/public-profile';
+import type { PublicProfileSettingsState, ProfileVisibility } from '../../../types/public-profile';
 import { patchProfile, SeekerApiError } from '../../../api/seeker-api';
 import { patchProfileSettings, PublicProfileApiError } from '../../../api/public-profile-api';
 import { Avatar } from '../../ui/Avatar';
 import { Field, TextInput, TextArea, Pills, PaneHead, PaneError, useDirty } from './editor';
+import VisibilityMenu from './VisibilityMenu';
 
 const DOMAINS = ['Engineering', 'Frontend', 'Backend', 'Full Stack', 'Mobile', 'Data', 'ML/AI', 'DevOps/SRE', 'Security', 'Design', 'Product', 'QA'];
 const ICONS: Record<string, React.ReactNode> = {
@@ -39,7 +40,7 @@ function fromProfile(p: ParsedProfile, s: PublicProfileSettingsState | null) {
     summary: p.summary ?? '',
     headline: s?.settings.headline ?? '',
     domains: [p.domain, p.subDomain].filter((d): d is string => !!d),
-    isPublic: !!s?.profilePublic,
+    visibility: (s?.profileVisibility ?? (s?.profilePublic ? 'public' : 'private')) as ProfileVisibility,
   };
 }
 
@@ -65,8 +66,8 @@ export default function BasicInfoPane({ profile, settings, avatar, onSaved, onSe
         domain: form.domains[0] ?? null, subDomain: form.domains[1] ?? null,
       });
       onSaved(next);
-      if (settings && (form.headline !== (settings.settings.headline ?? '') || form.isPublic !== settings.profilePublic)) {
-        onSettings(await patchProfileSettings({ profilePublic: form.isPublic, profileSettings: { headline: form.headline } }));
+      if (settings && (form.headline !== (settings.settings.headline ?? '') || form.visibility !== settings.profileVisibility)) {
+        onSettings(await patchProfileSettings({ profileVisibility: form.visibility, profileSettings: { headline: form.headline } }));
       }
       setSavedAt(Date.now());
     } catch (err) {
@@ -88,12 +89,8 @@ export default function BasicInfoPane({ profile, settings, avatar, onSaved, onSe
           <Field label="Full name"><TextInput value={form.fullName} onChange={e => set('fullName', e.target.value)} placeholder="Your name as it should appear" autoComplete="name" /></Field>
         </div>
 
-        <Field label="Who can see this">
-          <div className="pf-seg" role="radiogroup" aria-label="Profile visibility">
-            <button type="button" role="radio" aria-checked={form.isPublic} className="pf-seg__btn" onClick={() => set('isPublic', true)}><Globe size={13} /> Public</button>
-            <button type="button" role="radio" aria-checked={!form.isPublic} className="pf-seg__btn" onClick={() => set('isPublic', false)}><Lock size={13} /> Only me</button>
-          </div>
-          <span className="pf-field__hint">{form.isPublic ? 'Recruiters with your link can read it. Contact details stay hidden unless you turn them on in Public profile.' : 'Nobody sees it. Turn it on when it reads the way you want.'}</span>
+        <Field label="Profile visibility" hint="Contact details stay hidden either way, unless you turn them on in Public profile.">
+          <VisibilityMenu value={form.visibility} onChange={v => set('visibility', v)} />
         </Field>
 
         <Field label="Headline" count={`${form.headline.length}/${HEADLINE_MAX}`} hint="One line under your name. Say what you do, not your job title.">

@@ -38,9 +38,13 @@
   animation: rise 260ms var(--ease-out) both; animation-delay: calc(var(--i, 0) * 20ms);
   transition: border-color var(--m-ui) var(--ease-out), color var(--m-ui) var(--ease-out), background-color var(--m-ui) var(--ease-out), transform var(--m-press) var(--ease-out), opacity var(--m-ui) var(--ease-out);
 }
-.pf-pill:hover:not(:disabled) { border-color: var(--border-strong); color: var(--ink); }
+.pf-pill:hover:not(:disabled):not([aria-pressed="true"]) { border-color: var(--border-strong); color: var(--ink); }
+/* A selected pill keeps its inverted ink on hover: the old rule repainted the
+   label the same colour as the chip, which made the choice unreadable. */
+.pf-pill[aria-pressed="true"]:hover { background: var(--ink-2); border-color: var(--ink-2); color: var(--paper); }
 .pf-pill:active:not(:disabled) { transform: scale(var(--press-scale)); }
 .pf-pill[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.pf-pill[aria-pressed="true"] svg { color: var(--paper); }
 .pf-pill:disabled { opacity: 0.4; cursor: not-allowed; }
 .pf-pill__n { font-family: var(--font-jetbrains-mono), ui-monospace, monospace; font-size: 10px; color: var(--ink-faint); }
 

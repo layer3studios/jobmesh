@@ -3,10 +3,12 @@
 // behind /u/{slug}, its signed resume stream, and the contact form for profiles
 // that keep their email hidden.
 //
-// NO CREDENTIAL IS REQUIRED AND NONE IS TRUSTED. optionalAuth runs only so a
-// seeker looking at their own page is not counted as a visitor; a forged or absent
-// cookie changes nothing else. profilePublic:false is indistinguishable from "no
-// such slug" — both 404 — so an unpublished profile cannot be probed for.
+// NO CREDENTIAL IS REQUIRED FOR A PUBLIC PAGE AND NONE IS TRUSTED. optionalAuth
+// runs so a seeker looking at their own page is not counted as a visitor;
+// optionalEmployer runs so a recruiters-only page can recognise a recruiter. A
+// forged or absent cookie changes nothing else. Private, recruiters-only-seen-by-
+// a-stranger, and "no such slug" are all the SAME 404, so neither an unpublished
+// nor a restricted profile can be probed for.
 //
 // Mounted BEFORE the apply catch-all in register-routes.js, like every other
 // specific /api/public/* route.
@@ -18,9 +20,10 @@ import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { asyncHandler } from '../../middleware/async-handler-middleware.js';
 import { HttpError } from '../../middleware/error-handler-middleware.js';
 import { optionalAuth } from '../../middleware/require-seeker-middleware.js';
+import { optionalEmployer } from '../../middleware/require-employer-middleware.js';
 import {
   findPublishedProfileBySlug, incrementProfileViewCount, withSettingDefaults,
-  listPublishedProfileSlugs,
+  listPublishedProfileSlugs, visibilityOf,
 } from '../../models/seeker/seeker-public-profile-model.js';
 import { buildPublicProfile } from '../../services/seeker/public-profile-service.js';
 import {
@@ -50,6 +53,19 @@ async function requirePublishedProfile(slug) {
   return user;
 }
 
+/**
+ * A recruiters-only page is readable by a signed-in employer, and by its owner.
+ * Everyone else gets the SAME 404 a private profile gets — the whole point of
+ * the setting is that a stranger cannot tell a restricted page from a missing
+ * one, so this must never be a 403.
+ */
+function assertReadable(user, req) {
+  if (visibilityOf(user) !== 'recruiters') return;
+  if (req.employerUser?.employerUserId) return;
+  if (String(req.user?.userId ?? '') === String(user._id)) return;
+  throw new HttpError(404, 'Profile not found.', 'PROFILE_NOT_FOUND');
+}
+
 /** The signed, 24h resume URL for a slug — or null when there is no file to serve. */
 function resumeLinkFor(user, settings) {
   if (!settings.showResume || !user.seekerResumeFile?.storagePath) return null;
@@ -68,8 +84,9 @@ router.get('/', asyncHandler(async (_req, res) => {
 }));
 
 // GET /profile/:slug — the whole public profile, shaped by the owner's settings.
-router.get('/:slug', optionalAuth, asyncHandler(async (req, res) => {
+router.get('/:slug', optionalAuth, optionalEmployer, asyncHandler(async (req, res) => {
   const user = await requirePublishedProfile(req.params.slug);
+  assertReadable(user, req);
   const settings = withSettingDefaults(user.profileSettings);
   const profile = await buildPublicProfile(user, resumeLinkFor(user, settings));
 
@@ -82,8 +99,12 @@ router.get('/:slug', optionalAuth, asyncHandler(async (req, res) => {
 
   // Five minutes: long enough that a link going round a group chat is served from
   // cache, short enough that turning the profile off takes effect while the
-  // sender is still in the conversation.
-  res.setHeader('Cache-Control', 'public, max-age=300');
+  // sender is still in the conversation. A recruiters-only page varies by who is
+  // asking, so it is never cached by a shared proxy.
+  res.setHeader(
+    'Cache-Control',
+    visibilityOf(user) === 'recruiters' ? 'private, no-store' : 'public, max-age=300',
+  );
   res.json({ profile });
 }));
 
@@ -92,11 +113,12 @@ router.get('/:slug', optionalAuth, asyncHandler(async (req, res) => {
 // The token is checked FIRST (cheap, no I/O), then the profile is re-loaded so a
 // profile turned private, or a showResume flag turned off, revokes every
 // outstanding link immediately rather than at token expiry.
-router.get('/:slug/resume', asyncHandler(async (req, res) => {
+router.get('/:slug/resume', optionalAuth, optionalEmployer, asyncHandler(async (req, res) => {
   const { slug } = req.params;
   verifyProfileResumeToken(slug, req.query.token, req.query.expires);
 
   const user = await requirePublishedProfile(slug);
+  assertReadable(user, req);
   const settings = withSettingDefaults(user.profileSettings);
   if (!settings.showResume) throw new HttpError(403, 'Resume is not shared.', 'RESUME_HIDDEN');
 
