@@ -13,3 +13,4 @@ export * from './github-cache-model.js';
 export * from './seeker-public-profile-model.js';
 export * from './public-profile-slug-lookup.js';
 export * from './seeker-resume-file-model.js';
+export * from './seeker-avatar-model.js';

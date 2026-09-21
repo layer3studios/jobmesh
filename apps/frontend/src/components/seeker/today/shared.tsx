@@ -1,5 +1,6 @@
 // FILE: src/components/seeker/today/shared.tsx
-// Shared types, styles, and small leaf components used across the Today sections.
+// Shared styles and small leaf components used across the Today sections and
+// the other account pages.
 
 import type { CSSProperties, ReactNode } from 'react';
 import Link from 'next/link';
@@ -12,49 +13,42 @@ export const eyebrowStyle: CSSProperties = {
   fontWeight: 500, marginBottom: 8,
 };
 
-export function SectionHead({ eyebrow, title, linkLabel, linkTo }: {
-  eyebrow: string; title: string; linkLabel: string; linkTo: string;
+/** A glass section with a mono label, an optional subtitle and an optional link. */
+export function Section({ id, label, sub, linkLabel, linkTo, className, children }: {
+  id?: string; label: string; sub?: string; linkLabel?: string; linkTo?: string; className?: string; children: ReactNode;
 }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
-      <div>
-        <p style={eyebrowStyle}>{eyebrow}</p>
-        <h2 className="font-display" style={{
-          fontSize: '1.25rem', fontWeight: 600, color: 'var(--ink)',
-          letterSpacing: '-0.02em',
-        }}>{title}</h2>
+    <section id={id} className={`glass ws-section td-anchor${className ? ` ${className}` : ''}`}>
+      <div className="ws-section__head">
+        <div>
+          <p className="ws-section__label">{label}</p>
+          {sub && <p className="ws-section__sub">{sub}</p>}
+        </div>
+        {linkLabel && linkTo && (
+          <Link href={linkTo} className="ws-link-more">{linkLabel} <ArrowRight size={12} /></Link>
+        )}
       </div>
-      <Link href={linkTo} style={{
-        display: 'inline-flex', alignItems: 'center', gap: 4,
-        fontSize: '0.82rem', color: 'var(--ink-muted)',
-        textDecoration: 'none', fontWeight: 500,
-      }}>{linkLabel} <ArrowRight size={12} /></Link>
-    </div>
+      {children}
+    </section>
   );
 }
 
-export function MiniStat({ icon, value, label, accent }: {
-  icon: ReactNode; value: ReactNode; label: string; accent: 'success' | 'warning' | 'neutral';
+/** An editorial section for Today: a hairline rule, a mono kicker with a running number, a serif title. */
+export function EdSection({ id, number, kicker, title, link, children, className }: {
+  id?: string; number: string; kicker: string; title?: string; link?: { label: string; to: string; external?: boolean }; children: ReactNode; className?: string;
 }) {
-  const color = accent === 'success' ? 'var(--success)' : accent === 'warning' ? 'var(--warning)' : 'var(--ink-muted)';
-  const bg = accent === 'success' ? 'var(--success-soft)' : accent === 'warning' ? 'var(--warning-soft)' : 'var(--paper-2)';
   return (
-    <div style={{
-      padding: '10px 12px', background: 'var(--paper-2)',
-      borderRadius: 10, border: '1px solid var(--border)',
-    }}>
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-        <span style={{
-          width: 22, height: 22, borderRadius: 6,
-          background: bg, color,
-          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        }}>{icon}</span>
-        <span style={{
-          fontSize: '1.05rem', fontWeight: 600, color: 'var(--ink)',
-          letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums',
-        }}>{value}</span>
+    <section id={id} className={`ed${className ? ` ${className}` : ''}`} aria-labelledby={id ? `${id}-title` : undefined}>
+      <div className="ed__head">
+        <p className="ed__kicker"><span className="ed__num">{number}</span>{kicker}</p>
+        {title && <h2 id={id ? `${id}-title` : undefined} className="font-display ed__title">{title}</h2>}
+        {link && (
+          link.external
+            ? <a href={link.to} target="_blank" rel="noopener noreferrer" className="ed__more">{link.label} <ArrowRight size={12} /></a>
+            : <Link href={link.to} className="ed__more">{link.label} <ArrowRight size={12} /></Link>
+        )}
       </div>
-      <p style={{ fontSize: '0.72rem', color: 'var(--ink-muted)', marginTop: 3 }}>{label}</p>
-    </div>
+      {children}
+    </section>
   );
 }

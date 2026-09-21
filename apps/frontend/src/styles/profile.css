@@ -1,0 +1,258 @@
+/* FILE: src/styles/profile.css
+   /profile, set like the rest of the account pages: a masthead, then three
+   columns at width (section index, the editor, the live preview). No glass
+   panes: hairlines and type. Connections glow with one hue each once they
+   are live. Tokens only; motion reuses the press / rise primitives. */
+
+/* ── Editor: the pane head and body ────────────────────────────────────── */
+.pfx-sec__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.pfx-sec__title { font-family: var(--font-jetbrains-mono), ui-monospace, monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); }
+.pfx-sec__sub { font-size: 12.5px; color: var(--ink-muted); margin-top: 3px; }
+.pfx-sec__body { padding: 16px; display: grid; gap: 16px; }
+.pfx-sec__body > * { min-width: 0; }
+.pfx-sec__group { display: grid; gap: 14px; }
+.pfx-sec__group-title { font-family: var(--font-jetbrains-mono), ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.pf-pill__check { margin-left: 2px; }
+.pf-conn { background: var(--glass-card); }
+
+/* Preview links: real when the data exists, a dashed add when it does not. */
+.pfx-link {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--border); background: transparent;
+  color: var(--ink); font-family: inherit; font-size: 12.5px; font-weight: 500; text-decoration: none; cursor: pointer;
+  transition: border-color var(--m-ui) var(--ease-out), background-color var(--m-ui) var(--ease-out), color var(--m-ui) var(--ease-out), transform var(--m-press) var(--ease-out);
+}
+.pfx-link:hover { border-color: var(--border-strong); background: var(--accent-soft); }
+.pfx-link:active { transform: scale(var(--press-scale-sm)); }
+.pfx-link__ext { color: var(--ink-faint); }
+.pfx-link--add { color: var(--ink-muted); border-style: dashed; }
+.pfx-link--add:hover { color: var(--ink); border-style: solid; }
+.pf-block__empty--btn { display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; padding: 0; font: inherit; font-size: 13px; color: var(--ink-faint); font-style: italic; cursor: pointer; text-align: left; transition: color var(--m-ui) var(--ease-out); }
+.pf-block__empty--btn:hover { color: var(--ink); }
+.pf-block__more { font-size: 12px; color: var(--ink-faint); margin-top: 6px; }
+
+/* ── Connections (proof of work) ───────────────────────────────────────── */
+.pf-conn { --hue: var(--ink); display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--surface); transition: border-color var(--m-ui) var(--ease-out), box-shadow 400ms var(--ease-out); }
+.pf-conn[data-tone="github"] { --hue: #8E86D9; }
+.pf-conn[data-tone="leetcode"] { --hue: #C9924A; }
+.pf-conn[data-tone="linkedin"] { --hue: #5E9BDB; }
+.pf-conn[data-connected="true"] { border-color: color-mix(in srgb, var(--hue) 24%, var(--border)); box-shadow: 0 20px 50px -34px color-mix(in srgb, var(--hue) 35%, transparent); }
+.pf-conn__head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 16px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, color-mix(in srgb, var(--hue) 0%, transparent), transparent); transition: background 400ms var(--ease-out); }
+.pf-conn[data-connected="true"] .pf-conn__head { background: linear-gradient(90deg, color-mix(in srgb, var(--hue) 5%, transparent), transparent 60%); }
+.pf-conn__icon { width: 34px; height: 34px; border-radius: 10px; display: inline-grid; place-items: center; color: var(--ink-muted); border: 1px solid var(--border); background: var(--glass-card); transition: color var(--m-ui) var(--ease-out), border-color var(--m-ui) var(--ease-out), background-color var(--m-ui) var(--ease-out); }
+.pf-conn[data-connected="true"] .pf-conn__icon { color: var(--hue); border-color: color-mix(in srgb, var(--hue) 28%, transparent); background: color-mix(in srgb, var(--hue) 8%, transparent); }
+.pf-conn__who { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pf-conn__name { font-size: 15px; font-weight: 600; color: var(--ink); margin: 0; }
+.pf-conn__handle { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-jetbrains-mono), ui-monospace, monospace; font-size: 11.5px; color: var(--ink-muted); text-decoration: none; transition: color var(--m-ui) var(--ease-out); }
+a.pf-conn__handle:hover { color: var(--hue); }
+.pf-conn__status { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-jetbrains-mono), ui-monospace, monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); padding: 5px 9px; border-radius: 999px; border: 1px solid var(--border); }
+.pf-conn__status[data-on="true"] { color: var(--hue); border-color: color-mix(in srgb, var(--hue) 40%, transparent); }
+.pf-conn__dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.pf-conn__status[data-on="true"] .pf-conn__dot { animation: pulseDot 1.8s ease-in-out infinite; }
+.pf-conn__actions { margin-left: auto; display: inline-flex; gap: 6px; }
+.pf-conn__off:hover { color: var(--danger) !important; border-color: color-mix(in srgb, var(--danger) 45%, transparent) !important; }
+.pf-conn__body { padding: 16px; display: grid; gap: 14px; }
+.pf-conn__text { font-size: 13.5px; color: var(--ink-muted); line-height: 1.55; max-width: 60ch; margin: 0; }
+.pf-conn__foot { font-family: var(--font-jetbrains-mono), ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.04em; color: var(--ink-faint); margin: 0; }
+.pf-conn__form { display: grid; gap: 12px; }
+.pf-conn__inline { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.pf-conn__inline .pf-input { flex: 1 1 220px; }
+.pf-conn__row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.pf-conn__link { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 9px; border: 1px solid color-mix(in srgb, var(--hue) 40%, var(--border)); color: var(--ink); text-decoration: none; font-size: 13px; font-weight: 500; background: color-mix(in srgb, var(--hue) 8%, transparent); transition: background-color var(--m-ui) var(--ease-out), transform var(--m-press) var(--ease-out); }
+.pf-conn__link:hover { background: color-mix(in srgb, var(--hue) 16%, transparent); }
+.pf-spin { animation: spin 900ms linear infinite; }
+
+/* The stats inside a live connection take the connection's hue as their accent;
+   the ramp itself is defined once, further down. */
+.pf-conn[data-connected="true"] .pf-conn__body { --accent: var(--hue); }
+.pf-conn[data-connected="true"] .lc-stat-value--accent { color: var(--hue); }
+
+
+/* Topic chips, shared by the stat panels. */
+.pf-topics { display: flex; flex-wrap: wrap; gap: 6px; }
+.pf-topic { padding: 4px 10px; border-radius: 999px; font-size: 0.75rem; background: var(--surface-sunken); border: 1px solid transparent; color: var(--ink-muted); }
+.pf-topic__n { color: var(--ink-faint); }
+
+/* ── Warmth: the connected panels read as one colourful system ───────────
+   The stat tiles, difficulty bars, topic chips and language bar all borrow
+   the connection's hue, so a live GitHub or LeetCode card feels like the
+   service rather than a grey table with three coloured bars in it. */
+.pf-conn[data-connected="true"] .lc-stat {
+  background: linear-gradient(160deg, color-mix(in srgb, var(--hue) 9%, transparent), color-mix(in srgb, var(--hue) 3%, transparent));
+  border: 1px solid color-mix(in srgb, var(--hue) 15%, transparent);
+  transition: transform var(--m-ui) var(--ease-out), border-color var(--m-ui) var(--ease-out), box-shadow var(--m-ui) var(--ease-out);
+}
+.pf-conn[data-connected="true"] .lc-stat:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--hue) 32%, transparent);
+  box-shadow: 0 12px 28px -18px color-mix(in srgb, var(--hue) 50%, transparent);
+}
+.pf-conn[data-connected="true"] .lc-stat-value { color: var(--ink); }
+.pf-conn[data-connected="true"] .lc-stat-label { color: color-mix(in srgb, var(--hue) 35%, var(--ink-muted)); }
+.pf-conn[data-connected="true"] .lc-section-heading { color: color-mix(in srgb, var(--hue) 30%, var(--ink-muted)); }
+
+/* Difficulty and language bars: a soft glow under each fill, and a track
+   that is tinted rather than grey. */
+.pf-conn[data-connected="true"] .lc-bar-track { background: color-mix(in srgb, var(--hue) 5%, var(--surface-sunken)); }
+
+.pf-conn[data-connected="true"] .lc-lang-bar { background: color-mix(in srgb, var(--hue) 5%, var(--surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hue) 10%, transparent); }
+
+
+
+/* Topic chips: tinted, and they lift on hover so the panel feels alive. */
+.pf-conn[data-connected="true"] .lc-skill-chip,
+.pf-conn[data-connected="true"] [class*="skill"] {
+  transition: transform var(--m-press) var(--ease-out), border-color var(--m-ui) var(--ease-out), background-color var(--m-ui) var(--ease-out);
+}
+.pf-conn[data-connected="true"] .pf-topic {
+  background: color-mix(in srgb, var(--hue) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--hue) 13%, transparent);
+  color: var(--ink-2);
+}
+.pf-conn[data-connected="true"] .pf-topic:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--hue) 30%, transparent); color: var(--ink); }
+
+/* The contribution heatmap picks up the hue instead of the mono accent. */
+.pf-conn[data-connected="true"] .lc-heatmap-svg rect[fill="var(--accent)"] { fill: var(--hue); }
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-conn, .pf-conn__head, .pfx-link, .pf-vis__trigger, .pf-vis__menu, .pf-vis__item, .pf-vis__chev { transition: none; }
+  .pf-vis__menu[data-open="true"] .pf-vis__item { animation: none; }
+  .pf-conn__status[data-on="true"] .pf-conn__dot, .pf-spin { animation: none; }
+  .pf-conn[data-connected="true"] .lc-stat:hover, .pf-conn[data-connected="true"] .pf-topic:hover { transform: none; }
+}
+
+
+/* ── Visibility menu ────────────────────────────────────────────────────── */
+.pf-vis { position: relative; display: inline-block; }
+.pf-vis__trigger {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 10px;
+  border: 1px solid var(--border-strong); background: var(--surface); color: var(--ink);
+  font-family: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer;
+  transition: border-color var(--m-ui) var(--ease-out), background-color var(--m-ui) var(--ease-out), transform var(--m-press) var(--ease-out);
+}
+.pf-vis__trigger:hover:not(:disabled) { background: var(--surface-2); }
+.pf-vis__trigger:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.pf-vis__chev { color: var(--ink-faint); transition: transform var(--m-ui) var(--ease-out); }
+.pf-vis__trigger[aria-expanded="true"] .pf-vis__chev { transform: rotate(180deg); }
+
+/* Opens from the trigger, on the drawer curve, transform and opacity only. */
+.pf-vis__menu {
+  position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; min-width: 280px; padding: 6px; border-radius: 14px;
+  border: 1px solid var(--border-strong); transform-origin: top left;
+  /* A menu has to be readable over whatever it covers, so it is nearly opaque
+     with a heavier blur behind it rather than the light pane glass. */
+  background-color: color-mix(in srgb, var(--surface-solid) 94%, transparent);
+  -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%);
+  box-shadow: 0 1px 0 var(--glass-sheen) inset, 0 24px 60px -12px rgba(0, 0, 0, 0.55);
+  opacity: 0; transform: scale(0.96) translateY(-6px); pointer-events: none;
+  transition: opacity var(--m-ui) var(--ease-out), transform var(--m-sheet) var(--ease-drawer);
+}
+.pf-vis__menu[data-open="true"] { opacity: 1; transform: none; pointer-events: auto; }
+.pf-vis__item {
+  width: 100%; display: flex; align-items: flex-start; gap: 10px; padding: 9px 10px; border-radius: 10px;
+  border: 0; background: none; color: var(--ink-2); font-family: inherit; text-align: left; cursor: pointer;
+  transition: background-color var(--m-ui) var(--ease-out), color var(--m-ui) var(--ease-out), transform var(--m-press) var(--ease-out);
+}
+.pf-vis__menu[data-open="true"] .pf-vis__item { animation: rise 240ms var(--ease-out) both; animation-delay: calc(40ms + var(--i, 0) * 30ms); }
+.pf-vis__item:hover, .pf-vis__item:focus-visible { background: var(--accent-soft); color: var(--ink); outline: none; }
+.pf-vis__item:active { transform: scale(0.985); }
+.pf-vis__item[aria-selected="true"] { color: var(--ink); }
+.pf-vis__icon { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 7px; border: 1px solid var(--border); color: inherit; flex-shrink: 0; margin-top: 1px; }
+.pf-vis__text { display: grid; gap: 2px; min-width: 0; }
+.pf-vis__label { font-size: 13.5px; font-weight: 500; }
+.pf-vis__hint { font-size: 12px; color: var(--ink-faint); line-height: 1.45; }
+.pf-vis__check { margin-left: auto; color: var(--success); flex-shrink: 0; align-self: center; }
+
+/* ── The stat palette ────────────────────────────────────────────────────
+   Difficulty is ordinal, so the three read as one ramp rather than a traffic
+   light: a cool mint, a warm sand, a soft terracotta, all at the same
+   lightness and chroma so no single bar shouts. The categorical set for
+   languages is tuned to sit beside them. Applied wherever a stat panel is
+   rendered — the seeker's own connections and the public page. */
+.pf-conn[data-connected="true"] .pf-conn__body,
+.pp-card {
+  --success: #63C9A0;
+  --warning: #E5B36B;
+  --danger: #DD8878;
+  --cat-blue: #7FA8E0; --cat-green: #63C9A0; --cat-purple: #A99BE8;
+  --cat-amber: #E5B36B; --cat-indigo: #8E9BE0; --cat-orange: #E59C74;
+}
+
+/* ── Smoothness pass: the signed-in seeker pages ─────────────────────────
+   One vocabulary of motion across Today, Pipeline and Profile, so moving
+   between them feels like one product: sections rise once on entry, tabs and
+   rows settle rather than snap, and everything that can be pressed presses.
+   Every rule here animates transform / opacity / colour only, and every one
+   of them is dropped under reduced motion at the bottom of this file. */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+
+  /* Sections arrive once, staggered, instead of appearing all at once. */
+  .daily > * { animation: rise 420ms var(--ease-out) both; animation-delay: calc(var(--i, 0) * 70ms); }
+
+  /* The profile tab bar: the pane cross-fades and the tab itself settles. */
+  .pf-tab { transition: color var(--m-ui) var(--ease-out), background-color var(--m-ui) var(--ease-out), transform var(--m-press) var(--ease-out); }
+  .pf-tab:active { transform: scale(var(--press-scale)); }
+  .pf-swap-in { animation: jb-swap 260ms var(--ease-out) both; }
+
+  /* Panes and cards lift a hair on hover so the page answers the pointer. */
+  .pf-conn { will-change: transform; }
+  .pf-pane, .pf-conn { transition: border-color var(--m-ui) var(--ease-out), box-shadow 400ms var(--ease-out), transform 400ms var(--ease-out); }
+
+  /* Inputs and pills settle instead of snapping. */
+  .pf-input, .pf-pill, .pf-tag, .pf-seg__btn, .pfx-link, .ui-btn { will-change: transform; }
+}
+
+/* Buttons everywhere in the workspace get the same press. */
+.pf-seg__btn, .pf-tab, .wb__btn, .gp__link { -webkit-tap-highlight-color: transparent; }
+
+/* Focus is always visible and always the same shape. */
+.pf-tab:focus-visible, .pf-seg__btn:focus-visible, .pf-pill:focus-visible, .pfx-link:focus-visible, .pf-conn__link:focus-visible {
+  outline: none; box-shadow: var(--focus-ring); border-radius: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .daily > *, .pf-swap-in { animation: none; }
+  .pf-tab, .pf-pane, .pf-conn, .pf-input, .pf-pill, .pfx-link { transition: none; }
+}
+
+/* ── The photo control ───────────────────────────────────────────────────
+   A square tile, not a circle: a photo keeps its corners and reads as a
+   profile tile. The scrim sits over the image and is always legible, so the
+   control never depends on the picture underneath it. */
+.pf-av { display: flex; align-items: flex-start; gap: 18px; flex-wrap: wrap; }
+.pf-av__stack { display: grid; gap: 6px; justify-items: start; }
+.pf-av__cap { font-size: 12px; color: var(--ink-muted); }
+.pf-av__tile {
+  position: relative; width: 84px; height: 84px; flex-shrink: 0; border-radius: 14px; overflow: hidden;
+  /* A visible edge, so the tile reads as a frame around the photo rather than the
+     photo floating on the pane. */
+  border: 2px solid var(--border-strong); background: var(--paper-2); padding: 0; cursor: pointer;
+  display: grid; place-items: center; color: var(--ink);
+  transition: border-color var(--m-ui) var(--ease-out), box-shadow var(--m-ui) var(--ease-out), transform var(--m-press) var(--ease-out);
+}
+.pf-av__tile:hover:not(:disabled) { border-color: var(--ink-faint); box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 0.8); }
+.pf-av__tile:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.pf-av__tile:disabled { cursor: default; }
+.pf-av__img { width: 100%; height: 100%; object-fit: cover; display: block; grid-area: 1 / 1; }
+.pf-av__initials { grid-area: 1 / 1; font-family: var(--font-instrument-serif), Georgia, serif; font-size: 32px; color: var(--ink-muted); }
+/* The tile carries no label of its own: the caption above it says what a click
+   does, so the photo is never covered by a scrim. Hovering lifts a hint. */
+.pf-av__scrim {
+  grid-area: 1 / 1; align-self: end; width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 6px;
+  font-size: 10px; font-weight: 500; color: #FFFFFF;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.78));
+  opacity: 0; transform: translateY(4px);
+  transition: opacity var(--m-ui) var(--ease-out), transform var(--m-ui) var(--ease-out);
+}
+.pf-av__tile:hover .pf-av__scrim, .pf-av__tile:focus-visible .pf-av__scrim { opacity: 1; transform: none; }
+.pf-av__side { display: grid; gap: 8px; align-content: start; min-width: 0; padding-top: 22px; }
+.pf-av__revert {
+  display: inline-flex; align-items: center; gap: 6px; justify-self: start; padding: 6px 10px; border-radius: 8px;
+  border: 1px solid var(--border); background: transparent; color: var(--ink-muted);
+  font-family: inherit; font-size: 12.5px; cursor: pointer;
+  transition: color var(--m-ui) var(--ease-out), border-color var(--m-ui) var(--ease-out), transform var(--m-press) var(--ease-out);
+}
+.pf-av__revert:hover:not(:disabled) { color: var(--ink); border-color: var(--border-strong); }
+.pf-av__error { font-size: 12.5px; color: var(--danger); }
+@media (prefers-reduced-motion: reduce) { .pf-av__tile, .pf-av__scrim, .pf-av__revert { transition: none; } }

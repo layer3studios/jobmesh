@@ -17,6 +17,7 @@ import { getUserById } from '../../models/seeker/seeker-auth-helpers.js';
 import { validateSlugShape, SLUG_ERRORS } from '../../models/seeker/public-profile-slug.js';
 import {
   getPublicProfileStateForUser, updatePublicProfileState, validateSettingsPatch,
+  PROFILE_VISIBILITIES,
 } from '../../models/seeker/seeker-public-profile-model.js';
 import {
   isSlugTaken, generateAvailableSlug, suggestAlternativeSlugs,
@@ -56,7 +57,9 @@ async function resolveSlug(userId, body, state) {
   }
 
   // Turning the profile on for the first time: derive an address from their name.
-  if (body.profilePublic === true && !state.profileSlug) {
+  const turningOn = body.profilePublic === true
+    || (typeof body.profileVisibility === 'string' && body.profileVisibility !== 'private');
+  if (turningOn && !state.profileSlug) {
     const user = await getUserById(userId);
     const generated = await generateAvailableSlug(user?.name, user?.email, userId);
     if (!generated) throw new HttpError(409, 'Could not create a profile address.', SLUG_ERRORS.TAKEN);
@@ -89,12 +92,16 @@ router.get('/profile-slug-available', asyncHandler(async (req, res) => {
   return res.json({ available: true, code: null, suggestions: [] });
 }));
 
-// PATCH /profile-settings — profilePublic, profileSlug and any subset of the
-// visibility flags. Every key is optional; absent keys are left alone.
+// PATCH /profile-settings — profileVisibility (or the older profilePublic),
+// profileSlug and any subset of the visibility flags. Every key is optional;
+// absent keys are left alone.
 router.patch('/profile-settings', asyncHandler(async (req, res) => {
   const body = req.body ?? {};
   if (body.profilePublic !== undefined && typeof body.profilePublic !== 'boolean') {
     throw new HttpError(400, 'profilePublic must be a boolean.', 'INVALID_PROFILE_PUBLIC');
+  }
+  if (body.profileVisibility !== undefined && !PROFILE_VISIBILITIES.includes(body.profileVisibility)) {
+    throw new HttpError(400, 'profileVisibility must be public, recruiters or private.', 'INVALID_PROFILE_VISIBILITY');
   }
 
   const { settings, error } = validateSettingsPatch(body.profileSettings);
@@ -106,6 +113,7 @@ router.patch('/profile-settings', asyncHandler(async (req, res) => {
   const profileSlug = await resolveSlug(req.user.userId, body, state);
   const updated = await updatePublicProfileState(req.user.userId, {
     profilePublic: body.profilePublic,
+    profileVisibility: body.profileVisibility,
     ...(profileSlug ? { profileSlug } : {}),
     settings,
   });

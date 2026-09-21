@@ -6,13 +6,14 @@
 // THE SERVER'S ANSWER IS THE STATE. Every change PATCHes and the response
 // replaces local state, so the slug the backend generated, or the flag it
 // refused, is what the card shows — never an optimistic value that quietly
-// disagrees with the page a recruiter would load. Toggles and the headline are
-// debounced together (one second) so dragging through five checkboxes is one
-// request, not five.
+// disagrees with the page a recruiter would load. Toggles are debounced
+// (one second) so dragging through five checkboxes is one request, not five.
+// The headline is edited in Basic information, not here.
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Copy, ExternalLink } from 'lucide-react';
-import { Card, Button, Input, Switch, Alert, Stack, useToast } from '../../ui';
+import { Card, Button, Switch, Alert, Stack, useToast } from '../../ui';
+import VisibilityMenu from './VisibilityMenu';
 import {
   fetchProfileSettings, patchProfileSettings, PublicProfileApiError,
 } from '../../../api/public-profile-api';
@@ -25,7 +26,6 @@ import ProfileSlugField from './ProfileSlugField';
 import ProfileVisibilityToggles from './ProfileVisibilityToggles';
 
 const AUTOSAVE_MS = 1000;
-const HEADLINE_MAX_LENGTH = 120;
 
 export default function ProfileSettingsCard() {
   const { showToast } = useToast();
@@ -96,10 +96,9 @@ export default function ProfileSettingsCard() {
               One link that replaces your resume for cold outreach.
             </p>
           </div>
-          <Switch
-            label="Public profile"
-            checked={state.profilePublic}
-            onChange={(checked) => void save({ profilePublic: checked })}
+          <VisibilityMenu
+            value={state.profileVisibility}
+            onChange={(profileVisibility) => void save({ profileVisibility })}
           />
         </Stack>
 
@@ -107,7 +106,7 @@ export default function ProfileSettingsCard() {
 
         {!state.profilePublic ? (
           <p style={{ fontSize: '0.875rem', color: 'var(--ink-muted)' }}>
-            Your profile is private. Turn it on to get a shareable link.
+            Your profile is private. Set it to public or recruiters-only to get a shareable link.
           </p>
         ) : (
           <Stack gap={16}>
@@ -135,15 +134,6 @@ export default function ProfileSettingsCard() {
               onCommit={(profileSlug) => void save({ profileSlug })}
             />
 
-            <Input
-              label="How you want to be described"
-              placeholder="Full Stack Software Engineer"
-              maxLength={HEADLINE_MAX_LENGTH}
-              value={state.settings.headline ?? ''}
-              hint={`${(state.settings.headline ?? '').length}/${HEADLINE_MAX_LENGTH}`}
-              onChange={(event) => queueSettings({ headline: event.target.value })}
-            />
-
             <Switch
               label="Open to work"
               checked={state.settings.openToWork}
@@ -155,6 +145,13 @@ export default function ProfileSettingsCard() {
               available={state}
               onChange={queueSettings}
             />
+
+            {state.profileVisibility === 'recruiters' && (
+              <p style={{ fontSize: '0.8125rem', color: 'var(--ink-muted)', margin: 0 }}>
+                Anyone who is not a signed-in employer sees nothing at this link, the same
+                as if the page did not exist. It is also kept out of search engines.
+              </p>
+            )}
 
             <p style={{ fontSize: '0.8125rem', color: 'var(--ink-muted)', margin: 0 }}>
               {state.profileViewCount === 0

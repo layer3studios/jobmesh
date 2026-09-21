@@ -1,34 +1,106 @@
 /* FILE: src/styles/auth.css
-   The employer / admin sign-in frame (components/layouts/AuthLayout). A CSS
-   grid so the server can render the split without a viewport hook: two panes
-   from 900px, one centred card over a dim photograph below that. */
+   The sign-in frame for every audience (components/layouts/AuthLayout). The
+   ink photograph bleeds under the whole page and fades out to the right,
+   so there is no seam where a pane ends; the glass card floats over the
+   quiet side. Below 900px the photograph is a dim ground behind one
+   centred card. A CSS grid, so the server renders the split without a
+   viewport hook. */
 
 .auth-root {
   min-height: 100dvh; background: var(--paper); position: relative;
-  display: grid; grid-template-columns: 1fr;
+  display: grid; grid-template-columns: 1fr; isolation: isolate;
 }
-.auth-pane { position: absolute; inset: 0; overflow: hidden; }
+.auth-pane { position: absolute; inset: 0; overflow: hidden; z-index: 0; }
 .auth-ink {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
   opacity: 0.25; filter: grayscale(1);
+  animation: auth-ink-in 1200ms var(--ease-out) both;
 }
+@keyframes auth-ink-in { from { opacity: 0; transform: scale(1.04); } }
 .auth-scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(9,9,11,0.2), rgba(9,9,11,0.75)); }
 .auth-pane__copy { display: none; }
 .auth-card-wrap {
-  position: relative; display: flex; align-items: center; justify-content: center;
+  position: relative; z-index: 1; display: flex; align-items: center; justify-content: center;
   min-height: 100dvh;
   padding: max(24px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
 }
-.auth-card { width: 100%; max-width: 440px; border-radius: 18px; padding: 28px 22px 24px; box-shadow: var(--shadow-lg); }
+.auth-card {
+  width: 100%; max-width: 440px; border-radius: 22px; padding: 28px 22px 24px;
+  animation: auth-card-in 520ms var(--ease-out) both; animation-delay: 80ms;
+}
+@keyframes auth-card-in { from { opacity: 0; transform: translateY(10px) scale(0.985); } }
 .auth-card__brand { margin-bottom: 22px; }
+.auth-card__action { position: absolute; top: 14px; right: 14px; }
 
+/* ── Card contents (shared by the seeker, employer and admin cards) ────── */
+.auth-close {
+  width: 32px; height: 32px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border); color: var(--ink-muted); text-decoration: none;
+  transition: background-color var(--m-ui) var(--ease-out), color var(--m-ui) var(--ease-out), transform var(--m-press) var(--ease-out);
+}
+.auth-close:hover { background: var(--paper-2); color: var(--ink); }
+.auth-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.auth-eyebrow { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 10px; }
+.auth-title { font-size: clamp(1.9rem, 4vw, 2.4rem); font-weight: 400; color: var(--ink); letter-spacing: -0.04em; line-height: 1.05; margin-bottom: 10px; }
+.auth-lede { font-size: 14px; color: var(--ink-muted); line-height: 1.55; margin-bottom: 24px; max-width: 34ch; }
+
+.auth-google { display: flex; justify-content: center; min-height: 44px; margin-bottom: 18px; }
+.auth-google__wait {
+  display: inline-flex; align-items: center; gap: 10px; height: 40px; padding: 0 16px;
+  font-size: 13px; color: var(--ink-muted); border: 1px solid var(--border); border-radius: 10px;
+  animation: rise 240ms var(--ease-out) both;
+}
+.auth-google__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink); animation: pulseDot 1.2s ease-in-out infinite; }
+
+.auth-error {
+  font-size: 13px; color: var(--danger); background: var(--danger-soft);
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  border-radius: 10px; padding: 9px 12px; margin-bottom: 16px; text-align: center; line-height: 1.45;
+}
+
+.auth-rule {
+  display: flex; align-items: center; gap: 12px; margin: 22px 0 14px;
+  color: var(--ink-faint); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+}
+.auth-rule::before, .auth-rule::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.auth-benefits { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.auth-benefit {
+  display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--ink-2);
+  padding: 6px 8px; margin: 0 -8px; border-radius: 10px;
+  animation: rise 360ms var(--ease-out) both; animation-delay: calc(180ms + var(--i, 0) * var(--stagger));
+  transition: background-color var(--m-ui) var(--ease-out), color var(--m-ui) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .auth-benefit:hover { background: var(--accent-soft); color: var(--ink); }
+  .auth-benefit:hover .auth-benefit__icon { border-color: var(--border-strong); transform: translateY(-1px); }
+}
+.auth-benefit__icon {
+  width: 26px; height: 26px; border-radius: 8px; border: 1px solid var(--border); color: var(--ink);
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: border-color var(--m-ui) var(--ease-out), transform var(--m-ui) var(--ease-out);
+}
+
+.auth-fine { font-size: 12px; color: var(--ink-faint); text-align: center; margin-top: 22px; line-height: 1.55; }
+.auth-fine a { color: var(--ink-muted); text-decoration: underline; text-underline-offset: 2px; }
+.auth-fine a:hover { color: var(--ink); }
+
+/* ── Two panes from 900px: the photograph fades into the quiet side ───── */
 @media (min-width: 900px) {
   .auth-root { grid-template-columns: 1.1fr 1fr; }
-  .auth-pane { position: relative; inset: auto; min-height: 100dvh; }
+  .auth-pane {
+    position: relative; inset: auto; min-height: 100dvh;
+    /* Let the photograph run past its own column and dissolve — no edge. */
+    width: 130%;
+    -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 62%, transparent 100%);
+    mask-image: linear-gradient(90deg, #000 0%, #000 62%, transparent 100%);
+  }
   .auth-ink { opacity: 0.55; }
   .auth-pane__copy {
     position: relative; height: 100%; display: flex; flex-direction: column;
     justify-content: space-between; padding: 40px; color: #E5E2E1;
+    width: calc(100% / 1.3);
   }
   /* The pane is always ink, whatever the theme: the wordmark must read on it. */
   .auth-pane__copy .font-display { color: #E5E2E1; }
@@ -36,4 +108,8 @@
   .auth-card-wrap { min-height: auto; padding: 40px; }
   .auth-card { padding: 36px 32px 30px; }
   .auth-card__brand { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-ink, .auth-card, .auth-benefit, .auth-google__wait { animation: none; }
 }

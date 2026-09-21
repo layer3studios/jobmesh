@@ -8,7 +8,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { Search, X, Building2 } from 'lucide-react';
 import { useCompanies, type SortOption } from '../../../hooks/seeker/useCompanies';
-import { Container, PageHeader, EmptyState } from '../../ui';
+import { Container, EmptyState } from '../../ui';
 import DirectoryCard from '../DirectoryCard';
 import { FilterDropdown } from '../FilterDropdown';
 import { desktopSelectStyle } from '../dashboard/constants';
@@ -64,10 +64,14 @@ export default function CompanyDirectory() {
 
   return (
     <Container size="xl" style={{ paddingTop: 'clamp(24px, 5vw, 40px)', paddingBottom: 60 }}>
-      <PageHeader
-        label={`${COPY.directory.pageLabel} · ${loading ? 'Loading…' : `${total.toLocaleString()} companies actively hiring`}`}
-        title={<>{COPY.directory.pageTitle1} <em>{COPY.directory.pageTitle2}</em></>}
-      />
+      <div className="dir-head">
+        <div>
+          <p className="ws-section__label" style={{ marginBottom: 10 }}>
+            {COPY.directory.pageLabel} · {loading ? 'Loading…' : <span className="jb-count">{total.toLocaleString()} companies hiring</span>}
+          </p>
+          <h1 className="font-display dir-title">{COPY.directory.pageTitle1} <em>{COPY.directory.pageTitle2}</em></h1>
+        </div>
+      </div>
 
       {/* Search + sort */}
       <div style={{ display: 'flex', gap: 'var(--gutter)', flexWrap: 'wrap', alignItems: 'center', marginBottom: 20 }}>
@@ -129,9 +133,11 @@ export default function CompanyDirectory() {
         />
       ) : (
         <>
-          <div className="companies-grid stagger">
-            {companies.map(c => (
-              <DirectoryCard key={c._id || c.companyName} company={c} />
+          <div className="companies-grid">
+            {companies.map((c, i) => (
+              <div key={c._id || c.companyName} className="rise" style={{ '--i': Math.min(i, 11), display: 'flex' } as React.CSSProperties}>
+                <DirectoryCard company={c} />
+              </div>
             ))}
           </div>
 

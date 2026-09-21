@@ -15,7 +15,9 @@ const BASE: CSSProperties = {
   fontFamily: 'inherit', fontWeight: 500, letterSpacing: '-0.005em',
   border: '1px solid transparent', borderRadius: RADIUS.md, cursor: 'pointer',
   textDecoration: 'none', lineHeight: 1,
-  transition: `all ${MOTION.normal} ${MOTION.ease}`,
+  // Only compositor-friendly properties; the press (`:active`) lives in
+  // primitives.css `.ui-btn` because inline styles cannot express it.
+  transition: `transform var(--m-press) var(--ease-out), background-color ${MOTION.normal} ${MOTION.ease}, border-color ${MOTION.normal} ${MOTION.ease}, color ${MOTION.normal} ${MOTION.ease}, opacity ${MOTION.normal} ${MOTION.ease}, box-shadow ${MOTION.normal} ${MOTION.ease}`,
   whiteSpace: 'nowrap', WebkitTapHighlightColor: 'transparent',
 };
 
@@ -80,16 +82,17 @@ export function Button({
     </>
   );
 
+  const cls = `ui-btn${className ? ` ${className}` : ''}`;
   if (Tag === 'a') {
     return (
-      <a href={href} className={className} style={merged}
+      <a href={href} className={cls} style={merged}
         onFocus={(e) => { focusRing(true)(e); onFocus?.(e as never); }}
         onBlur={(e) => { focusRing(false)(e); onBlur?.(e as never); }}
         {...(rest as object)}>{inner}</a>
     );
   }
   return (
-    <button disabled={loading || rest.disabled} className={className} style={merged}
+    <button disabled={loading || rest.disabled} className={cls} style={merged}
       aria-busy={loading || undefined}
       onFocus={(e) => { focusRing(true)(e); onFocus?.(e); }}
       onBlur={(e) => { focusRing(false)(e); onBlur?.(e); }}

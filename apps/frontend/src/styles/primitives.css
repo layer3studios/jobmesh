@@ -10,13 +10,8 @@
 @keyframes toastIn { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pulseDot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.8); } }
-.pulse-dot { animation: pulseDot 1.6s ease-in-out infinite; }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-.galaxy-ticker { display: inline-flex; white-space: nowrap; animation: marquee 38s linear infinite; }
-.galaxy-ticker:hover { animation-play-state: paused; }
-@media (prefers-reduced-motion: reduce) { .galaxy-ticker { animation: none; } }
 
-.anim-up { animation: fadeUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .anim-fade { animation: fadeIn 0.3s ease both; }
 /* App pages do not animate in (UI overhaul): the entrance classes are inert. */
 .anim-scale { animation: none; }
@@ -38,11 +33,56 @@
    end state restored. Must stay below the .stagger rules above: equal
    specificity, so the later declaration is the one that wins. */
 @media (prefers-reduced-motion: reduce) {
-  .anim-up, .anim-fade, .anim-scale, .stagger > * {
+  .anim-fade, .anim-scale, .stagger > * {
     animation: none;
     opacity: 1;
     transform: none;
   }
+}
+
+/* ── Press, shake, rise: the three micro-interactions everything shares ──
+   `.press` is the click: 0.97 on :active, released faster than it was
+   pressed. Hover lift is gated to a real pointer so touch never gets a
+   phantom hover. `.ui-btn` is the Button primitive's class (its colours are
+   inline, so only transform lives here). `.shake` is the error nudge, once.
+   `.rise` is a list item entering, staggered by --i. */
+.press, .ui-btn {
+  transition: transform var(--m-press) var(--ease-out);
+  will-change: transform;
+}
+.press:active, .ui-btn:active:not(:disabled) { transform: scale(var(--press-scale)); transition-duration: 80ms; }
+.press--sm:active { transform: scale(var(--press-scale-sm)); }
+@media (hover: hover) and (pointer: fine) {
+  .ui-btn:hover:not(:disabled) { transform: translateY(-1px); }
+  .ui-btn:active:not(:disabled) { transform: translateY(0) scale(var(--press-scale)); }
+}
+.ui-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Checkbox: the box tints, the mark draws in with a small overshoot. */
+.ui-check { transition: background-color var(--m-press) var(--ease-out), border-color var(--m-press) var(--ease-out), transform var(--m-press) var(--ease-out); }
+.ui-check[data-checked] { transform: scale(1); }
+label:active .ui-check { transform: scale(0.9); }
+@keyframes check-in { from { transform: scale(0.4); opacity: 0; } 60% { transform: scale(1.15); opacity: 1; } to { transform: scale(1); } }
+.ui-check__mark { animation: check-in 240ms var(--ease-out) both; }
+@media (prefers-reduced-motion: reduce) { .ui-check__mark { animation: none; } .ui-check { transition: none; } }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+.shake { animation: shake 320ms var(--ease-out) both; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.rise { animation: rise 360ms var(--ease-out) both; animation-delay: calc(var(--i, 0) * var(--stagger)); }
+
+@media (prefers-reduced-motion: reduce) {
+  .press, .ui-btn { transition: none; }
+  .press:active, .ui-btn:active:not(:disabled), .ui-btn:hover:not(:disabled) { transform: none; }
+  .shake { animation: none; }
+  .rise { animation: none; opacity: 1; transform: none; }
 }
 
 .skeleton {
@@ -70,9 +110,6 @@
   box-shadow: inset 0 1px 0 var(--glass-sheen), var(--shadow-md);
   transform: translateY(-2px);
 }
-.sketch-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; }
-.sketch-ink { }
-
 .container-md { max-width: 768px; margin: 0 auto; padding: 0 16px; }
 .container-lg { max-width: 1024px; margin: 0 auto; padding: 0 16px; }
 .container-xl { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
@@ -91,36 +128,6 @@
 .companies-grid > * { min-width: 0; max-width: 100%; }
 @media (max-width: 639px) { .companies-grid { gap: 12px; } }
 
-.progress-grid { display: grid; grid-template-columns: 1fr; gap: 14px; align-items: start; }
-.progress-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-@media (min-width: 1024px) { .progress-grid { grid-template-columns: 1fr 1fr; } }
-
-.snap-carousel {
-  display: flex; gap: 12px; overflow-x: auto;
-  scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; padding-bottom: 8px;
-}
-.snap-carousel::-webkit-scrollbar { display: none; }
-.snap-carousel > * { scroll-snap-align: start; }
-
-
-.job-description-html { font-size: inherit; }
-.job-description-html p { margin: 0 0 12px; }
-.job-description-html ul, .job-description-html ol { padding-left: 22px; margin: 0 0 14px; }
-.job-description-html li { margin: 4px 0; }
-.job-description-html h1, .job-description-html h2, .job-description-html h3, .job-description-html h4 {
-  font-family: var(--font-instrument-serif), Georgia, serif;
-  font-weight: 600; margin-top: 22px; margin-bottom: 10px;
-  letter-spacing: -0.015em; color: var(--ink);
-}
-.job-description-html h3 { font-size: 1.02rem; }
-.job-description-html h4 { font-size: 0.95rem; }
-.job-description-html a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
-.job-description-html strong, .job-description-html b { color: var(--ink); font-weight: 600; }
-.job-description-html mark.skill-match {
-  background: var(--accent-soft); color: var(--accent);
-  padding: 1px 4px; border-radius: 4px; font-weight: 600;
-}
 .jd-boilerplate-toggle {
   display: inline-flex; align-items: center; gap: 6px;
   background: transparent; border: 1px solid var(--border);
@@ -132,12 +139,4 @@
 
 .has-bottom-nav { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
 
-.grid-bg {
-  background-image:
-    linear-gradient(to right, var(--border) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
-  background-size: 32px 32px;
-  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-}
 .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5; pointer-events: none; }

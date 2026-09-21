@@ -45,6 +45,7 @@ export function useDashboardJobs(filters: FilterParams) {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const fetchJobs = useCallback(async (pageNum: number, append: boolean) => {
@@ -88,14 +89,18 @@ export function useDashboardJobs(filters: FilterParams) {
 
     if (append) setLoadingMore(true);
     else { setLoading(true); setCurrentPage(1); }
+    setError(null);
     try {
       const r = await fetch(`/api/seeker/jobs?${p}`, { credentials: 'include', signal: controller.signal });
+      if (!r.ok) throw new Error(`The jobs service answered ${r.status}. Give it a second and try again.`);
       const d = await r.json() as JobsResponse;
       if (controller.signal.aborted) return;
       responseCache.set(cacheKey, { data: d, at: Date.now() });
       applyResponse(d);
     } catch (e) {
-      if ((e as Error)?.name !== 'AbortError') console.error(e);
+      if ((e as Error)?.name === 'AbortError') return;
+      console.error(e);
+      setError(e instanceof Error && e.message ? e.message : 'Check your connection and try again.');
     } finally {
       if (!controller.signal.aborted) {
         if (append) setLoadingMore(false); else setLoading(false);
@@ -111,5 +116,7 @@ export function useDashboardJobs(filters: FilterParams) {
     return () => clearTimeout(t);
   }, [fetchJobs]);
 
-  return { jobs, setJobs, totalJobs, totalPages, currentPage, loading, loadingMore, fetchJobs };
+  const retry = useCallback(() => { responseCache.clear(); void fetchJobs(1, false); }, [fetchJobs]);
+
+  return { jobs, setJobs, totalJobs, totalPages, currentPage, loading, loadingMore, error, retry, fetchJobs };
 }

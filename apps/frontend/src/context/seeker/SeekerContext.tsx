@@ -25,7 +25,7 @@ const Ctx = createContext<UserCtx>({
   previousVisitAt: null, todayCount: 0, streak: 0, dailyGoal: 5,
   skillsEditorOpen: false,
   openSkillsEditor: () => { }, closeSkillsEditor: () => { },
-  saveSkills: async () => { }, saveDailyGoal: async () => { },
+  saveSkills: async () => { }, saveDailyGoal: async () => { }, setAvatar: () => { },
   toggleApplied: async () => { }, toggleDismissed: async () => { },
   updateStage: async () => { },
   logout: () => { }, login: async () => { },
@@ -97,6 +97,12 @@ export function SeekerProvider(
     setDismissedJobIds(new Set());
   }, [rawLogout]);
 
+  // One place swaps the photo, so the nav, the workspace and the preview agree
+  // the moment an upload lands rather than after the next reload.
+  const setAvatar = useCallback((picture: string | null, uploaded: boolean) => {
+    setCurrentUser(user => (user ? { ...user, picture: picture ?? '', hasUploadedAvatar: uploaded } : user));
+  }, [setCurrentUser]);
+
   const openSkillsEditor = useCallback(() => setSkillsEditorOpen(true), []);
   const closeSkillsEditor = useCallback(() => setSkillsEditorOpen(false), []);
 
@@ -104,7 +110,7 @@ export function SeekerProvider(
     <Ctx.Provider value={{
       currentUser, isLoading, isUserDataLoading, userSkills, appliedJobs, appliedCount,
       appliedJobIds, dismissedJobIds, previousVisitAt, todayCount, streak, dailyGoal,
-      skillsEditorOpen, openSkillsEditor, closeSkillsEditor, saveSkills, saveDailyGoal,
+      skillsEditorOpen, openSkillsEditor, closeSkillsEditor, saveSkills, saveDailyGoal, setAvatar,
       toggleApplied, toggleDismissed, updateStage, logout, login,
     }}>
       {children}

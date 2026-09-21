@@ -39,12 +39,6 @@
 .hm-pill--solid:hover { background: #FFFFFF; transform: translateY(-1px); box-shadow: var(--shadow-md); }
 .hm-pill--solid:active { background: var(--ink-2); transform: translateY(0) scale(0.98); box-shadow: var(--shadow-xs); transition-duration: var(--m-fast); transition-timing-function: var(--ease-press); }
 
-/* Ember — the single coloured action. Used for the employer path only, so the
-   two audiences are told apart by colour as well as by copy. */
-.hm-pill--ember { background: var(--ember); color: #FFFFFF; box-shadow: var(--shadow-sm); }
-.hm-pill--ember:hover { background: var(--ember-bright); transform: translateY(-1px); box-shadow: var(--shadow-md); }
-.hm-pill--ember:active { background: var(--ember); transform: translateY(0) scale(0.98); box-shadow: var(--shadow-xs); transition-duration: var(--m-fast); transition-timing-function: var(--ease-press); }
-
 /* Ghost — hairline, for the secondary path. */
 .hm-pill--ghost { background: rgba(19, 19, 22, 0.35); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--ink); border-color: var(--border-strong); }
 .hm-pill--ghost:hover { border-color: var(--border-loud); background: rgba(255, 255, 255, 0.05); transform: translateY(-1px); }

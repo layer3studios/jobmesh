@@ -3,9 +3,8 @@
 // Consumers: `import { Button, Card, Input, Badge, Modal } from '@/components/ui'`.
 
 // Layout primitives
-export { Container, Stack, Divider } from './layout';
+export { Container, Stack } from './layout';
 export { PageShell } from './PageShell';
-export type { PageShellWidth } from './PageShell';
 
 // Actions & display
 export { Button } from './Button';
@@ -18,15 +17,13 @@ export { Avatar } from './Avatar';
 export { Input } from './Input';
 export { Textarea } from './Textarea';
 export { Select } from './Select';
-export type { SelectOption } from './Select';
 export { Checkbox } from './Checkbox';
 export { Radio } from './Radio';
-export type { RadioOption } from './Radio';
 export { Switch } from './Switch';
-export { Label, FormField, FieldShell, focusHandlers, fieldBaseStyle } from './forms';
+export { FieldShell, focusHandlers, fieldBaseStyle } from './forms';
 
 // Feedback & loading
-export { PageHeader, EmptyState, Alert, StatCard } from './feedback';
+export { PageHeader, EmptyState, Alert } from './feedback';
 export { SkeletonLine, SkeletonCard } from './Skeleton';
 export { Tooltip } from './Tooltip';
 
@@ -42,8 +39,5 @@ export { ActionsMenu } from './ActionsMenu';
 export type { ActionsMenuItem } from './ActionsMenu';
 export { Table } from './Table';
 export type { Column } from './Table';
-export { Stepper } from './Stepper';
-export type { Step } from './Stepper';
-export { FileUpload } from './FileUpload';
 
 // Logo helpers

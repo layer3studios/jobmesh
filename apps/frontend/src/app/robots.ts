@@ -38,7 +38,6 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
         '/employer/',
         '/admin/',
         '/today',
-        '/progress',
         '/resume',
         '/profile',
         '/account/',

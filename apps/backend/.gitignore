@@ -22,3 +22,10 @@ data/assignment-submissions/
 
 # Careers-page culture photos (employer uploads, never in the repo)
 data/culture-photos/
+
+# Uploaded profile photos — employer users and seekers both write here through
+# avatar-storage-service. Real people's faces: same rule as resumes, never in
+# the repo.
+data/avatars/
+# Company logos, uploaded the same way.
+data/logos/

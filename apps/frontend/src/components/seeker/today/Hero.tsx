@@ -1,47 +1,61 @@
+'use client';
 // FILE: src/components/seeker/today/Hero.tsx
-import ProgressRing from '../ProgressRing';
-import { eyebrowStyle } from './shared';
+// The masthead. Today reads like a daily paper: the date set large in the
+// serif, a mono dateline with the greeting, one sentence for the moment the
+// seeker is in, and a single way forward. No numbers here; the board has them.
+import { ArrowRight } from 'lucide-react';
+import { Button } from '../../ui';
 
 interface Props {
-  isDesktop: boolean;
-  greeting: string;
   firstName: string;
   todayCount: number;
   dailyGoal: number;
-  onGoalChange: (n: number) => void;
+  streak: number;
+  totalApplied: number;
+  now: Date | null;
 }
 
-export default function Hero({ isDesktop, greeting, firstName, todayCount, dailyGoal, onGoalChange }: Props) {
-  return (
-    <div
-      className="anim-up"
-      style={{
-        display: 'grid',
-        gridTemplateColumns: isDesktop ? 'minmax(0, 1fr) minmax(0, 1fr)' : '1fr',
-        gap: 24, alignItems: 'stretch', marginBottom: 32,
-      }}
-    >
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <p style={eyebrowStyle}>{greeting}</p>
-        <h1 className="font-display" style={{
-          fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', fontWeight: 400,
-          color: 'var(--ink)', letterSpacing: '-0.04em', lineHeight: 1.02,
-        }}>{firstName}.</h1>
-        <p style={{ color: 'var(--ink-muted)', marginTop: 8, fontSize: '1rem', lineHeight: 1.55 }}>
-          {todayCount > 0
-            ? `You've applied to ${todayCount} role${todayCount === 1 ? '' : 's'} today.`
-            : "Let's get a few applications out today."}
-        </p>
-      </div>
+/** One sentence for the moment the seeker is in. Never a count: the board says those. */
+export function voiceLine({ todayCount, dailyGoal, streak, totalApplied, hour }: {
+  todayCount: number; dailyGoal: number; streak: number; totalApplied: number; hour: number;
+}): string {
+  const left = dailyGoal - todayCount;
+  if (left < 0) return 'Past the goal. Tomorrow starts ahead.';
+  if (left === 0) return streak > 1 ? 'Done, and the streak holds.' : 'Today is done. Anything more is a bonus.';
+  if (totalApplied === 0) return 'The first application is the hardest. Start there.';
+  if (todayCount === 0 && streak === 0) return 'Streaks restart with one. Today works.';
+  if (todayCount === 0) return hour >= 18 ? 'Still time for one before the day closes.' : 'Pick one role you would actually take. Send it.';
+  if (left === 1) return 'One more closes the loop.';
+  return 'Good pace. Keep it moving.';
+}
 
-      {/* Quick-glance daily goal ring. Detailed stats (streak / totals / funnel)
-          live on the Progress page so they aren't duplicated here. */}
-      <div className="glass" style={{
-        borderRadius: 14, padding: 'clamp(16px, 3vw, 22px)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        <ProgressRing todayCount={todayCount} dailyGoal={dailyGoal} onGoalChange={onGoalChange} />
+export default function Hero({ firstName, todayCount, dailyGoal, streak, totalApplied, now }: Props) {
+  const hour = now ? now.getHours() : 12;
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const line = voiceLine({ todayCount, dailyGoal, streak, totalApplied, hour });
+  const done = todayCount >= dailyGoal;
+  const weekday = now ? now.toLocaleDateString('en-IN', { weekday: 'long' }) : '';
+  const rest = now ? now.toLocaleDateString('en-IN', { day: 'numeric', month: 'long' }) : '';
+
+  return (
+    <header className="mh">
+      <p className="mh__dateline">
+        <span>The daily</span>
+        <span className="mh__sep" aria-hidden>/</span>
+        <span>{greeting}, {firstName}</span>
+      </p>
+      <div className="mh__row">
+        <h1 className="font-display mh__date" aria-label={now ? `${weekday}, ${rest}` : 'Today'}>
+          <span className="mh__word">{weekday || 'Today'}</span>
+          {rest && <span className="mh__word mh__word--muted">{rest}</span>}
+        </h1>
+        <div className="mh__aside">
+          <p className="mh__line">{line}</p>
+          <Button as="a" href="/jobs" variant={done ? 'secondary' : 'primary'} size="md" iconRight={<ArrowRight size={14} />}>
+            {done ? 'Browse anyway' : 'Find a role'}
+          </Button>
+        </div>
       </div>
-    </div>
+    </header>
   );
 }

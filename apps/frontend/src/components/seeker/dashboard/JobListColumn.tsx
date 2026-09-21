@@ -48,7 +48,7 @@ export default function JobListColumn({
             isComeBack={!!comeBackMap[j._id]}
             comeBackNote={comeBackMap[j._id] || ''}
             isNew={isNew}
-            relativeTime={isNew ? null : rt}
+            relativeTime={rt}
             visibleBadges={compactJobBadges(j)}
             showSkillMatch={matched > 0}
             skillMatchText={compactMatchLabel ? `${matchPct}%` : `${matchPct}% match`}
@@ -61,7 +61,7 @@ export default function JobListColumn({
       })}
 
       {hasMore && (
-        <div style={{ padding: 12, display: 'flex', justifyContent: 'center', borderTop: compactMatchLabel ? '1px solid var(--border)' : undefined }}>
+        <div className="jb-list__more">
           <Button variant="ghost" size="sm" loading={loadingMore} onClick={onLoadMore}>
             Load more
           </Button>

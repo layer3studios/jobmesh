@@ -36,8 +36,8 @@ export function MultiSelectDropdown({ label, options, selected, onChange, baseSt
       />
       <FilterPanel open={open} onClose={close} anchorRef={triggerRef} minWidth={200}>
         <div role="group" aria-label={label}>
-          {options.map(o => (
-            <div key={o.value} className="jb-option" style={{ padding: '6px 10px', borderRadius: 7, fontSize: '0.82rem' }}>
+          {options.map((o, i) => (
+            <div key={o.value} className="jb-option rise" style={{ padding: '6px 10px', borderRadius: 7, fontSize: '0.82rem', '--i': Math.min(i, 8) } as React.CSSProperties}>
               <Checkbox label={o.label} checked={selected.includes(o.value)} onChange={() => toggle(o.value)} compact />
             </div>
           ))}
@@ -45,6 +45,7 @@ export function MultiSelectDropdown({ label, options, selected, onChange, baseSt
         {active && (
           <button
             type="button"
+            className="press rise"
             onClick={() => onChange([])}
             style={{
               width: '100%', marginTop: 4, padding: '7px 10px',

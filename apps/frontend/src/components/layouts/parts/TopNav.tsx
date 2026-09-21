@@ -95,9 +95,9 @@ export default function TopNav(p: Props) {
         {/* Quick stat — desktop only, logged in. A mono figure, not a badge. */}
         {!p.isMobile && p.currentUser && (
           <Link
-            href="/progress"
+            href="/pipeline"
             className="an-util"
-            title="View progress"
+            title="Your pipeline"
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 10,
               height: 36, padding: '0 12px', borderRadius: 8, textDecoration: 'none',

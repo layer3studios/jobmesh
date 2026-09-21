@@ -15,23 +15,25 @@ export const optionStyle: CSSProperties = {
   padding: '7px 10px', borderRadius: 7, cursor: 'pointer',
   fontFamily: 'inherit', fontSize: '0.82rem', color: 'var(--text-primary)',
   background: 'transparent', border: 'none', textAlign: 'left',
-  borderLeft: '2px solid transparent',
+  position: 'relative',
 };
 
 /** The selected option carries the indigo left edge — the only hue in the panel. */
 export const selectedOptionStyle: CSSProperties = {
-  ...optionStyle, borderLeftColor: 'var(--thread-indigo)', fontWeight: 600,
+  ...optionStyle, fontWeight: 600,
 };
 
-export function FilterTrigger({ label, active, open, onClick, baseStyle, triggerRef }: {
+export function FilterTrigger({ label, active, open, pulse, onClick, baseStyle, triggerRef }: {
   label: string; active: boolean; open: boolean; onClick: () => void;
+  /** True for a beat after the value changes: the chip pops. */
+  pulse?: boolean;
   baseStyle: CSSProperties; triggerRef: RefObject<HTMLButtonElement | null>;
 }) {
   return (
     <button
       ref={triggerRef}
       type="button"
-      className="jb-chip"
+      className={`jb-chip${pulse ? ' jb-pop' : ''}`}
       onClick={onClick}
       aria-haspopup="listbox"
       aria-expanded={open}
@@ -44,18 +46,20 @@ export function FilterTrigger({ label, active, open, onClick, baseStyle, trigger
         color: active || open ? 'var(--text-primary)' : 'var(--ink-muted)',
       }}
     >
-      {label}
-      <ChevronDown size={13} aria-hidden style={{ color: 'var(--ink-faint)', flexShrink: 0 }} />
+      <span key={label} className="jb-chip__label">{label}</span>
+      <ChevronDown size={13} aria-hidden className="jb-chip__chev" style={{ color: 'var(--ink-faint)', flexShrink: 0 }} />
     </button>
   );
 }
 
-export function FilterPanel({ open, onClose, anchorRef, children, minWidth = 200 }: {
+export function FilterPanel({ open, onClose, anchorRef, children, minWidth = 200, maxHeight = 320 }: {
   open: boolean;
   onClose: () => void;
   anchorRef: RefObject<HTMLButtonElement | null>;
   children: ReactNode;
   minWidth?: number;
+  /** Taller panels (the More filters dialog) pass their own cap. */
+  maxHeight?: number | string;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const position = useAnchoredPosition(anchorRef, panelRef, open);
@@ -81,12 +85,12 @@ export function FilterPanel({ open, onClose, anchorRef, children, minWidth = 200
   return createPortal(
     <div
       ref={panelRef}
-      className="jb-panel thin-scroll"
+      className="jb-panel panel-scroll"
       style={{
         position: 'fixed',
         top: position?.top ?? 0, left: position?.left ?? 0,
         visibility: position ? 'visible' : 'hidden',
-        zIndex: Z.dropdown, minWidth, maxHeight: 320, overflowY: 'auto',
+        zIndex: Z.dropdown, minWidth, maxHeight, overflowY: 'auto',
         background: 'var(--glass-panel)',
         border: '1px solid var(--border-hairline)', borderRadius: 10,
         boxShadow: 'var(--shadow-md)', padding: 6,

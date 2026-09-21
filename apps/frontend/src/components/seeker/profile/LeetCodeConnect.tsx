@@ -1,22 +1,18 @@
 'use client';
 // FILE: src/components/seeker/profile/LeetCodeConnect.tsx
-// The LeetCode card on the seeker profile: connect an account, then see exactly
-// what an employer will see.
-//
-// THE CONNECTED STATE SHOWS THE FULL PANEL, not a teaser. This is the one place a
-// candidate can check what they are publishing before a recruiter reads it, and a
-// summary here would defeat that.
+// The LeetCode connection on the seeker profile: connect an account, then see
+// exactly what an employer will see. The connected state shows the full
+// panel, not a teaser: this is where a candidate checks what they publish.
 
 import { useCallback, useEffect, useState } from 'react';
-import { Code2, RefreshCw } from 'lucide-react';
-import { Alert, Button, Card, Input, Stack, SkeletonLine } from '@/components/ui';
-import {
-  connectLeetCode, disconnectLeetCode, getLeetCodeProfile, refreshLeetCode, SeekerApiError,
-} from '@/api/seeker-api';
+import { Code2, Check } from 'lucide-react';
+import { Alert, Button, SkeletonLine } from '@/components/ui';
+import { connectLeetCode, disconnectLeetCode, getLeetCodeProfile, refreshLeetCode, SeekerApiError } from '@/api/seeker-api';
 import type { LeetCodeProfile } from '@/types/seeker-profile';
 import LeetCodeStats from './LeetCodeStats';
+import { TextInput } from './editor';
+import { ConnectShell } from './ConnectShell';
 
-/** "4 hours ago" — precise enough to judge freshness, vague enough to stay readable. */
 function relativeTime(iso: string): string {
   const minutes = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
   if (minutes < 1) return 'just now';
@@ -40,126 +36,65 @@ export default function LeetCodeConnect() {
       const result = await getLeetCodeProfile();
       setConnected(result.connected);
       setData(result.data ?? null);
-    } catch {
-      // A failed read is not an error the candidate can act on — the card simply
-      // offers to connect, which is the right next step either way.
-      setConnected(false);
-    } finally {
-      setIsLoading(false);
-    }
+    } catch { setConnected(false); }
+    finally { setIsLoading(false); }
   }, []);
 
   useEffect(() => { void load(); }, [load]);
 
   async function run(action: () => Promise<void>) {
-    setIsBusy(true);
-    setError(null);
-    try {
-      await action();
-    } catch (caught) {
-      setError(caught instanceof SeekerApiError ? caught.message : 'Something went wrong. Try again.');
-    } finally {
-      setIsBusy(false);
-    }
+    setIsBusy(true); setError(null);
+    try { await action(); }
+    catch (caught) { setError(caught instanceof SeekerApiError ? caught.message : 'Something went wrong. Try again.'); }
+    finally { setIsBusy(false); }
   }
 
-  const handleConnect = () => run(async () => {
-    const profile = await connectLeetCode(username.trim());
-    setData(profile);
-    setConnected(true);
-    setUsername('');
-  });
-
+  const handleConnect = () => run(async () => { setData(await connectLeetCode(username.trim())); setConnected(true); setUsername(''); });
   const handleRefresh = () => run(async () => { setData(await refreshLeetCode()); });
+  const handleDisconnect = () => run(async () => { await disconnectLeetCode(); setData(null); setConnected(false); });
 
-  const handleDisconnect = () => run(async () => {
-    await disconnectLeetCode();
-    setData(null);
-    setConnected(false);
-  });
-
-  if (isLoading) return <Card><SkeletonLine width="45%" height={20} /></Card>;
-
-  if (!connected) {
-    return (
-      <Card>
-        <Stack gap={12}>
-          <Stack gap={9} dir="row" align="center">
-            <Code2 size={17} aria-hidden="true" style={{ color: 'var(--accent)' }} />
-            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--ink)' }}>
-              LeetCode
-            </h3>
-          </Stack>
-          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ink-muted)', maxWidth: '58ch' }}>
-            Connect your account and employers reviewing your application can see what
-            you have solved — problems, contests and the topics you are strongest in.
-          </p>
-          {error && <Alert type="error">{error}</Alert>}
-          <Stack gap={8} dir="row" align="flex-end" wrap>
-            <div style={{ flex: '1 1 200px', minWidth: 0 }}>
-              <Input
-                label="LeetCode username"
-                value={username}
-                placeholder="your-username"
-                maxLength={20}
-                disabled={isBusy}
-                onChange={(e) => setUsername(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter' && username.trim()) handleConnect(); }}
-              />
-            </div>
-            <Button disabled={isBusy || !username.trim()} onClick={handleConnect}>
-              {isBusy ? 'Checking…' : 'Connect'}
-            </Button>
-          </Stack>
-        </Stack>
-      </Card>
-    );
-  }
+  if (isLoading) return <div className="pf-conn" aria-busy="true"><div className="pf-conn__head"><SkeletonLine width="45%" height={20} /></div></div>;
 
   return (
-    <Card>
-      <Stack gap={14}>
-        <Stack gap={10} dir="row" align="center" wrap>
-          <Code2 size={17} aria-hidden="true" style={{ color: 'var(--accent)' }} />
-          <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--ink)' }}>
-            LeetCode
-            {data && (
-              <span style={{ color: 'var(--ink-faint)', fontWeight: 400 }}> · @{data.username}</span>
-            )}
-          </h3>
-          <span style={{ flex: 1 }} />
-          <Button variant="ghost" size="sm" disabled={isBusy} onClick={handleRefresh}>
-            <Stack gap={6} dir="row" align="center">
-              <RefreshCw size={13} aria-hidden="true" />
-              {isBusy ? 'Refreshing…' : 'Refresh'}
-            </Stack>
-          </Button>
-          <Button variant="link" size="sm" disabled={isBusy} onClick={handleDisconnect}>
-            Disconnect
-          </Button>
-        </Stack>
-
-        {error && <Alert type="error">{error}</Alert>}
-        {data?.isStale && (
-          <Alert type="warning">
-            These numbers are from the last successful update — LeetCode could not be
-            reached. Refresh to try again.
-          </Alert>
-        )}
-
-        {data ? (
-          <>
-            <LeetCodeStats data={data} />
-            <p style={{ margin: 0, fontSize: '0.72rem', color: 'var(--ink-faint)' }}>
-              Updated {relativeTime(data.fetchedAt)} · refreshes daily
-            </p>
-          </>
-        ) : (
-          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ink-muted)' }}>
-            Connected, but we have not been able to read your stats yet. Try Refresh.
-          </p>
-        )}
-      </Stack>
-    </Card>
+    <ConnectShell
+      icon={<Code2 size={17} />}
+      name="LeetCode"
+      tone="leetcode"
+      handle={data?.username}
+      href={data?.username ? `https://leetcode.com/u/${data.username}` : null}
+      connected={connected}
+      busy={isBusy}
+      onRefresh={handleRefresh}
+      onDisconnect={handleDisconnect}
+    >
+      {!connected ? (
+        <div className="pf-conn__form">
+          <p className="pf-conn__text">Connect your account and employers reviewing your application see what you have solved: problems, contests and the topics you are strongest in.</p>
+          {error && <Alert type="error">{error}</Alert>}
+          <div className="pf-conn__inline">
+            <TextInput
+              value={username} placeholder="your-leetcode-username" maxLength={20} autoCapitalize="none" spellCheck={false} disabled={isBusy}
+              onChange={e => setUsername(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && username.trim()) handleConnect(); }}
+              aria-label="LeetCode username"
+            />
+            <Button disabled={isBusy || !username.trim()} onClick={handleConnect} iconLeft={<Check size={13} />}>{isBusy ? 'Checking' : 'Connect'}</Button>
+          </div>
+        </div>
+      ) : (
+        <>
+          {error && <Alert type="error">{error}</Alert>}
+          {data?.isStale && <Alert type="warning">These numbers are from the last successful update. LeetCode could not be reached. Refresh to try again.</Alert>}
+          {data ? (
+            <>
+              <LeetCodeStats data={data} />
+              <p className="pf-conn__foot">Updated {relativeTime(data.fetchedAt)} · refreshes daily</p>
+            </>
+          ) : (
+            <p className="pf-conn__text">Connected, but we have not been able to read your stats yet. Try Refresh.</p>
+          )}
+        </>
+      )}
+    </ConnectShell>
   );
 }

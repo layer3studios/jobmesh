@@ -19,8 +19,7 @@
    - SUSPENSE  — the landing states what happens, it does not hand over the
                  product. No search box, no job list: those live behind /jobs. */
 
-.hm-root,
-.hm-masthead {
+.hm-root {
   color-scheme: dark;
 
   /* ── Ground + ink ─────────────────────────────────────────────────── */
@@ -114,15 +113,14 @@
 }
 /* Only the full-page landing takes over the viewport; a masthead is a band. */
 .hm-root { min-height: 100dvh; display: flex; flex-direction: column; }
-.hm-root ::selection, .hm-masthead ::selection { background: var(--ember-soft); color: var(--ink); }
+.hm-root ::selection { background: var(--ember-soft); color: var(--ink); }
 
 /* ── Faces ──────────────────────────────────────────────────────────────
    The Tailwind @theme aliases (--font-serif / --font-mono) are pruned as
    unused by Tailwind v4 and resolve to nothing at runtime, so these name the
    next/font variables directly. `.font-display` in base.css has the same bug
    site-wide — a Commit 0 fix. */
-.hm-root,
-.hm-masthead {
+.hm-root {
   /* DM Sans is the landing's prose face (Monochrome Editorial system). */
   font-family: var(--font-dm-sans), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
@@ -147,7 +145,6 @@
   font-size: var(--t-label); text-transform: uppercase; letter-spacing: 0.16em;
   color: var(--ink-muted);
 }
-.hm-eyebrow--ember { color: var(--ember); }
 .hm-heading {
   font-size: var(--t-display-3); font-weight: 400; line-height: 1.05;
   letter-spacing: -0.03em; color: var(--ink);
@@ -162,9 +159,3 @@
   padding-bottom: var(--s-4); border-bottom: 1px solid var(--border);
 }
 
-/* Entrance stagger — loads after .anim-up (primitives.css) so delays win. */
-.hm-d1 { animation-delay: 90ms; }
-.hm-d2 { animation-delay: 180ms; }
-.hm-d3 { animation-delay: 280ms; }
-.hm-d4 { animation-delay: 380ms; }
-.hm-d5 { animation-delay: 480ms; }

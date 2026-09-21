@@ -32,7 +32,7 @@
   /* The sheen along a glass edge and the light it catches at the top. */
   --glass-sheen: rgba(255, 255, 255, 0.55);
   --glass-glow: rgba(255, 255, 255, 0.35);
-  --glass-blur: 22px; --glass-sat: 170%;
+  --glass-blur: 24px; --glass-sat: 180%;
   --on-indigo: #FFFFFF;
   --accent: #09090B;
   --accent-hover: #26262A;
@@ -127,7 +127,7 @@
   --glass-card: rgba(24, 23, 23, 0.48); --glass-strong: rgba(20, 19, 19, 0.78);
   --glass-sheen: rgba(255, 255, 255, 0.10);
   --glass-glow: rgba(255, 255, 255, 0.05);
-  --glass-blur: 22px; --glass-sat: 170%;
+  --glass-blur: 24px; --glass-sat: 180%;
   --on-indigo: #FFFFFF;
   --accent: #E5E2E1;
   --accent-hover: #FFFFFF;
@@ -192,6 +192,23 @@
   --tag-4-bg: rgba(167, 159, 242, 0.14);
   --tag-5-bg: rgba(139, 149, 242, 0.14);
   --tag-6-bg: rgba(240, 145, 106, 0.14);
+}
+
+/* ── Motion — the curves and the press, shared by every audience. ─────────
+   Enter/exit and the press use --ease-out; anything that moves or morphs
+   uses --ease-in-out; sheets and drawers use --ease-drawer. Numbers from the
+   research brief (docs/UI-RESEARCH.md §4): press 0.97 @ 120–160ms, UI under
+   300ms, stagger 30–80ms. */
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --m-press: 140ms;
+  --m-ui: 200ms;
+  --m-sheet: 380ms;
+  --press-scale: 0.97;
+  --press-scale-sm: 0.94;
+  --stagger: 45ms;
 }
 
 /* ── Page shell — one set of page-level spacing for employer + admin. ─── */

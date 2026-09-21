@@ -1,41 +1,42 @@
 'use client';
 // FILE: src/components/seeker/ResumeParsingScreen.tsx
-// The screen shown between upload and profile. With errorCode null it renders the
-// honest "in progress" view — indeterminate spinner, a rotating status line, and an
-// explicit 15-30s expectation, no fake percentage bar (R3). With errorCode set it
-// renders the friendly error view (mapped copy + Retry + a paste-text escape hatch).
+// The screen between upload and profile. With errorCode null: three named
+// stages and a bar that moves fast-to-slow on elapsed time (Conrad: a bar
+// that starts quickly is abandoned half as often), never parks at 99%, and a
+// line that says what is happening. With errorCode set: mapped copy, Retry,
+// and the paste-text escape hatch.
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Card, Spinner, Alert, Button, Stack } from '../ui';
+import { Check, RefreshCw } from 'lucide-react';
+import { Alert, Button, Stack } from '../ui';
 
 // Frontend copy is a UX concern, not part of the API contract (D5).
 const RESUME_PARSE_ERROR_MESSAGES: Record<string, string> = {
   PDF_TEXT_EXTRACTION_FAILED:
-    "We couldn't read text from that PDF — it may be scanned or image-based. Please paste your resume text instead.",
+    "We couldn't read text from that PDF — it may be scanned or image-based. Paste your resume text instead.",
   GEMMA_UNAVAILABLE:
     'Resume parsing is temporarily unavailable. Please try again in a minute.',
   RESUME_PARSE_FAILED: "We couldn't parse your resume. Please try again.",
   POLL_TIMEOUT:
-    'This is taking longer than expected. Your resume may still be processing — refresh /profile in a minute, or try again.',
+    'This is taking longer than expected. Your resume may still be processing — open your profile in a minute, or try again.',
 };
-
 const GENERIC_ERROR_MESSAGE = "We couldn't parse your resume. Please try again.";
 
-const STATUS_LINES = [
-  'Reading your PDF…',
-  'Understanding your experience…',
-  'Finalising your profile…',
-];
-const STATUS_ROTATE_MILLISECONDS = 4000;
+const STAGES = ['Reading the PDF', 'Extracting skills & roles', 'Matching you to the market'] as const;
+/** Elapsed seconds at which each stage is considered done. */
+const STAGE_AT = [4, 14, 40];
 
 function resolveMessage(errorCode: string, errorMessage: string | null): string {
   const mapped = RESUME_PARSE_ERROR_MESSAGES[errorCode];
   if (mapped) return mapped;
-  // Unmapped code — a new backend error the frontend copy map hasn't caught up with.
-  // Fall back to the server's message; warn once so it surfaces in dev (C5).
   console.warn(`[ResumeParsingScreen] unmapped errorCode: ${errorCode}`);
   return errorMessage || GENERIC_ERROR_MESSAGE;
+}
+
+/** Fast-to-slow: 50% of the bar in the first ~8s, then asymptotic to 92%. */
+function progressFor(seconds: number): number {
+  return Math.min(92, Math.round(92 * (1 - Math.exp(-seconds / 11))));
 }
 
 interface Props {
@@ -45,48 +46,54 @@ interface Props {
 }
 
 export default function ResumeParsingScreen({ errorCode, errorMessage, onRetry }: Props) {
-  const [lineIndex, setLineIndex] = useState(0);
+  const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {
     if (errorCode !== null) return;
-    const timer = setInterval(
-      () => setLineIndex((prev) => (prev + 1) % STATUS_LINES.length),
-      STATUS_ROTATE_MILLISECONDS,
-    );
-    return () => clearInterval(timer);
+    const t = setInterval(() => setSeconds(s => s + 1), 1000);
+    return () => clearInterval(t);
   }, [errorCode]);
 
   if (errorCode !== null) {
     return (
-      <Card padding="lg" style={{ maxWidth: 460, margin: '40px auto', textAlign: 'center' }}>
-        <Stack gap={16}>
+      <div className="glass ws-section rise" style={{ maxWidth: 520, margin: '24px auto' }}>
+        <Stack gap={14}>
           <Alert type="error">{resolveMessage(errorCode, errorMessage)}</Alert>
-          <Stack gap={10} dir="row" align="center" justify="center" wrap>
-            <Button onClick={onRetry}>Try again</Button>
-            <Link href="/resume" style={{ fontSize: '0.85rem', color: 'var(--accent)' }}>
+          <Stack gap={10} dir="row" align="center" wrap>
+            <Button onClick={onRetry} iconLeft={<RefreshCw size={13} />}>Try again</Button>
+            <Link href="/resume" style={{ fontSize: 13, color: 'var(--ink-muted)', textDecoration: 'underline', textUnderlineOffset: 3 }}>
               Paste text instead
             </Link>
           </Stack>
         </Stack>
-      </Card>
+      </div>
     );
   }
 
+  const pct = progressFor(seconds);
+  const stageIndex = STAGE_AT.findIndex(t => seconds < t);
+  const active = stageIndex === -1 ? STAGES.length - 1 : stageIndex;
+
   return (
-    <Card padding="lg" style={{ maxWidth: 460, margin: '40px auto', textAlign: 'center' }}>
-      <Stack gap={14} align="center">
-        <Spinner size={30} />
-        <h2 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--ink)' }}>Parsing your resume…</h2>
-        <p style={{ fontSize: '0.9rem', color: 'var(--ink-muted)' }}>
-          Usually 15–30 seconds — no need to refresh.
+    <div className="glass ws-section rise" style={{ maxWidth: 560, margin: '24px auto' }} aria-busy="true">
+      <div className="rs-steps">
+        <p className="ws-section__label" aria-live="polite">{STAGES[active]}…</p>
+        <div className="rs-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label="Building your profile">
+          <div className="rs-bar__fill" style={{ width: `${pct}%` }} />
+        </div>
+        <div className="rs-stages">
+          {STAGES.map((s, i) => (
+            <span key={s} className="rs-stage" data-state={i < active ? 'done' : i === active ? 'active' : 'todo'}>
+              {i < active ? <Check size={11} /> : <span style={{ fontVariantNumeric: 'tabular-nums' }}>{i + 1}</span>} {s}
+            </span>
+          ))}
+        </div>
+        <p className="rs-tip">
+          {seconds < 12 ? 'Usually 15–30 seconds. No need to refresh.'
+            : seconds < 40 ? 'Still working — longer resumes take a little more.'
+            : 'Taking longer than usual. You can close this tab; we finish in the background and your profile will be ready.'}
         </p>
-        <p aria-live="polite" style={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--accent)' }}>
-          {STATUS_LINES[lineIndex]}
-        </p>
-        <p style={{ fontSize: '0.8rem', color: 'var(--ink-muted)' }}>
-          You can safely close this tab — we'll finish parsing in the background.
-        </p>
-      </Stack>
-    </Card>
+      </div>
+    </div>
   );
 }
