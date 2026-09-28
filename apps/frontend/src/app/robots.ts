@@ -8,6 +8,7 @@
 import { headers } from 'next/headers';
 import type { MetadataRoute } from 'next';
 import { absoluteUrl } from '@/lib/site-url';
+import { ALLOWED_AI_AGENTS, BLOCKED_AGENTS } from '@/lib/seo/crawler-policy';
 
 /** Hosts where nothing at all should be crawled. */
 const FULLY_DISALLOWED_SUBDOMAINS = ['health', 'api', 'admin', 'hire'];
@@ -24,35 +25,44 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
   // they stay crawlable — only the post-submit confirmation is hidden.
   if (subdomain === 'apply') {
     return {
-      rules: { userAgent: '*', allow: '/', disallow: ['/*/success', '/interview/'] },
+      rules: [
+        { userAgent: '*', allow: '/', disallow: ['/*/success', '/interview/'] },
+        { userAgent: [...BLOCKED_AGENTS], disallow: '/' },
+      ],
       sitemap: absoluteUrl('/sitemap.xml'),
     };
   }
 
   // Bare domain (seeker), and every dev request.
+  const privatePaths = [
+    '/employer/',
+    '/admin/',
+    '/today',
+    '/resume',
+    '/profile',
+    '/account/',
+    '/login',
+    '/status',
+    '/apply/*/success',
+    // /u/{slug} is deliberately NOT here: shareable candidate profiles are
+    // public by their owner's explicit choice and should be indexable. A
+    // profile turned off exports noindex from its own metadata.
+    // Booking tokens are live credentials — never crawled. The page ALSO
+    // exports noindex metadata: robots.txt alone cannot stop indexing of a
+    // URL linked from elsewhere.
+    '/interview/',
+  ];
   return {
-    rules: {
-      userAgent: '*',
-      allow: '/',
-      disallow: [
-        '/employer/',
-        '/admin/',
-        '/today',
-        '/resume',
-        '/profile',
-        '/account/',
-        '/login',
-        '/status',
-        '/apply/*/success',
-        // /u/{slug} is deliberately NOT here: shareable candidate profiles are
-        // public by their owner's explicit choice and should be indexable. A
-        // profile turned off exports noindex from its own metadata.
-        // Booking tokens are live credentials — never crawled. The page ALSO
-        // exports noindex metadata: robots.txt alone cannot stop indexing of a
-        // URL linked from elsewhere.
-        '/interview/',
-      ],
-    },
+    rules: [
+      // Search engines and everyone else.
+      { userAgent: '*', allow: '/', disallow: privatePaths },
+      // AI search / answer bots, named explicitly so the intent is unambiguous:
+      // they may crawl what Google may, and get JobMesh cited and recommended.
+      { userAgent: [...ALLOWED_AI_AGENTS], allow: '/', disallow: privatePaths },
+      // Model-training and dataset scrapers: nothing. middleware.ts also
+      // refuses these user agents with a 403, for the ones that ignore this file.
+      { userAgent: [...BLOCKED_AGENTS], disallow: '/' },
+    ],
     sitemap: absoluteUrl('/sitemap.xml'),
   };
 }

@@ -13,6 +13,7 @@ import SeoJobList from '../../../../components/seo/SeoJobList';
 import { buildBreadcrumbListSchema, buildItemListSchema } from '../../../../lib/schema';
 import { getSeekerJobsPageServer, type SeekerJobsPage } from '../../../../lib/server-api/seeker';
 import { absoluteUrl } from '../../../../lib/site-url';
+import { buildFaqPageSchema, buildTechJobFaq } from '../../../../lib/seo/tech-job-faq';
 import { MIN_JOBS_TO_INDEX, TECH_JOB_PAGES, findTechJobPage, type TechJobPage } from '../../../../lib/seo/tech-job-pages';
 
 export const revalidate = 3600;
@@ -59,6 +60,8 @@ export default async function TechJobsPage({ params }: { params: Promise<{ slug:
   const { jobs, totalJobs } = await loadJobs(page);
   const companies = [...new Set(jobs.map(job => job.Company))].slice(0, 8);
   const siblings = TECH_JOB_PAGES.filter(other => other.slug !== page.slug);
+  const asOf = new Date();
+  const faq = buildTechJobFaq(page, jobs, totalJobs, asOf);
 
   const breadcrumbSchema = buildBreadcrumbListSchema([
     { name: 'Tech jobs', path: '/tech-jobs' },
@@ -70,6 +73,7 @@ export default async function TechJobsPage({ params }: { params: Promise<{ slug:
     <main style={{ width: '100%', maxWidth: 960, margin: '0 auto', padding: 'clamp(20px, 4vw, 32px) clamp(16px, 4vw, 24px) 64px' }}>
       <JsonLd schema={breadcrumbSchema} />
       {jobs.length > 0 && <JsonLd schema={itemListSchema} />}
+      <JsonLd schema={buildFaqPageSchema(faq)} />
 
       <nav aria-label="Breadcrumb" style={{ ...labelStyle, marginBottom: 16 }}>
         <Link href="/tech-jobs" style={{ color: 'inherit', textDecoration: 'none' }}>Tech jobs</Link> / {page.label}
@@ -93,6 +97,21 @@ export default async function TechJobsPage({ params }: { params: Promise<{ slug:
           <Link href="/jobs">See all {totalJobs} roles with filters →</Link>
         </p>
       )}
+
+      <section aria-labelledby="faq-heading" style={{ marginTop: 48 }}>
+        <h2 id="faq-heading" style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>{page.heading}: common questions</h2>
+        <p style={{ fontSize: 13, color: 'var(--ink-muted)', marginBottom: 16 }}>
+          Updated <time dateTime={asOf.toISOString()}>{asOf.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</time> from live listings.
+        </p>
+        <dl style={{ display: 'grid', gap: 16, margin: 0 }}>
+          {faq.map(item => (
+            <div key={item.question}>
+              <dt style={{ fontWeight: 600, color: 'var(--ink)' }}>{item.question}</dt>
+              <dd style={{ margin: '4px 0 0', lineHeight: 1.6, color: 'var(--ink-muted)' }}>{item.answer}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
 
       <section aria-labelledby="related-heading" style={{ marginTop: 48 }}>
         <h2 id="related-heading" style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>More tech jobs in India</h2>
