@@ -5,3 +5,4 @@ export { buildItemListSchema } from './item-list';
 export { buildBreadcrumbListSchema } from './breadcrumb-list';
 export { buildCompanySchema } from './company';
 export { buildPersonSchema } from './person';
+export { buildArticleSchema } from './article';

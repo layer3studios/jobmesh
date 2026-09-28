@@ -9,7 +9,7 @@ export interface OrganizationSchemaInput {
 }
 
 export function buildOrganizationSchema(input: OrganizationSchemaInput = {}) {
-  const logoPath = input.logoPath ?? '/og/logo.png';
+  const logoPath = input.logoPath ?? '/logo.jpg';
   const logo = logoPath.startsWith('http') ? logoPath : absoluteUrl(logoPath);
   return {
     '@context': 'https://schema.org',

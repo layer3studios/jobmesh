@@ -11,6 +11,8 @@ import { useAnalyticsConsent } from '../../../hooks/useAnalyticsConsent';
 const LINKS = [
   { href: '/jobs', label: COPY.home.footerJobs },
   { href: '/directory', label: COPY.home.footerCompanies },
+  { href: '/tech-jobs', label: 'By city & role' },
+  { href: '/blog', label: 'Blog' },
   { href: '/legal/privacy', label: COPY.home.footerPrivacy },
   { href: '/legal', label: COPY.home.footerTerms },
 ] as const;
