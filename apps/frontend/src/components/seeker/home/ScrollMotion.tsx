@@ -52,14 +52,21 @@ export default function ScrollMotion({ scope }: { scope: string }) {
         // Hide reveal targets up front. Setting the start state only when a
         // batch entered meant each block painted, blinked out, then rose —
         // a flicker on every section while scrolling.
+        //
+        // Cards and links carry a CSS `transition: transform, opacity` for
+        // hover. Left on, the browser re-eases every value GSAP writes, so the
+        // rise lags and wobbles; it is switched off for the tween. At rest the
+        // inline transform is cleared too — an inline `translate(0,0)` would
+        // outrank `.hm-card:hover` and kill the hover lift.
         const reveals = root.querySelectorAll('[data-reveal]');
-        gsap.set(reveals, { y: 36, opacity: 0 });
+        const AT_REST = 'transform,opacity,transition';
+        gsap.set(reveals, { y: 36, opacity: 0, transition: 'none' });
         ScrollTrigger.batch(reveals, {
           start: 'top 88%',
           onEnter: batch => gsap.to(batch,
-            { y: 0, opacity: 1, duration: 0.95, ease: EASE, stagger: 0.09, overwrite: true }),
+            { y: 0, opacity: 1, duration: 0.95, ease: EASE, stagger: 0.09, overwrite: true, clearProps: AT_REST }),
           // Loaded already scrolled past a block (reload, back button): show it.
-          onLeave: batch => gsap.set(batch, { y: 0, opacity: 1, overwrite: true }),
+          onLeave: batch => gsap.set(batch, { clearProps: AT_REST, overwrite: true }),
           once: true,
         });
 
@@ -88,6 +95,22 @@ export default function ScrollMotion({ scope }: { scope: string }) {
           });
         });
 
+        // In-page links (/hire's "#how") go through Lenis. A native fragment
+        // jump mid-glide was overwritten by Lenis on the next frame, so the
+        // page snapped down, then back, then glided. Lenis honours the
+        // targets' scroll-margin-top (home-motion.css), which clears the nav.
+        const onAnchorClick = (event: MouseEvent) => {
+          if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+          const link = (event.target as Element | null)?.closest?.('a[href^="#"]');
+          const hash = link?.getAttribute('href');
+          const target = hash && hash.length > 1 ? document.getElementById(decodeURIComponent(hash.slice(1))) : null;
+          if (!target) return;
+          event.preventDefault();
+          lenis.scrollTo(target);
+          history.replaceState(history.state, '', hash);
+        };
+        root.addEventListener('click', onAnchorClick);
+
         const nav = root.querySelector('.hm-nav');
         if (nav) ScrollTrigger.create({ start: 40, onToggle: self => nav.classList.toggle('hm-nav--scrolled', self.isActive) });
 
@@ -102,6 +125,7 @@ export default function ScrollMotion({ scope }: { scope: string }) {
             onUpdate: self => { scenePointer.scrollProgress = self.progress; },
           });
         }
+        return () => root.removeEventListener('click', onAnchorClick);
       }, root);
 
       return () => {

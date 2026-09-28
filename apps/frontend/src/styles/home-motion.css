@@ -28,6 +28,13 @@ html.lenis { scroll-behavior: auto !important; }
   .hm-root .hm-panel--score { background: rgba(19, 19, 22, 0.92); }
 }
 
+/* ── Page guards ────────────────────────────────────────────────────────
+   `clip`, not `hidden`: stops a sideways-sliding reveal from letting a phone
+   pan the page horizontally, without breaking the sticky nav. Anchor targets
+   land just below the sticky nav, with Lenis or without it. */
+.hm-root { overflow-x: clip; }
+.hm-root [id] { scroll-margin-top: 84px; }
+
 /* ── The Three.js scene ─────────────────────────────────────────────── */
 .hm-scene-host { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
 .hm-scene { width: 100% !important; height: 100% !important; }

@@ -20,10 +20,16 @@ export default function Ticker({ counts }: { counts: HomeCounts }) {
     `${jobCount}+ ${COPY.home.tickerActivePrefix} ${companyCount}+ ${COPY.home.tickerCompaniesSuffix}`,
     COPY.home.tickerSuffix,
   ].filter(Boolean);
+  const text = `${parts.join(' · ')} · `;
 
   return (
     <div className="hm-ticker hm-mono" role="marquee" aria-live="off">
-      <span className="hm-ticker__text">{parts.join(' · ')}</span>
+      {/* Two copies slide by exactly one copy's width, so the loop point is
+          invisible. A single copy snapped back to mid-screen every cycle. */}
+      <span className="hm-ticker__track">
+        <span className="hm-ticker__text">{text}</span>
+        <span className="hm-ticker__text" aria-hidden="true">{text}</span>
+      </span>
     </div>
   );
 }
