@@ -32,10 +32,35 @@ export async function generateMetadata(
   const company = await findCompany(companySlug);
   if (!company) return { title: 'Company not found' };
   return {
-    title: `${company.companyName} — open roles`,
-    description: `Open tech roles at ${company.companyName}. ${company.openRoles} positions hiring now.`,
+    title: `${company.companyName} jobs in India — ${company.openRoles} open ${company.openRoles === 1 ? 'role' : 'roles'}`,
+    description: companyDescription(company),
     alternates: { canonical: absoluteUrl(`/company/${companySlug}`) },
   };
+}
+
+/** 120-160 character summary; the old one-liner was ~50 characters. */
+function companyDescription(company: ICompany): string {
+  const where = company.cities.length ? ` in ${company.cities.slice(0, 3).join(', ')}` : ' in India';
+  const what = company.industry ? ` ${company.industry}` : '';
+  const text = `${company.companyName} is hiring for ${company.openRoles} tech ${company.openRoles === 1 ? 'role' : 'roles'}${where}. See every open${what} position, updated daily, and apply directly on the ${company.companyName} careers site.`;
+  return text.length <= 160 ? text : `${text.slice(0, 157).replace(/\s+\S*$/, '')}…`;
+}
+
+/**
+ * A short, factual paragraph built from the listings, so a company with two
+ * open roles is not a near-empty page (flagged as thin content by the audit).
+ */
+function companyIntro(company: ICompany, jobs: IJob[]): string {
+  const count = jobs.length || company.openRoles;
+  const parts = [`${company.companyName} currently has ${count} open tech ${count === 1 ? 'role' : 'roles'} listed on JobMesh`];
+  if (company.cities.length) parts[0] += `, based in ${company.cities.slice(0, 5).join(', ')}`;
+  const remote = jobs.filter(job => job.IsRemote).length;
+  const titles = [...new Set(jobs.map(job => job.JobTitle))].slice(0, 3);
+  let text = `${parts[0]}.`;
+  if (titles.length) text += ` Recent openings include ${titles.join(', ')}.`;
+  if (remote) text += ` ${remote} of them ${remote === 1 ? 'is' : 'are'} remote.`;
+  text += ` Every listing is collected from the ${company.companyName} careers site and links straight to the employer's application, refreshed daily.`;
+  return text;
 }
 
 function Fact({ label, value }: { label: string; value: string }) {
@@ -101,6 +126,10 @@ export default async function CompanyPage({ params }: { params: Promise<{ compan
           {company.domain && <Fact label="Site" value={company.domain.replace(/^https?:\/\//, '')} />}
         </div>
       </header>
+
+      <p style={{ margin: '8px 0 0', fontSize: 15, lineHeight: 1.65, color: 'var(--ink-muted)', maxWidth: '72ch' }}>
+        {companyIntro(company, jobs)}
+      </p>
 
       <p style={{ ...labelStyle, margin: '24px 0 12px' }}>Open roles · {jobs.length}</p>
       <div style={{ display: 'grid', gap: 'var(--gutter)' }}>

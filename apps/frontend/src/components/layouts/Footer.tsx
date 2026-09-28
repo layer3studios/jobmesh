@@ -49,6 +49,8 @@ export default function Footer({ audience = 'seeker' }: { audience?: Audience })
   const navigate: FooterLink[] = copy ? copy.navigate : [
     ['/jobs', COPY.footer.jobFeedLink],
     ['/directory', COPY.footer.companiesLink],
+    ['/tech-jobs', 'Jobs by city & role'],
+    ['/blog', 'Blog'],
     ['/today', 'Today'],
   ];
   // Cross-origin from hire.jobmesh.in in production; same-origin in dev.

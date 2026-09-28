@@ -27,6 +27,7 @@ export default function JobDetailStandalone({ job }: { job: IJob }) {
     <div className="glass" style={{ borderRadius: 14, overflow: 'hidden', minHeight: 480 }}>
       <JobDetailPanel
         job={job}
+        titleAs="h1"
         appliedJobIds={appliedJobIds}
         comeBackMap={comeBackMap}
         onToggleApplied={toggleApplied}

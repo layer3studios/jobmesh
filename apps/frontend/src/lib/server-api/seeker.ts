@@ -41,6 +41,57 @@ export async function getSeekerJobsServer(limit?: number): Promise<IJob[]> {
   return body.jobs ?? [];
 }
 
+/** Public feed filters the backend understands (seeker-jobs-routes.js). */
+export interface SeekerJobsQuery {
+  page?: number;
+  limit?: number;
+  locations?: string[];
+  workplace?: 'remote' | 'hybrid' | 'onsite';
+  entryLevel?: boolean;
+  search?: string;
+}
+
+export interface SeekerJobsPage { jobs: IJob[]; totalJobs: number; totalPages: number }
+
+/** One page of the public feed, filtered server-side. */
+export async function getSeekerJobsPageServer(query: SeekerJobsQuery = {}): Promise<SeekerJobsPage> {
+  const params = new URLSearchParams();
+  if (query.page) params.set('page', String(query.page));
+  if (query.limit) params.set('limit', String(query.limit));
+  if (query.locations?.length) params.set('locations', query.locations.join(','));
+  if (query.workplace) params.set('workplace', query.workplace);
+  if (query.entryLevel) params.set('entryLevel', 'true');
+  if (query.search) params.set('search', query.search);
+  const suffix = params.size ? `?${params}` : '';
+  const body = await publicServerFetch<{ jobs?: IJob[]; totalJobs?: number; totalPages?: number } | IJob[]>(
+    `/seeker/jobs${suffix}`, JOBS_REVALIDATE,
+  );
+  if (Array.isArray(body)) return { jobs: body, totalJobs: body.length, totalPages: 1 };
+  const jobs = body.jobs ?? [];
+  return { jobs, totalJobs: body.totalJobs ?? jobs.length, totalPages: body.totalPages ?? 1 };
+}
+
+/** Backend ceiling per feed request (MAX_FEED_LIMIT). */
+const FEED_PAGE_SIZE = 50;
+/** Guard against a runaway loop if totalPages is ever wrong. 60 × 50 = 3,000 jobs. */
+const MAX_SITEMAP_PAGES = 60;
+
+/**
+ * Every active job, walking the feed page by page. The feed caps each response at
+ * 50 rows, so a single un-paged call (what the sitemap used to make) listed only
+ * the newest 50 jobs and left the rest out of the sitemap.
+ */
+export async function getAllSeekerJobsServer(): Promise<IJob[]> {
+  const first = await getSeekerJobsPageServer({ page: 1, limit: FEED_PAGE_SIZE });
+  const pages = Math.min(first.totalPages, MAX_SITEMAP_PAGES);
+  if (pages <= 1) return first.jobs;
+  const rest = await Promise.all(
+    Array.from({ length: pages - 1 }, (_, index) =>
+      getSeekerJobsPageServer({ page: index + 2, limit: FEED_PAGE_SIZE }).then(page => page.jobs).catch(() => [] as IJob[])),
+  );
+  return [...first.jobs, ...rest.flat()];
+}
+
 /** How many active roles landed in the last 24h (public). Powers the homepage
  *  ticker + live badge. Asks for limit=1 and reads `totalJobs` off the paginated
  *  envelope, so the count is exact without pulling the rows. Returns 0 on any

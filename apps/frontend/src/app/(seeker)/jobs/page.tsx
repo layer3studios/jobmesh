@@ -20,7 +20,9 @@ const JOBS_DESCRIPTION =
   'All tech jobs from top Indian companies, updated daily. Filter by role, experience, salary, location, work mode and tech stack.';
 
 export const metadata: Metadata = {
-  title: COPY.site.documentTitleJobs,
+  // `absolute`: the copy already ends in "· JobMesh" (the client sets the same
+  // string as document.title), so the layout template must not add another.
+  title: { absolute: COPY.site.documentTitleJobs },
   description: JOBS_DESCRIPTION,
   // Filtered views live on query params; canonical keeps crawl equity on /jobs.
   alternates: { canonical: absoluteUrl('/jobs') },

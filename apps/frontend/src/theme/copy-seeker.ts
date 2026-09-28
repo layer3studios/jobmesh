@@ -89,7 +89,7 @@ export const SEEKER_COPY = {
     sortAZ: 'A → Z',
     sortZA: 'Z → A',
     sortMostHiring: 'Most hiring',
-    documentTitle: 'Tech companies hiring in India · JobMesh',
+    documentTitle: 'Tech companies hiring in India',
   },
   footer: {
     navigateTitle: 'Navigate',
@@ -120,7 +120,7 @@ export const SEEKER_COPY = {
     subtitle: 'How tech hiring is moving — posting momentum, role demand, and who is ramping up.',
     shareButtonLabel: 'Share',
     shareTitle: 'Hiring trends in India · JobMesh',
-    documentTitle: 'Hiring trends in India · JobMesh',
+    documentTitle: 'Hiring trends in India',
     errorTitle: "Couldn't load trends",
     errorBody: 'Something went wrong. Try refreshing.',
     emptyTitle: 'Not enough data yet',
