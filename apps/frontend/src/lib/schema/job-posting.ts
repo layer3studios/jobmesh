@@ -16,11 +16,39 @@ export interface JobPostingSchemaInput {
   addressRegion?: string;
   salary?: { minValue?: number; maxValue?: number; currency?: string; unitText?: string } | null;
   isRemote?: boolean;
+  /**
+   * True only when the candidate applies ON JobMesh (native postings). Scraped
+   * listings send people to the employer's own site, and Google's guidelines
+   * treat a false `directApply: true` as misrepresentation. Default true.
+   */
+  directApply?: boolean;
 }
 
 export interface JobPostingCompanyInput {
   name: string;
   logoUrl?: string;
+  /**
+   * The organisation's own URL. Defaults to its careers page on apply.jobmesh.in,
+   * which only exists for native companies; pass null for scraped ones.
+   */
+  sameAs?: string | null;
+}
+
+const GOOGLE_EMPLOYMENT_TYPES = ['FULL_TIME', 'PART_TIME', 'CONTRACTOR', 'TEMPORARY', 'INTERN', 'VOLUNTEER', 'PER_DIEM', 'OTHER'];
+
+/**
+ * Map a scraped ATS value ("Full-time", "Contract", "Internship"...) onto
+ * Google's fixed enum. Anything unrecognised becomes FULL_TIME, the common
+ * case, rather than a value Google rejects.
+ */
+export function normalizeEmploymentType(raw?: string | null): string {
+  const value = (raw ?? '').trim().toUpperCase().replace(/[\s-]+/g, '_');
+  if (GOOGLE_EMPLOYMENT_TYPES.includes(value)) return value;
+  if (/INTERN/.test(value)) return 'INTERN';
+  if (/PART/.test(value)) return 'PART_TIME';
+  if (/CONTRACT|FREELANCE/.test(value)) return 'CONTRACTOR';
+  if (/TEMP|SEASONAL/.test(value)) return 'TEMPORARY';
+  return 'FULL_TIME';
 }
 
 export function buildJobPostingSchema(job: JobPostingSchemaInput, company: JobPostingCompanyInput) {
@@ -31,12 +59,12 @@ export function buildJobPostingSchema(job: JobPostingSchemaInput, company: JobPo
     description: job.descriptionHtml,
     datePosted: job.postedAt,
     validThrough: job.validThrough,
-    employmentType: job.employmentType ?? 'FULL_TIME',
-    directApply: true,
+    employmentType: normalizeEmploymentType(job.employmentType),
+    directApply: job.directApply ?? true,
     hiringOrganization: {
       '@type': 'Organization',
       name: company.name,
-      sameAs: getApplyUrl(`/${job.companySlug}`),
+      ...(company.sameAs === null ? {} : { sameAs: company.sameAs ?? getApplyUrl(`/${job.companySlug}`) }),
       ...(company.logoUrl ? { logo: company.logoUrl } : {}),
     },
     jobLocation: {
@@ -64,6 +92,9 @@ export function buildJobPostingSchema(job: JobPostingSchemaInput, company: JobPo
   }
 
   if (job.isRemote) {
+    // Google needs BOTH for a remote role: the telecommute flag, and where
+    // applicants may live. Without jobLocationType it is listed as on-site.
+    schema.jobLocationType = 'TELECOMMUTE';
     schema.applicantLocationRequirements = { '@type': 'Country', name: 'India' };
   }
 

@@ -97,8 +97,11 @@ export default async function JobDetailPage({ params }: { params: Promise<{ jobI
           }
         : null,
       isRemote: job.IsRemote ?? false,
+      // Scraped listing: the candidate applies on the employer's site, not here.
+      directApply: false,
     },
-    { name: job.Company },
+    // No apply.jobmesh.in careers page exists for a scraped company.
+    { name: job.Company, sameAs: null },
   );
   const breadcrumbSchema = buildBreadcrumbListSchema([
     { name: 'Jobs', path: '/jobs' },

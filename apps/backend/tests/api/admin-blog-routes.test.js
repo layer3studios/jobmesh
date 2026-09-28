@@ -18,10 +18,13 @@ const VALID = { title: 'Remote jobs in India', description: 'A guide.', body: '#
 function fakeDeps() {
   const audits = [];
   const created = [];
+  const pinged = [];
   return {
     audits,
     created,
+    pinged,
     deps: {
+      notifyIndexNow: (paths) => { pinged.push(...paths); },
       listAllPosts: async () => [],
       findPostById: async () => null,
       createPost: async (value) => {
@@ -55,12 +58,19 @@ test('a plain admin can list posts but cannot create one', async () => {
 });
 
 test('a super_admin creates a post, slug derived from the title, and it is audited', async () => {
-  const { deps, created, audits } = fakeDeps();
+  const { deps, created, audits, pinged } = fakeDeps();
   const res = await request(adminApp('super_admin', deps)).post('/api/admin/blog').send({ ...VALID, status: 'published' });
   assert.equal(res.status, 201);
   assert.equal(created[0].slug, 'remote-jobs-in-india');
   assert.equal(res.body.data.post.status, 'published');
   assert.equal(audits[0].event, AUDIT_EVENTS.BLOG_POST_CREATED);
+  assert.deepEqual(pinged, ['/blog/remote-jobs-in-india', '/blog']);
+});
+
+test('a draft is never sent to IndexNow', async () => {
+  const { deps, pinged } = fakeDeps();
+  await request(adminApp('super_admin', deps)).post('/api/admin/blog').send(VALID);
+  assert.deepEqual(pinged, []);
 });
 
 test('invalid input is rejected with field errors', async () => {
