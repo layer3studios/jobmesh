@@ -2,6 +2,7 @@
 // Write-side operations for the jobs collection.
 
 import { ObjectId } from 'mongodb';
+import { notifyIndexNow } from '../../services/seo/indexnow-client.js';
 import { col } from '../connection.js';
 import { SITES_CONFIG } from '../../config.js';
 import { createJobModel } from '../../models/shared/job-model.js';
@@ -115,6 +116,9 @@ export async function saveJobs(rawJobs) {
   });
 
   const result = await jobs.bulkWrite(ops, { ordered: false });
+  // New job pages → Bing/ChatGPT search right away (no-op without INDEXNOW_KEY).
+  const newIds = Object.values(result.upsertedIds ?? {});
+  if (newIds.length) notifyIndexNow(newIds.map((id) => `/jobs/${id}`));
   return (result.upsertedCount || 0) + (result.modifiedCount || 0);
 }
 

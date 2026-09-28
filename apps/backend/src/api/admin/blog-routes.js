@@ -20,6 +20,7 @@ import {
 } from '../../models/content/blog-post-model.js';
 import { appendAudit as defaultAppendAudit } from '../../services/dpdp/audit-log-service.js';
 import { AUDIT_EVENTS } from '../../models/dpdp/dpdp-constants.js';
+import { notifyIndexNow as defaultNotifyIndexNow } from '../../services/seo/indexnow-client.js';
 
 function requireSuperAdmin(req, _res, next) {
   if (req.adminUser?.role !== 'super_admin') {
@@ -43,6 +44,7 @@ export function createBlogAdminRouter(deps = {}) {
     updatePost = defaultUpdate,
     deletePost = defaultDelete,
     appendAudit = defaultAppendAudit,
+    notifyIndexNow = defaultNotifyIndexNow,
   } = deps;
   const router = Router();
 
@@ -71,6 +73,7 @@ export function createBlogAdminRouter(deps = {}) {
     const result = await createPost(parsed.value, req.adminUser?.adminUserId ?? null);
     if (!result.ok) throw invalid({ slug: 'Another post already uses this URL' });
     await audit(req, AUDIT_EVENTS.BLOG_POST_CREATED, result.post, { status: result.post.status });
+    if (result.post.status === 'published') notifyIndexNow([`/blog/${result.post.slug}`, '/blog']);
     res.status(201).json({ data: { post: toAdminPost(result.post) } });
   }));
 
@@ -86,6 +89,11 @@ export function createBlogAdminRouter(deps = {}) {
       oldStatus: result.before?.status,
       newStatus: result.post?.status,
     });
+    // Published, edited while live, or just unpublished: search engines should re-fetch.
+    if (result.post?.status === 'published' || result.before?.status === 'published') {
+      const slugs = new Set([result.post?.slug, result.before?.slug].filter(Boolean));
+      notifyIndexNow([...[...slugs].map((slug) => `/blog/${slug}`), '/blog']);
+    }
     res.json({ data: { post: toAdminPost(result.post) } });
   }));
 
@@ -93,6 +101,7 @@ export function createBlogAdminRouter(deps = {}) {
     const result = await deletePost(req.params.id);
     if (!result.ok) throw new HttpError(404, 'Post not found', 'BLOG_POST_NOT_FOUND');
     await audit(req, AUDIT_EVENTS.BLOG_POST_DELETED, result.post);
+    if (result.post?.status === 'published') notifyIndexNow([`/blog/${result.post.slug}`, '/blog']);
     res.json({ data: { deleted: true } });
   }));
 

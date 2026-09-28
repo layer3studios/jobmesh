@@ -31,6 +31,8 @@ export const FEED_PROJECTION = {
   ApplicationURL: 1, DirectApplyURL: 1,
   Department: 1, ContractType: 1, WorkplaceType: 1, IsRemote: 1,
   SalaryMin: 1, SalaryMax: 1, SalaryCurrency: 1, SalaryInfo: 1,
+  // Salary FAQ on /tech-jobs pages compares yearly figures only.
+  SalaryInterval: 1,
   Status: 1, isEntryLevel: 1, autoTags: 1,
   scrapedAt: 1, createdAt: 1,
   // Client-side skill matching only — never rendered as prose.

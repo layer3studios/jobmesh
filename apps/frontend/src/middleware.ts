@@ -14,6 +14,7 @@
 // localhost:3001/employer keeps behaving exactly as it did before this file existed.
 import { NextResponse, type NextRequest } from 'next/server';
 import { PATH_PREFIX_BY_AUDIENCE, isLocalHostname, resolveAudience } from './lib/subdomain';
+import { isBlockedCrawler } from './lib/seo/crawler-policy';
 
 /** Paths the 'apply' host serves without the /apply prefix (booking links). */
 const APPLY_PASSTHROUGH_PREFIXES = ['/apply', '/interview'];
@@ -25,7 +26,9 @@ const APPLY_PASSTHROUGH_PREFIXES = ['/apply', '/interview'];
  * expects a text file. These still flow through rewriteTo() so the handler can
  * read x-subdomain and vary its output per host.
  */
-const ROOT_PASSTHROUGH_PATHS = ['/robots.txt', '/sitemap.xml', '/manifest.json', '/favicon.ico'];
+const ROOT_PASSTHROUGH_PATHS = [
+  '/robots.txt', '/sitemap.xml', '/manifest.json', '/favicon.ico', '/llms.txt', '/indexnow-key.txt',
+];
 
 /** Route handlers live at /api on the Next tier (health). Never audience-prefixed. */
 const ROOT_PASSTHROUGH_PREFIXES = ['/api/'];
@@ -67,6 +70,16 @@ function prefixedPath(prefix: string, pathname: string): string {
 }
 
 export function middleware(request: NextRequest) {
+  // Model-training and dataset scrapers (lib/seo/crawler-policy.ts) get a 403
+  // on every host. robots.txt stays readable so the polite ones can see they
+  // are disallowed; search engines and AI answer bots never match this list.
+  if (request.nextUrl.pathname !== '/robots.txt' && isBlockedCrawler(request.headers.get('user-agent'))) {
+    return new NextResponse('Crawling for AI training or datasets is not permitted. See /robots.txt.', {
+      status: 403,
+      headers: { 'content-type': 'text/plain; charset=utf-8' },
+    });
+  }
+
   const hostHeader = request.headers.get('host');
 
   // Dev, or a proxy that stripped Host: fall through to path-based routing.
