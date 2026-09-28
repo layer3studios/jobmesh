@@ -32,6 +32,8 @@ import { createEmailLogRouter } from './api/admin/email-log-routes.js';
 import { createAlertSettingsRouter } from './api/admin/alert-settings-routes.js';
 import { createResendWebhookRouter } from './api/public/resend-webhook-route.js';
 import { createSeoRouter } from './api/admin/seo-routes.js';
+import { createBlogAdminRouter } from './api/admin/blog-routes.js';
+import { createPublicBlogRouter } from './api/public/public-blog-routes.js';
 import { createCompanyHealthRouter } from './api/admin/company-health-routes.js';
 import { createMissionControlRouter } from './api/admin/mission-control-routes.js';
 import newsRouter from './api/seeker/news-routes.js';
@@ -136,6 +138,7 @@ export function registerRoutes(app) {
   app.use('/api/admin/email-log', requireAdmin, createEmailLogRouter());
   app.use('/api/admin/alerts', requireAdmin, createAlertSettingsRouter());
   app.use('/api/admin/seo', requireAdmin, createSeoRouter());
+  app.use('/api/admin/blog', requireAdmin, createBlogAdminRouter());
   app.use('/api/public/webhooks/resend', createResendWebhookRouter());
   app.use('/api/admin', adminRouter);
   // Admin analytics: jm_admin_token via new require-admin-middleware (D5 — standalone,
@@ -185,6 +188,7 @@ export function registerRoutes(app) {
   app.use('/api/employer/jobs', requireEmployer, requireEmployerCompany, employerInterviewTimesRouter);
   app.use('/api/dpdp', dpdpRouter); // per-route guards (D9) — /notice-version is public
   app.use('/api/public/resume-download', resumeDownloadRouter); // signed-token PDF stream (before the apply catch-all)
+  app.use('/api/public/blog', createPublicBlogRouter()); // published blog posts (before the apply catch-all)
   app.use('/api/public/company-logo', companyLogoRouter); // unauthenticated careers-page logo (before the apply catch-all)
   app.use('/api/public/culture-photo', culturePhotoRouter); // unauthenticated careers-page photos (before the apply catch-all)
   app.use('/api/public/avatar', employerAvatarRouter); // unauthenticated interviewer photo (before the apply catch-all)

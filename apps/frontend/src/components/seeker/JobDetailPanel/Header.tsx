@@ -11,9 +11,11 @@ interface Props {
   job: IJob;
   domain?: string;
   mobileMode?: boolean;
+  /** h1 on the standalone /jobs/[id] page (its main heading); h2 inside the board. */
+  titleAs?: 'h1' | 'h2';
 }
 
-export default function Header({ job, domain }: Props) {
+export default function Header({ job, domain, titleAs: Title = 'h2' }: Props) {
   const auto = getAutoTags(job);
   const rt = relTime(job.PostedDate || job.createdAt || job.scrapedAt || null);
   const isNew = rt === 'Today' || rt === '1d ago';
@@ -26,7 +28,7 @@ export default function Header({ job, domain }: Props) {
         {auto.urgency === 'Urgent' && <span className="jb-tag" style={{ color: 'var(--danger)', borderColor: 'transparent', background: 'var(--danger-soft)' }}>Urgent</span>}
       </p>
 
-      <h2 className="font-display jb-detail__title">{job.JobTitle}</h2>
+      <Title className="font-display jb-detail__title">{job.JobTitle}</Title>
 
       <div className="jb-detail__company">
         <CompanyLogo name={job.Company} url={job.ApplicationURL} domain={domain} size={32} borderRadius={8} style={{ flexShrink: 0 }} />

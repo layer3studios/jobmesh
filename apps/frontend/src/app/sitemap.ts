@@ -3,14 +3,21 @@
 // (D_impl_3). Public reads, so a missing cookie is fine; a backend hiccup degrades
 // to just the static routes rather than failing the build/request.
 import type { MetadataRoute } from 'next';
-import { getSeekerJobsServer, getSeekerDirectoryServer } from '@/lib/server-api/seeker';
+import { getAllSeekerJobsServer, getSeekerDirectoryServer } from '@/lib/server-api/seeker';
+import { TECH_JOB_PAGES } from '@/lib/seo/tech-job-pages';
+import { getPublishedBlogPostsServer } from '@/lib/server-api/blog';
 import { getPublicProfileSlugsServer } from '@/lib/server-api/public-profile';
 import { slugifyCompanyName } from '@/utils/slugify-company';
 import { absoluteUrl } from '@/lib/site-url';
 
 export const revalidate = 3600;
 
-const STATIC_PATHS = ['/', '/jobs', '/directory', '/legal', '/legal/privacy'];
+// The landing pages (/find-work, /companies, /hire) and the SEO hubs were
+// missing here, so Google only found them by following links.
+const STATIC_PATHS = [
+  '/', '/jobs', '/find-work', '/companies', '/hire', '/directory', '/tech-jobs', '/blog',
+  '/legal', '/legal/privacy',
+];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = STATIC_PATHS.map((path) => ({
@@ -18,9 +25,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: 'daily',
     priority: path === '/' ? 1 : 0.7,
   }));
+  for (const page of TECH_JOB_PAGES) {
+    entries.push({ url: absoluteUrl(`/tech-jobs/${page.slug}`), changeFrequency: 'daily', priority: 0.8 });
+  }
+  try {
+    for (const post of await getPublishedBlogPostsServer()) {
+      entries.push({
+        url: absoluteUrl(`/blog/${post.slug}`),
+        lastModified: post.updatedAt ?? post.publishedAt ?? undefined,
+        changeFrequency: 'monthly',
+        priority: 0.6,
+      });
+    }
+  } catch {
+    // No blog posts in the sitemap this hour; they are still linked from /blog.
+  }
 
   try {
-    const [jobs, companies] = await Promise.all([getSeekerJobsServer(), getSeekerDirectoryServer()]);
+    const [jobs, companies] = await Promise.all([getAllSeekerJobsServer(), getSeekerDirectoryServer()]);
     for (const job of jobs) {
       entries.push({
         url: absoluteUrl(`/jobs/${job._id}`),

@@ -27,7 +27,9 @@ const JOBS_SHOWN = 12;
 const COMPANIES_SHOWN = 10;
 
 export const metadata: Metadata = {
-  title: TITLE,
+  // `absolute`: TITLE already names the brand; the layout template would add
+  // "| JobMesh" a second time.
+  title: { absolute: TITLE },
   description: BRAND.description,
   keywords: [
     'tech jobs India', 'software engineer jobs India', 'IT jobs India',

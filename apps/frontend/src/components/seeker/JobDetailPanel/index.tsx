@@ -11,6 +11,8 @@ interface Props {
   job: IJob;
   domain?: string;
   mobileMode?: boolean;
+  /** Heading level of the job title; 'h1' on the standalone SEO page. */
+  titleAs?: 'h1' | 'h2';
   is3xl?: boolean;
   appliedJobIds: Set<string>;
   comeBackMap: Record<string, string>;
@@ -21,7 +23,7 @@ interface Props {
 }
 
 export default function JobDetailPanel({
-  job, domain, mobileMode, is3xl, appliedJobIds,
+  job, domain, mobileMode, titleAs, is3xl, appliedJobIds,
   comeBackMap, onToggleApplied, onToggleComeBack, onRemoveComeBack, onSelectJob,
 }: Props) {
   void is3xl;
@@ -33,7 +35,7 @@ export default function JobDetailPanel({
   return (
     <div key={job._id} className={`jb-detail__inner jb-swap${mobileMode ? ' jb-detail--mobile' : ''}`}>
       <div className="jb-detail__head">
-        <Header job={job} domain={domain} mobileMode={mobileMode} />
+        <Header job={job} domain={domain} mobileMode={mobileMode} titleAs={titleAs} />
         <Actions
           job={job}
           mobileMode={mobileMode}
