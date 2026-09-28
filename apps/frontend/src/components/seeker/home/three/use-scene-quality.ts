@@ -21,8 +21,15 @@ export function useSceneQuality(): SceneQuality {
       isLite: window.innerWidth < LITE_MAX_WIDTH || (navigator.hardwareConcurrency ?? 8) <= 4,
       isReady: true,
     });
-    const id = requestAnimationFrame(() => setQuality(decide()));
-    const onResize = () => setQuality(decide());
+    // Keep the previous object when nothing changed. On a phone `resize` fires
+    // every time the address bar slides in or out; a fresh object each time
+    // re-rendered the canvas mid-scroll and made it hitch.
+    const update = () => setQuality(prev => {
+      const next = decide();
+      return prev.isReady && prev.isLite === next.isLite && prev.reducedMotion === next.reducedMotion ? prev : next;
+    });
+    const id = requestAnimationFrame(update);
+    const onResize = update;
     window.addEventListener('resize', onResize);
     return () => { cancelAnimationFrame(id); window.removeEventListener('resize', onResize); };
   }, []);

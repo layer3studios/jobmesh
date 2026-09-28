@@ -12,6 +12,7 @@ import MeshGlobe from './MeshGlobe';
 import OrbitCubes from './OrbitCubes';
 import GravityDust from './GravityDust';
 import { scenePointer } from './pointer-store';
+import SceneFrameloop from './scene-frameloop';
 
 const CAMERA_Z = 6.2;
 const PARALLAX = 0.55;
@@ -42,8 +43,12 @@ export default function HeroScene({ reducedMotion, isLite }: Props) {
       camera={{ position: [0, 0, CAMERA_Z], fov: 42, near: 0.1, far: 40 }}
       gl={{ antialias: isLite, alpha: true, powerPreference: 'high-performance', stencil: false }}
       frameloop={reducedMotion ? 'demand' : 'always'}
+      // The canvas never takes pointer events, so its page offset is unused;
+      // measuring it on every scroll only re-sized the renderer mid-scroll.
+      resize={{ scroll: false }}
       style={{ pointerEvents: 'none' }}
     >
+      <SceneFrameloop isAnimated={!reducedMotion} />
       <Suspense fallback={null}>
         <CameraRig />
         <MeshGlobe />

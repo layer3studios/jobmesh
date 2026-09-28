@@ -21,6 +21,9 @@ import Lenis from 'lenis';
 import { scenePointer } from './three/pointer-store';
 
 gsap.registerPlugin(ScrollTrigger);
+// On phones the address bar sliding away resizes the viewport; without this
+// every slide re-measured every trigger and the page jumped under the thumb.
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 const EASE = 'power4.out';
 
@@ -46,11 +49,17 @@ export default function ScrollMotion({ scope }: { scope: string }) {
           y: 22, opacity: 0, duration: 0.75, ease: EASE, stagger: 0.09, delay: 0.3,
         });
 
-        ScrollTrigger.batch(root.querySelectorAll('[data-reveal]'), {
+        // Hide reveal targets up front. Setting the start state only when a
+        // batch entered meant each block painted, blinked out, then rose —
+        // a flicker on every section while scrolling.
+        const reveals = root.querySelectorAll('[data-reveal]');
+        gsap.set(reveals, { y: 36, opacity: 0 });
+        ScrollTrigger.batch(reveals, {
           start: 'top 88%',
-          onEnter: batch => gsap.fromTo(batch,
-            { y: 36, opacity: 0 },
+          onEnter: batch => gsap.to(batch,
             { y: 0, opacity: 1, duration: 0.95, ease: EASE, stagger: 0.09, overwrite: true }),
+          // Loaded already scrolled past a block (reload, back button): show it.
+          onLeave: batch => gsap.set(batch, { y: 0, opacity: 1, overwrite: true }),
           once: true,
         });
 
@@ -75,7 +84,7 @@ export default function ScrollMotion({ scope }: { scope: string }) {
         root.querySelectorAll<HTMLElement>('.hm-ink--band .hm-ink__img, .hm-ink--final .hm-ink__img').forEach(img => {
           gsap.fromTo(img, { yPercent: -8 }, {
             yPercent: 8, ease: 'none',
-            scrollTrigger: { trigger: img.closest('section, div') ?? img, start: 'top bottom', end: 'bottom top', scrub: true },
+            scrollTrigger: { trigger: img.closest('section, div') ?? img, start: 'top bottom', end: 'bottom top', scrub: 0.4 },
           });
         });
 

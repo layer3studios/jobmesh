@@ -4,13 +4,37 @@
    scripting off or reduced motion on, everything simply sits at rest:
    nothing here hides content. */
 
+/* ── Lenis smooth scroll ──────────────────────────────────────────────
+   Lenis' own stylesheet, inlined. board.css sets `html { scroll-behavior:
+   smooth }` for the app; left on under Lenis, the browser tweens every
+   scrollTo Lenis issues on top of Lenis' own easing and the page judders. */
+html.lenis, html.lenis body { height: auto; }
+html.lenis { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: clip; }
+.lenis.lenis-smooth iframe { pointer-events: none; }
+
+/* ── Glass on phones and tablets ────────────────────────────────────────
+   backdrop-filter re-blurs whatever is behind it every frame that backdrop
+   changes — here a live WebGL canvas and cards sliding in. Mobile GPUs drop
+   frames doing it, so on touch screens the panes go near-opaque instead. */
+@media (max-width: 900px), (hover: none) {
+  .hm-root .hm-nav { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(9, 9, 11, 0.92); }
+  .hm-root .hm-card, .hm-root .hm-glass, .hm-root .hm-panel--score, .hm-root .hm-hero__badge,
+  .hm-root .hm-pill--ghost, .hm-root .hr-kanban {
+    backdrop-filter: none; -webkit-backdrop-filter: none;
+  }
+  .hm-root .hm-card, .hm-root .hm-glass, .hm-root .hr-kanban { background: rgba(19, 19, 22, 0.9); }
+  .hm-root .hm-panel--score { background: rgba(19, 19, 22, 0.92); }
+}
+
 /* ── The Three.js scene ─────────────────────────────────────────────── */
 .hm-scene-host { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
 .hm-scene { width: 100% !important; height: 100% !important; }
 
 /* ── Hero words rise out of a clipped line ──────────────────────────── */
 .hm-line { display: inline-block; overflow: hidden; vertical-align: bottom; padding: 0 0.08em; margin: 0 -0.08em; }
-.hm-word { display: inline-block; will-change: transform, opacity; }
+.hm-word { display: inline-block; }
 
 /* ── Nav gains a hairline once the page has moved ───────────────────── */
 .hm-nav { transition: box-shadow var(--m-slow) var(--ease), background-color var(--m-slow) var(--ease); }
