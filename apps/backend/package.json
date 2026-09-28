@@ -8,6 +8,7 @@
     "dev": "nodemon src/server.js",
     "scrape": "node src/tasks/runScraper.js",
     "audit:assignments": "node src/scripts/audit-assignments.js",
+    "seed:blog": "node src/scripts/seed-blog-posts.js",
     "migrate:auto-tags": "node scripts/migrate-auto-tags.js",
     "migrate:clean-descriptions": "node scripts/migrate-clean-descriptions.js",
     "test:backend": "node --test --test-concurrency=1 \"tests/**/*.test.js\"",

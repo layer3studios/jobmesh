@@ -69,6 +69,10 @@ export const AUDIT_EVENTS = Object.freeze({
   JOB_DELETED: 'job_deleted',
   // Who changed the alerting configuration — including who turned it off.
   ALERT_SETTINGS_CHANGED: 'alert_settings_changed',
+  // Public blog content, written from the admin panel.
+  BLOG_POST_CREATED: 'blog_post_created',
+  BLOG_POST_UPDATED: 'blog_post_updated',
+  BLOG_POST_DELETED: 'blog_post_deleted',
 });
 
 /** True when `value` is one of the frozen enum's values. */

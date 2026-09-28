@@ -5,7 +5,7 @@
 import type { MetadataRoute } from 'next';
 import { getAllSeekerJobsServer, getSeekerDirectoryServer } from '@/lib/server-api/seeker';
 import { TECH_JOB_PAGES } from '@/lib/seo/tech-job-pages';
-import { BLOG_POSTS } from '@/content/blog/posts';
+import { getPublishedBlogPostsServer } from '@/lib/server-api/blog';
 import { getPublicProfileSlugsServer } from '@/lib/server-api/public-profile';
 import { slugifyCompanyName } from '@/utils/slugify-company';
 import { absoluteUrl } from '@/lib/site-url';
@@ -28,13 +28,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const page of TECH_JOB_PAGES) {
     entries.push({ url: absoluteUrl(`/tech-jobs/${page.slug}`), changeFrequency: 'daily', priority: 0.8 });
   }
-  for (const post of BLOG_POSTS) {
-    entries.push({
-      url: absoluteUrl(`/blog/${post.slug}`),
-      lastModified: post.updatedAt ?? post.publishedAt,
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    });
+  try {
+    for (const post of await getPublishedBlogPostsServer()) {
+      entries.push({
+        url: absoluteUrl(`/blog/${post.slug}`),
+        lastModified: post.updatedAt ?? post.publishedAt ?? undefined,
+        changeFrequency: 'monthly',
+        priority: 0.6,
+      });
+    }
+  } catch {
+    // No blog posts in the sitemap this hour; they are still linked from /blog.
   }
 
   try {

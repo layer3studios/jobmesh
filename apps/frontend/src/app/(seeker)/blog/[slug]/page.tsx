@@ -1,5 +1,6 @@
 // FILE: src/app/(seeker)/blog/[slug]/page.tsx
-// One blog post. Markdown from content/blog/posts.ts, rendered on the server
+// One blog post. Markdown from the blog_posts collection (written in the admin
+// panel at /admin/blog, served by /api/public/blog), rendered on the server
 // (no raw HTML — react-markdown without rehype-raw, as in shared/Markdown.tsx),
 // with Article + BreadcrumbList JSON-LD. Internal links render as next/link.
 import type { Metadata } from 'next';
@@ -8,19 +9,21 @@ import { notFound } from 'next/navigation';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { JsonLd } from '../../../../components/schema/JsonLd';
-import { BLOG_POSTS, findBlogPost } from '../../../../content/blog/posts';
+import { getPublishedBlogPostServer, getPublishedBlogPostsServer } from '../../../../lib/server-api/blog';
 import { buildArticleSchema, buildBreadcrumbListSchema } from '../../../../lib/schema';
 import { absoluteUrl } from '../../../../lib/site-url';
 
-export const dynamicParams = false;
+// New posts appear without a deploy: pages render on first request, then cache.
+export const revalidate = 60;
 
-export function generateStaticParams() {
-  return BLOG_POSTS.map(post => ({ slug: post.slug }));
+export async function generateStaticParams() {
+  const posts = await getPublishedBlogPostsServer().catch(() => []);
+  return posts.map(post => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const post = findBlogPost(slug);
+  const post = await getPublishedBlogPostServer(slug).catch(() => null);
   if (!post) return { title: 'Post not found', robots: { index: false } };
   const url = absoluteUrl(`/blog/${post.slug}`);
   return {
@@ -29,7 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     alternates: { canonical: url },
     openGraph: {
       type: 'article', title: post.title, description: post.description, url, locale: 'en_IN',
-      publishedTime: post.publishedAt, modifiedTime: post.updatedAt ?? post.publishedAt, tags: post.tags,
+      publishedTime: post.publishedAt ?? undefined, modifiedTime: post.updatedAt ?? post.publishedAt ?? undefined, tags: post.tags,
     },
     twitter: { card: 'summary', title: post.title, description: post.description },
   };
@@ -51,15 +54,17 @@ function formatDate(iso: string): string {
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = findBlogPost(slug);
+  const post = await getPublishedBlogPostServer(slug);
   if (!post) notFound();
-  const others = BLOG_POSTS.filter(other => other.slug !== post.slug).slice(0, 3);
+  const others = (await getPublishedBlogPostsServer().catch(() => []))
+    .filter(other => other.slug !== post.slug).slice(0, 3);
+  const publishedAt = post.publishedAt ?? post.updatedAt ?? new Date().toISOString();
 
   return (
     <main style={{ width: '100%', maxWidth: 760, margin: '0 auto', padding: 'clamp(20px, 4vw, 40px) clamp(16px, 4vw, 24px) 64px' }}>
       <JsonLd schema={buildArticleSchema({
         title: post.title, description: post.description, path: `/blog/${post.slug}`,
-        publishedAt: post.publishedAt, updatedAt: post.updatedAt, author: post.author,
+        publishedAt, updatedAt: post.updatedAt ?? undefined, author: post.author,
       })} />
       <JsonLd schema={buildBreadcrumbListSchema([
         { name: 'Blog', path: '/blog' },
@@ -73,7 +78,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             {post.title}
           </h1>
           <p style={{ marginTop: 12, fontSize: 14, color: 'var(--ink-muted)' }}>
-            {post.author} · <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+            {post.author} · <time dateTime={publishedAt}>{formatDate(publishedAt)}</time>
           </p>
         </header>
         <div style={{ fontSize: 17, lineHeight: 1.7, color: 'var(--ink)' }}>
