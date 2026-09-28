@@ -44,7 +44,11 @@ export default function GravityDust() {
     return { positions, velocities, linePositions: new Float32Array(LINK_COUNT * 2 * 3) };
   }, []);
 
-  const nearest = useRef<{ index: number; distance: number }[]>([]);
+  // Pointer → nearest motes, kept as a small sorted list in fixed arrays.
+  // Pushing an object per mote per frame fed the garbage collector ~25k
+  // objects a second, and its pauses showed up as periodic stutters.
+  const nearestIndex = useMemo(() => new Int32Array(LINK_COUNT), []);
+  const nearestDistance = useMemo(() => new Float32Array(LINK_COUNT), []);
 
   useFrame((_, delta) => {
     const points = pointsRef.current;
@@ -54,8 +58,11 @@ export default function GravityDust() {
     const pointerX = scenePointer.x * viewport.width / 2;
     const pointerY = scenePointer.y * viewport.height / 2;
     const isActive = scenePointer.isActive;
+    const drag = Math.pow(DRAG, frameScale);
+    const limitX = viewport.width / 2 + 0.5;
+    const limitY = viewport.height / 2 + 0.5;
 
-    nearest.current.length = 0;
+    let found = 0;
     for (let index = 0; index < COUNT; index += 1) {
       const i = index * 3;
       const x = positions[i];
@@ -74,10 +81,18 @@ export default function GravityDust() {
           velocities[i] += (dx / unit) * pull;
           velocities[i + 1] += (dy / unit) * pull;
         }
-        if (distance < LINK_REACH) nearest.current.push({ index, distance });
+        if (distance < LINK_REACH && (found < LINK_COUNT || distance < nearestDistance[found - 1])) {
+          let slot = found < LINK_COUNT ? found++ : LINK_COUNT - 1;
+          while (slot > 0 && nearestDistance[slot - 1] > distance) {
+            nearestDistance[slot] = nearestDistance[slot - 1];
+            nearestIndex[slot] = nearestIndex[slot - 1];
+            slot -= 1;
+          }
+          nearestDistance[slot] = distance;
+          nearestIndex[slot] = index;
+        }
       }
 
-      const drag = Math.pow(DRAG, frameScale);
       velocities[i] *= drag;
       velocities[i + 1] *= drag;
       const speed = Math.hypot(velocities[i], velocities[i + 1]);
@@ -89,19 +104,22 @@ export default function GravityDust() {
       positions[i + 1] += velocities[i + 1] * frameScale;
 
       // Wrap, so the field keeps its density without visible walls.
-      const limitX = viewport.width / 2 + 0.5;
-      const limitY = viewport.height / 2 + 0.5;
       if (positions[i] > limitX) positions[i] = -limitX; else if (positions[i] < -limitX) positions[i] = limitX;
       if (positions[i + 1] > limitY) positions[i + 1] = -limitY; else if (positions[i + 1] < -limitY) positions[i + 1] = limitY;
     }
     (points.geometry.attributes.position as THREE.BufferAttribute).needsUpdate = true;
 
     // Connection lines: pointer → its nearest motes.
-    nearest.current.sort((a, b) => a.distance - b.distance);
-    const linkCount = isActive ? Math.min(LINK_COUNT, nearest.current.length) : 0;
+    const linkCount = isActive ? found : 0;
     for (let link = 0; link < linkCount; link += 1) {
-      const target = nearest.current[link].index * 3;
-      linePositions.set([pointerX, pointerY, 0, positions[target], positions[target + 1], positions[target + 2]], link * 6);
+      const target = nearestIndex[link] * 3;
+      const out = link * 6;
+      linePositions[out] = pointerX;
+      linePositions[out + 1] = pointerY;
+      linePositions[out + 2] = 0;
+      linePositions[out + 3] = positions[target];
+      linePositions[out + 4] = positions[target + 1];
+      linePositions[out + 5] = positions[target + 2];
     }
     lines.geometry.setDrawRange(0, linkCount * 2);
     (lines.geometry.attributes.position as THREE.BufferAttribute).needsUpdate = true;

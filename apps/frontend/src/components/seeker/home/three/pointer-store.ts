@@ -16,9 +16,21 @@ export interface ScenePointer {
 
 export const scenePointer: ScenePointer = { x: 0, y: 0, isActive: false, scrollProgress: 0 };
 
-/** Attach window listeners that keep `scenePointer` current for a canvas host. */
+/**
+ * Attach window listeners that keep the pointer half of `scenePointer` current
+ * for a canvas host. Scroll progress is NOT tracked here: ScrollMotion drives
+ * it from ScrollTrigger, on the same clock as Lenis. A second writer on the raw
+ * `scroll` event read a slightly different value every frame, and the camera
+ * shook between the two.
+ */
 export function trackPointer(host: HTMLElement): () => void {
+  scenePointer.scrollProgress = 0;
+  scenePointer.isActive = false;
   const onMove = (event: PointerEvent) => {
+    // Only a mouse aims the camera. A finger dragging the page on a phone
+    // fires pointermove too, and used to yank the scene toward the thumb
+    // mid-scroll.
+    if (event.pointerType !== 'mouse') return;
     const rect = host.getBoundingClientRect();
     const insideY = event.clientY >= rect.top && event.clientY <= rect.bottom;
     scenePointer.x = ((event.clientX - rect.left) / (rect.width || 1)) * 2 - 1;
@@ -26,17 +38,10 @@ export function trackPointer(host: HTMLElement): () => void {
     scenePointer.isActive = insideY;
   };
   const onLeave = () => { scenePointer.isActive = false; };
-  const onScroll = () => {
-    const rect = host.getBoundingClientRect();
-    scenePointer.scrollProgress = Math.min(1, Math.max(0, -rect.top / (rect.height || 1)));
-  };
   window.addEventListener('pointermove', onMove, { passive: true });
-  window.addEventListener('pointerleave', onLeave);
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
+  document.documentElement.addEventListener('pointerleave', onLeave);
   return () => {
     window.removeEventListener('pointermove', onMove);
-    window.removeEventListener('pointerleave', onLeave);
-    window.removeEventListener('scroll', onScroll);
+    document.documentElement.removeEventListener('pointerleave', onLeave);
   };
 }

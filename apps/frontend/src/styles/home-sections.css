@@ -17,15 +17,20 @@
 }
 
 /* ── Ticker — the live wire. ───────────────────────────────────────── */
-@keyframes hm-ticker-scroll { from { transform: translateX(50%); } to { transform: translateX(-100%); } }
+@keyframes hm-ticker-scroll { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
 .hm-ticker {
   overflow: hidden; padding: 7px 0;
   background: var(--paper); color: var(--ink-muted);
   border-bottom: 1px solid var(--border);
   font-size: var(--t-label-sm); letter-spacing: 0.05em; text-transform: uppercase; line-height: 1.4;
 }
-.hm-ticker__text { display: inline-block; white-space: nowrap; animation: hm-ticker-scroll 34s linear infinite; }
-@media (prefers-reduced-motion: reduce) { .hm-ticker { display: flex; justify-content: center; } .hm-ticker__text { animation: none; } }
+.hm-ticker__track { display: inline-flex; white-space: nowrap; animation: hm-ticker-scroll 60s linear infinite; }
+.hm-ticker__text { flex-shrink: 0; padding-right: 0.6em; }
+@media (prefers-reduced-motion: reduce) {
+  .hm-ticker { display: flex; justify-content: center; }
+  .hm-ticker__track { animation: none; }
+  .hm-ticker__text[aria-hidden="true"] { display: none; }
+}
 
 /* ── Showcase — the two audience sections share one grammar. ────────── */
 .hm-show { position: relative; padding-top: var(--s-10); padding-bottom: var(--s-10); }

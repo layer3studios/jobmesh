@@ -16,6 +16,7 @@ import CubeField from './CubeField';
 import RingField from './RingField';
 import Lattice from './Lattice';
 import { scenePointer } from './pointer-store';
+import SceneFrameloop from './scene-frameloop';
 
 export type PageSceneVariant = 'field' | 'rings' | 'lattice';
 
@@ -48,8 +49,12 @@ export default function PageScene({ variant, reducedMotion, isLite }: Props) {
       // Bloom softens edges anyway, so MSAA is paid for twice; leave it off.
       gl={{ antialias: isLite, alpha: true, powerPreference: 'high-performance', stencil: false, depth: true }}
       frameloop={reducedMotion ? 'demand' : 'always'}
+      // The canvas never takes pointer events, so its page offset is unused;
+      // measuring it on every scroll only re-sized the renderer mid-scroll.
+      resize={{ scroll: false }}
       style={{ pointerEvents: 'none' }}
     >
+      <SceneFrameloop isAnimated={!reducedMotion} />
       <Suspense fallback={null}>
         <CameraRig />
         {variant === 'field' && <CubeField isLite={isLite} />}
