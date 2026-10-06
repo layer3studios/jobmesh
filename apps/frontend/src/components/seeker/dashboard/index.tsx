@@ -29,7 +29,7 @@ export default function Dashboard() {
   /** Job ids whose full document has already been fetched — see the effect below. */
   const hydratedIds = useRef<Set<string>>(new Set());
 
-  const { isMobile, useSplit } = useViewport();
+  const { layoutMode } = useViewport();
   const { appliedJobIds, dismissedJobIds, toggleApplied, toggleDismissed, userSkills, currentUser } = useSeeker();
   const { comeBackMap, toggle: handleToggleComeBack, remove: handleRemoveComeBack } = useComeBack(currentUser);
 
@@ -79,6 +79,9 @@ export default function Dashboard() {
   // from this same array — so a row picked out of `jobs` paints instantly and then
   // has to be topped up by id. `hydratedIds` makes that at most one fetch per job:
   // without it, the effect would see a still-partial doc and refetch forever.
+  //
+  // When restoring from URL in sheet mode, open the sheet automatically so that
+  // deep links (/jobs?selectedJob=<id>) open the detail immediately.
   useEffect(() => {
     if (!f.selectedJobParam) return;
     const id = f.selectedJobParam;
@@ -86,7 +89,11 @@ export default function Dashboard() {
 
     // Paint immediately from the list row when we have one — the header, salary
     // and tags are all present there; only the body is missing.
-    if (found && id !== selectedJob?._id) setSelectedJob(found);
+    if (found && id !== selectedJob?._id) {
+      setSelectedJob(found);
+      // Deep-link: open the sheet so the user sees the job detail immediately.
+      if (layoutMode === 'sheet') setJobSheetOpen(true);
+    }
 
     // Completeness of the doc we actually hold decides this, never identity: a job
     // reached from the Similar Jobs rail is already `selectedJob` by the time this
@@ -109,7 +116,7 @@ export default function Dashboard() {
     // whether it still needs a description. Re-running on the hydrated value is
     // harmless — the id then matches, so nothing is overwritten and `hydratedIds`
     // stops a second fetch.
-  }, [f.selectedJobParam, jobs, selectedJob]);
+  }, [f.selectedJobParam, jobs, selectedJob, layoutMode]);
 
   const companyDomainMap = useMemo(() => {
     const m = new Map<string, string>();
@@ -132,21 +139,30 @@ export default function Dashboard() {
     });
   }, [visibleJobs, f.sortByMatch, skillRe]);
 
-  // Auto-select first job on desktop
+  // Auto-select first job on desktop split view ONLY.
+  // Must not run in sheet mode — it would write selectedJob into the URL on a
+  // phone and trigger the sheet to open unprompted.
   useEffect(() => {
-    if (!useSplit) return;
+    if (layoutMode !== 'split') return;
     if (!selectedJob && finalJobs.length > 0) {
       setSelectedJob(finalJobs[0]);
       f.setSp(p => { p.set('selectedJob', finalJobs[0]._id); });
     }
-  }, [useSplit, finalJobs, selectedJob]);
+  }, [layoutMode, finalJobs, selectedJob]);
 
   const handleSelectJob = useCallback((job: IJob) => {
     trackJobResultClick(job._id, finalJobs.findIndex(j => j._id === job._id));
     setSelectedJob(job);
     f.setSp(p => { p.set('selectedJob', job._id); });
-    if (isMobile) setJobSheetOpen(true);
-  }, [isMobile, finalJobs]);
+    // In sheet mode (any viewport that is not split), open the bottom sheet.
+    if (layoutMode === 'sheet') setJobSheetOpen(true);
+  }, [layoutMode, finalJobs]);
+
+  const handleCloseJobSheet = useCallback(() => {
+    setJobSheetOpen(false);
+    // Clear selectedJob from URL so the back button doesn't re-open the sheet.
+    f.setSp(p => { p.delete('selectedJob'); });
+  }, []);
 
   const newJobsCount = useMemo(() => countNewJobs(jobs), [jobs]);
   useDashboardAnalytics({ loading, totalResults: totalJobs, filterCount: f.activeFilters.length, searchInput: f.searchInput });
@@ -163,8 +179,7 @@ export default function Dashboard() {
     <DashboardLayout
       f={f}
       facets={facets}
-      isMobile={isMobile}
-      useSplit={useSplit}
+      layoutMode={layoutMode}
       jobs={jobs}
       finalJobs={finalJobs}
       totalJobs={totalJobs}
@@ -187,7 +202,7 @@ export default function Dashboard() {
       jobSheetOpen={jobSheetOpen}
       filterSheetOpen={filterSheetOpen}
       onOpenFilterSheet={() => setFilterSheetOpen(true)}
-      onCloseJobSheet={() => setJobSheetOpen(false)}
+      onCloseJobSheet={handleCloseJobSheet}
       onCloseFilterSheet={() => setFilterSheetOpen(false)}
       onToggleSortByMatch={handleToggleSortByMatch}
       onSelectJob={handleSelectJob}

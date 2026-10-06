@@ -19,6 +19,7 @@ import type { useComeBack } from '../../../hooks/seeker/useComeBack';
 import type { useDashboardFilters } from './useDashboardFilters';
 import type { useJobFacets } from './useJobFacets';
 import type { useDashboardJobs } from './useDashboardJobs';
+import type { DashboardLayoutMode } from './useViewport';
 import DashboardControls from './DashboardControls';
 import DashboardBody from './DashboardBody';
 import MobileSheets from './MobileSheets';
@@ -29,8 +30,7 @@ type ComeBack = ReturnType<typeof useComeBack>;
 export interface DashboardLayoutProps {
   f: ReturnType<typeof useDashboardFilters>;
   facets: ReturnType<typeof useJobFacets>;
-  isMobile: boolean;
-  useSplit: boolean;
+  layoutMode: DashboardLayoutMode;
 
   jobs: IJob[];
   finalJobs: IJob[];
@@ -68,10 +68,10 @@ export interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout(p: DashboardLayoutProps) {
-  const { f, facets } = p;
+  const { f, facets, layoutMode } = p;
 
   return (
-    <Container size="xl" style={{ paddingTop: 'clamp(16px, 4vw, 24px)', paddingBottom: p.isMobile ? 80 : 40, width: '100%' }}>
+    <Container size="xl" style={{ paddingTop: 'clamp(16px, 4vw, 24px)', paddingBottom: layoutMode === 'sheet' ? 80 : 40, width: '100%' }}>
       {/* No page title: the search band is the header. One mono line states scale. */}
       <p style={{
         fontFamily: 'var(--font-jetbrains-mono), ui-monospace, monospace',
@@ -82,7 +82,7 @@ export default function DashboardLayout(p: DashboardLayoutProps) {
       </p>
 
       <DashboardControls
-        isMobile={p.isMobile}
+        isMobile={layoutMode === 'sheet'}
         searchInput={f.searchInput} setSearchInput={f.setSearchInput}
         sortByMatch={f.sortByMatch}
         toggleSortByMatch={p.onToggleSortByMatch}
@@ -109,7 +109,7 @@ export default function DashboardLayout(p: DashboardLayoutProps) {
 
       <DashboardBody
         loading={p.loading} error={p.error} onRetry={p.onRetry} jobs={p.jobs} finalJobs={p.finalJobs}
-        useSplit={p.useSplit}
+        useSplit={layoutMode === 'split'}
         selectedJob={p.selectedJob}
         companyDomainMap={p.companyDomainMap}
         appliedJobIds={p.appliedJobIds} comeBackMap={p.comeBackMap}
@@ -127,7 +127,10 @@ export default function DashboardLayout(p: DashboardLayoutProps) {
         onClearFilters={f.clearAll}
       />
 
-      {p.isMobile && (
+      {/* Sheet-mode mobile sheets: rendered for ALL non-split layouts, not just
+          phones narrower than 768px. Portaled to document.body in each component
+          so they escape the .page-enter containing block. */}
+      {layoutMode === 'sheet' && (
         <MobileSheets
           job={p.selectedJob}
           jobSheetOpen={p.jobSheetOpen}
