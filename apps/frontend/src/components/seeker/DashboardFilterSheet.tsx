@@ -1,11 +1,16 @@
 'use client';
 // FILE: src/components/seeker/DashboardFilterSheet.tsx
-import { useEffect, useState } from 'react';
+// Mobile filter bottom sheet, portaled to document.body to escape the
+// .page-enter containing block (same as DashboardJobSheet).
+
+import { useEffect, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { Button } from '../ui';
 import DashboardFilterSheetFields from './DashboardFilterSheetFields';
 import type { JobFacets } from './dashboard/useJobFacets';
 import { Z } from '@/theme/tokens';
+import { useFocusTrap } from '../ui/useFocusTrap';
 
 interface Option { value: string; label: string; }
 
@@ -48,6 +53,9 @@ export default function DashboardFilterSheet({
 }: Props) {
   const [mounted, setMounted] = useState(isOpen);
   const [closing, setClosing] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => { setHydrated(true); }, []);
 
   // Salary committed on a short debounce to avoid a refetch per keystroke.
   const [salMin, setSalMin] = useState(salaryMinFilter);
@@ -60,6 +68,9 @@ export default function DashboardFilterSheet({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [salMin, salMax]);
 
+  const stableClose = useCallback(() => { onClose(); }, [onClose]);
+  const panelRef = useFocusTrap<HTMLDivElement>(isOpen && mounted, stableClose);
+
   useEffect(() => {
     if (isOpen) { setMounted(true); setClosing(false); }
     else if (mounted) {
@@ -69,11 +80,31 @@ export default function DashboardFilterSheet({
     }
   }, [isOpen, mounted]);
 
-  if (!mounted) return null;
+  // Body scroll lock
+  useEffect(() => {
+    if (!isOpen) return;
 
-  return (
+    const scrollY = window.scrollY;
+    const { body } = document;
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.left = '0';
+    body.style.right = '0';
+
+    return () => {
+      body.style.position = '';
+      body.style.top = '';
+      body.style.left = '';
+      body.style.right = '';
+      window.scrollTo(0, scrollY);
+    };
+  }, [isOpen]);
+
+  if (!hydrated || !mounted) return null;
+
+  return createPortal(
     <div
-      onClick={onClose}
+      onClick={stableClose}
       style={{
         position: 'fixed', inset: 0, zIndex: Z.sheet,
         background: 'rgba(15,15,14,0.45)',
@@ -81,6 +112,10 @@ export default function DashboardFilterSheet({
       }}
     >
       <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Job filters"
         onClick={e => e.stopPropagation()}
         style={{
           position: 'absolute', bottom: 0, left: 0, right: 0,
@@ -90,6 +125,7 @@ export default function DashboardFilterSheet({
           display: 'flex', flexDirection: 'column',
           animation: `${closing ? 'sheetSlideDown' : 'sheetSlideUp'} 0.28s cubic-bezier(0.16, 1, 0.3, 1)`,
           paddingBottom: 'env(safe-area-inset-bottom)',
+          overscrollBehavior: 'contain',
         }}
       >
         {/* Drag handle */}
@@ -107,7 +143,7 @@ export default function DashboardFilterSheet({
           <h2 className="font-display" style={{ fontSize: '1.1rem', fontWeight: 600 }}>
             Filters {activeFilterCount > 0 && <span style={{ color: 'var(--ink-muted)', fontWeight: 500, fontSize: '0.85rem' }}>· {activeFilterCount}</span>}
           </h2>
-          <button onClick={onClose} aria-label="Close" style={{
+          <button onClick={stableClose} aria-label="Close" style={{
             width: 30, height: 30, borderRadius: 8,
             background: 'var(--paper-2)', border: '1px solid var(--border)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -145,11 +181,12 @@ export default function DashboardFilterSheet({
           display: 'flex', gap: 8,
         }}>
           <Button variant="ghost" size="md" onClick={clearAllFilters} style={{ flex: 1 }}>Clear all</Button>
-          <Button variant="primary" size="md" onClick={onClose} style={{ flex: 2 }}>
+          <Button variant="primary" size="md" onClick={stableClose} style={{ flex: 2 }}>
             Show {visibleJobsCount} results
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
