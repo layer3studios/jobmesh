@@ -18,7 +18,13 @@ import BottomNav from './parts/BottomNav';
 import { useViewport } from '../../hooks/shared/useViewport';
 import type { NavItem } from './parts/types';
 
-export default function SeekerAppShell({ children }: { children: ReactNode }) {
+interface ShellProps {
+  children: ReactNode;
+  /** Hire half of the product is live. Off hides every door into it. */
+  employerSideEnabled: boolean;
+}
+
+export default function SeekerAppShell({ children, employerSideEnabled }: ShellProps) {
   const { mode, toggle } = useTheme();
   const {
     currentUser, logout, skillsEditorOpen, openSkillsEditor, closeSkillsEditor,
@@ -71,6 +77,7 @@ export default function SeekerAppShell({ children }: { children: ReactNode }) {
         onToggleTheme={toggle}
         onOpenSkillsEditor={openSkillsEditor}
         onLogout={logout}
+        employerSideEnabled={employerSideEnabled}
       />}
 
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>

@@ -17,7 +17,7 @@ const LINKS = [
   { href: '/companies', label: COPY.home.navCompanies },
 ] as const;
 
-export default function LandingNav() {
+export default function LandingNav({ employerSideEnabled }: { employerSideEnabled: boolean }) {
   const pathname = usePathname();
 
   // iOS Safari paints the overscroll and status-bar areas with <html>'s own
@@ -59,10 +59,13 @@ export default function LandingNav() {
         <div className="hm-nav__spacer" />
 
         {/* The employer path is in the chrome, not only in the body: a company
-            that lands here must be able to leave for hire.jobmesh.in at once. */}
-        <Link href="/hire" className="hm-nav__link hm-mono" aria-current={pathname === '/hire' ? 'page' : undefined}>
-          {COPY.home.navHire}
-        </Link>
+            that lands here must be able to leave for hire.jobmesh.in at once —
+            once that half of the product is switched on at /admin/flags. */}
+        {employerSideEnabled && (
+          <Link href="/hire" className="hm-nav__link hm-mono" aria-current={pathname === '/hire' ? 'page' : undefined}>
+            {COPY.home.navHire}
+          </Link>
+        )}
         <Link href="/login" className="hm-nav__signin hm-mono">{COPY.home.navSignIn}</Link>
         <Link href="/jobs" className="hm-pill hm-pill--solid hm-pill--sm">{COPY.home.navGetStarted}</Link>
       </div>

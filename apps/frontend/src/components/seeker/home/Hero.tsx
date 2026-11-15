@@ -9,8 +9,6 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { COPY } from '../../../theme/brand';
 import type { HomeCounts } from './shared';
-import InkImage from './InkImage';
-import HeroScene3D from './HeroScene3D';
 
 /** "Where talent finds" / "its next chapter" — one clipped line per word. */
 function StatementWords({ text }: { text: string }) {
@@ -25,16 +23,13 @@ function StatementWords({ text }: { text: string }) {
   );
 }
 
-export default function Hero({ counts }: { counts: HomeCounts }) {
+export default function Hero({ counts, employerSideEnabled }: { counts: HomeCounts; employerSideEnabled: boolean }) {
   const badgeText = counts.jobCount > 0
     ? `${counts.jobCount.toLocaleString('en-IN')}+ ${COPY.home.metricRolesLabel}`
     : COPY.home.rolesAddedDaily;
 
   return (
     <section className="hm-section hm-hero" aria-labelledby="hero-heading">
-      <InkImage name="ink-hero" treatment="hero" />
-      <HeroScene3D />
-      <div className="hm-hero__veil" aria-hidden="true" />
 
       <div className="hm-hero__content">
         <div className="hm-hero__badge hm-mono">
@@ -46,16 +41,28 @@ export default function Hero({ counts }: { counts: HomeCounts }) {
           <StatementWords text={COPY.home.heroStatement} />
         </h1>
 
-        <p className="hm-hero__lede">{COPY.home.heroLede}</p>
+        <p className="hm-hero__lede">
+          {employerSideEnabled ? COPY.home.heroLede : COPY.home.heroLedeSeekerOnly}
+        </p>
 
+        {/* Two doors when both halves are open. With the hire half off the
+            second door would be the only way out of a one-sided page, so it
+            becomes the companies directory rather than disappearing and
+            leaving a lone button adrift in the middle of the hero. */}
         <div className="hm-hero__doors">
           <Link href="/jobs" className="hm-pill hm-pill--solid hm-pill--lg">
             {COPY.home.heroPrimaryCTA}
             <ArrowRight size={17} className="hm-pill__arrow" aria-hidden="true" />
           </Link>
-          <Link href="/hire" className="hm-pill hm-pill--ghost hm-pill--lg">
-            {COPY.home.heroSecondaryCTA2}
-          </Link>
+          {employerSideEnabled ? (
+            <Link href="/hire" className="hm-pill hm-pill--ghost hm-pill--lg">
+              {COPY.home.heroSecondaryCTA2}
+            </Link>
+          ) : (
+            <Link href="/directory" className="hm-pill hm-pill--ghost hm-pill--lg">
+              {COPY.home.heroSecondaryCTA}
+            </Link>
+          )}
         </div>
       </div>
 

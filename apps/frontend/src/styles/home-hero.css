@@ -1,24 +1,9 @@
 /* FILE: src/styles/home-hero.css
-   The hero, and the shared ink-photograph layer every image band uses.
-   Layers back to front:
-     0. .hm-ink            — the ink-in-water photograph (InkImage), masked
-     1. .hm-hero__veil     — keeps the centre dark enough for the headline
-     2. content            — badge, the statement, two doors
-   No search field: the landing states what happens; the product is behind
-   the door. Every decorative layer is aria-hidden, pointer-events:none, and
-   still under prefers-reduced-motion. */
-
-/* ── The ink layer. Treatments mirror the reference: hero fades at the
-   bottom only, band fades top and bottom, final fades at the top only. ──── */
-.hm-ink { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-.hm-ink__img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
-.hm-ink--hero { mask-image: linear-gradient(to bottom, black 50%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%); }
-.hm-ink--band { mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%); }
-.hm-ink--final { mask-image: linear-gradient(to bottom, transparent 0%, black 22%, black 100%); -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 22%, black 100%); }
-
-/* Slow Ken-Burns drift so the photograph never reads as a static wallpaper. */
-@keyframes hm-ink-drift { 0% { transform: scale(1.04) translate3d(0, 0, 0); } 100% { transform: scale(1.12) translate3d(-1.5%, -1%, 0); } }
-.hm-ink--hero .hm-ink__img { animation: hm-ink-drift 38s ease-in-out infinite alternate; will-change: transform; }
+   The hero. It used to be three stacked decorative layers — an ink-in-water
+   photograph, a Three.js mesh over it, and a radial veil dark enough to win
+   the headline back from both. All three are gone: the page now states what
+   it does on a plain ground, and the only colour is the accent.
+   Every decorative layer left is aria-hidden and honours reduced motion. */
 
 /* ── Hero ───────────────────────────────────────────────────────────── */
 .hm-hero {
@@ -28,22 +13,18 @@
   padding-top: var(--s-9); padding-bottom: var(--s-9);
   text-align: center;
 }
-.hm-hero__veil {
-  position: absolute; inset: 0; z-index: 2; pointer-events: none;
-  background: radial-gradient(ellipse 48% 42% at 50% 52%, rgba(9, 9, 11, 0.78) 0%, rgba(9, 9, 11, 0.32) 55%, rgba(9, 9, 11, 0) 80%);
-}
 .hm-hero__content { position: relative; z-index: 3; width: 100%; max-width: 960px; }
 
 @keyframes hm-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 .hm-hero__badge {
   display: inline-flex; align-items: center; gap: var(--s-2);
   margin-bottom: var(--s-6); padding: 6px 16px;
-  border: 1px solid var(--border-strong); border-radius: var(--r-pill);
-  background: rgba(9, 9, 11, 0.5);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border); border-radius: var(--r-pill);
+  background: var(--surface-2);
   font-size: var(--t-label); text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-2);
 }
-.hm-hero__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ink); animation: hm-pulse 2.4s ease-in-out infinite; }
+/* The live dot is the accent: the one spot of colour above the fold. */
+.hm-hero__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: hm-pulse 2.4s ease-in-out infinite; }
 
 /* The statement. Instrument Serif italic, 72px on desktop per the system. */
 .hm-hero__title {
@@ -73,5 +54,5 @@
   .hm-hero__cue { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hm-hero__dot, .hm-hero__cue-line, .hm-ink--hero .hm-ink__img { animation: none; }
+  .hm-hero__dot, .hm-hero__cue-line { animation: none; }
 }

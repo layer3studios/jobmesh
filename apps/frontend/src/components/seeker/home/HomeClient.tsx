@@ -25,34 +25,34 @@ import HowItWorks from './HowItWorks';
 import CompaniesGrid from './CompaniesGrid';
 import FinalCTA from './FinalCTA';
 import LandingFooter from './LandingFooter';
-import InkImage from './InkImage';
 import ScrollMotion from './ScrollMotion';
 
 interface Props extends HomeCounts {
   companies: ICompany[];
+  /** Hire half is live. Off drops the employer sections and doors. */
+  employerSideEnabled: boolean;
 }
 
 export default function HomeClient({
-  companies, jobCount, companyCount, todayCount, topHiringNames,
+  companies, jobCount, companyCount, todayCount, topHiringNames, employerSideEnabled,
 }: Props) {
   const counts: HomeCounts = { jobCount, companyCount, todayCount, topHiringNames };
 
   return (
     <div className="hm-root">
       <ScrollMotion scope=".hm-root" />
-      <LandingNav />
+      <LandingNav employerSideEnabled={employerSideEnabled} />
       <Ticker counts={counts} />
-      <Hero counts={counts} />
+      <Hero counts={counts} employerSideEnabled={employerSideEnabled} />
       <SeekerShowcase />
-      <CompanyShowcase />
+      {employerSideEnabled && <CompanyShowcase />}
       <TrustStrip counts={counts} />
       <LogoStrip companies={companies} />
-      <MeshSpine />
+      <MeshSpine employerSideEnabled={employerSideEnabled} />
       <HowItWorks />
       <CompaniesGrid companies={companies} />
       {/* The close and the footer share the last photograph, as in the reference. */}
       <div className="hm-final-wrap">
-        <InkImage name="ink-hero" treatment="final" />
         <FinalCTA />
         <LandingFooter />
       </div>

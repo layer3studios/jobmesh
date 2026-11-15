@@ -18,7 +18,6 @@ import { useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
-import { scenePointer } from './three/pointer-store';
 
 gsap.registerPlugin(ScrollTrigger);
 // On phones the address bar sliding away resizes the viewport; without this
@@ -88,13 +87,6 @@ export default function ScrollMotion({ scope }: { scope: string }) {
           });
         });
 
-        root.querySelectorAll<HTMLElement>('.hm-ink--band .hm-ink__img, .hm-ink--final .hm-ink__img').forEach(img => {
-          gsap.fromTo(img, { yPercent: -8 }, {
-            yPercent: 8, ease: 'none',
-            scrollTrigger: { trigger: img.closest('section, div') ?? img, start: 'top bottom', end: 'bottom top', scrub: 0.4 },
-          });
-        });
-
         // In-page links (/hire's "#how") go through Lenis. A native fragment
         // jump mid-glide was overwritten by Lenis on the next frame, so the
         // page snapped down, then back, then glided. Lenis honours the
@@ -115,16 +107,6 @@ export default function ScrollMotion({ scope }: { scope: string }) {
         if (nav) ScrollTrigger.create({ start: 40, onToggle: self => nav.classList.toggle('hm-nav--scrolled', self.isActive) });
 
         // The 3D scene's scroll-sink is driven from HERE, not from a raw window
-        // scroll listener: iOS Safari fires `scroll` unreliably through
-        // rubber-band and momentum phases, so the object used to freeze mid-way
-        // on a phone. ScrollTrigger already normalises all of that.
-        const hero = root.querySelector('.hm-hero, .lp-hero, .hr-hero');
-        if (hero) {
-          ScrollTrigger.create({
-            trigger: hero, start: 'top top', end: 'bottom top', scrub: true,
-            onUpdate: self => { scenePointer.scrollProgress = self.progress; },
-          });
-        }
         return () => root.removeEventListener('click', onAnchorClick);
       }, root);
 

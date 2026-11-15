@@ -46,31 +46,28 @@
   --border-strong: rgba(255, 255, 255, 0.20);
   --border-loud: rgba(255, 255, 255, 0.38);
 
-  /* ── Ember: the one hue. Signal only. ─────────────────────────────── */
-  --ember: #E86A3C;
-  --ember-bright: #FF8552;
-  --ember-soft: rgba(232, 106, 60, 0.14);
-  --ember-line: rgba(232, 106, 60, 0.42);
-  --teal: #3C8C8C;
-
-  /* App-token aliases so shared components inherit the landing palette. */
-  --accent: var(--ember);
-  --accent-hover: var(--ember-bright);
-  --accent-soft: var(--ember-soft);
-  --accent-mid: var(--ember-line);
-  --primary: var(--ember);
-  --primary-hover: var(--ember-bright);
-  --primary-soft: var(--ember-soft);
-  --link: var(--ember);
+  /* ── The one hue. Signal only. ────────────────────────────────────────
+     The landing used to run its own ember (#E86A3C) while the app ran
+     indigo, so the product had two accents and the landing did not look
+     like the thing it was selling. Both are the same indigo now — the dark
+     tone, since this surface is always dark: 7.28:1 on the ground. */
+  --accent: #8B95F2;
+  --accent-hover: #A5B4FC;
+  --accent-soft: rgba(139, 149, 242, 0.14);
+  --accent-mid: rgba(139, 149, 242, 0.42);
+  --primary: var(--accent);
+  --primary-hover: var(--accent-hover);
+  --primary-soft: var(--accent-soft);
+  --link: var(--accent);
   --success: var(--ink);
   --success-soft: rgba(255, 255, 255, 0.08);
-  --info: var(--teal);
-  --info-soft: rgba(60, 140, 140, 0.14);
+  --info: var(--accent);
+  --info-soft: var(--accent-soft);
   --text-on-accent: #09090B;
   --text-inverse: #09090B;
-  --glass-bg: rgba(9, 9, 11, 0.68);
+  --glass-bg: #09090B;
   --glass-stroke: rgba(255, 255, 255, 0.07);
-  --highlight-edge: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --highlight-edge: none;
 
   /* ── Type scale (px) ──────────────────────────────────────────────── */
   --t-display-1: clamp(44px, 6.6vw, 86px);

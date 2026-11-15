@@ -1,18 +1,12 @@
 'use client';
 // FILE: src/components/seeker/companies/CompaniesHero.tsx
-// The /companies hero — the same centred, pure-ink grammar as /find-work with
-// a different signature object: concentric orbits (RingField). A company is
-// an orbit; there are many of them round one centre. The console is a
-// company search that hands off to the real directory at /directory?q=….
-import dynamic from 'next/dynamic';
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+// The /companies hero — a centred statement and a company search that hands
+// off to the real directory at /directory?q=….
+import { useState, type KeyboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { COPY } from '../../../theme/brand';
-import { trackPointer } from '../home/three/pointer-store';
-import { useSceneQuality } from '../home/three/use-scene-quality';
 
-const PageScene = dynamic(() => import('../home/three/PageScene'), { ssr: false });
 
 function Words({ text, isAccent }: { text: string; isAccent?: boolean }) {
   return (
@@ -28,14 +22,7 @@ function Words({ text, isAccent }: { text: string; isAccent?: boolean }) {
 
 export default function CompaniesHero({ companyCount }: { companyCount: number }) {
   const router = useRouter();
-  const hostRef = useRef<HTMLDivElement>(null);
-  const { reducedMotion, isLite, isReady } = useSceneQuality();
   const [value, setValue] = useState('');
-
-  useEffect(() => {
-    const host = hostRef.current;
-    return host ? trackPointer(host) : undefined;
-  }, []);
 
   const submit = () => {
     const query = value.trim().replace(/<[^>]*>/g, '').trim();
@@ -47,10 +34,6 @@ export default function CompaniesHero({ companyCount }: { companyCount: number }
 
   return (
     <section className="hm-section lp-hero" aria-labelledby="companies-heading">
-      <div ref={hostRef} className="hm-scene-host">
-        {isReady && <PageScene variant="rings" reducedMotion={reducedMotion} isLite={isLite} />}
-      </div>
-      <div className="lp-hero__veil" aria-hidden="true" />
 
       <div className="lp-hero__content">
         <div className="hm-hero__badge hm-mono">

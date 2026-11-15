@@ -5,6 +5,7 @@
 // component: metadata + the same aggregate counts the landing advertises.
 import type { Metadata } from 'next';
 import { getSeekerDirectoryServer, getSeekerTodayCountServer } from '../../../lib/server-api/seeker';
+import { isEmployerSideEnabled } from '../../../lib/server-api/flags';
 import { absoluteUrl } from '../../../lib/site-url';
 import { BRAND, COPY } from '../../../theme/brand';
 import FindWorkClient from '../../../components/seeker/find-work/FindWorkClient';
@@ -27,6 +28,7 @@ export const metadata: Metadata = {
 };
 
 export default async function FindWorkPage() {
+  const employerSideEnabled = await isEmployerSideEnabled();
   // allSettled: the counters are decoration; one failing must not blank the page.
   const [directoryResult, todayResult] = await Promise.allSettled([
     getSeekerDirectoryServer(), getSeekerTodayCountServer(),
@@ -42,6 +44,7 @@ export default async function FindWorkPage() {
 
   return (
     <FindWorkClient
+      employerSideEnabled={employerSideEnabled}
       companies={companies.slice(0, 10)}
       jobCount={jobCount}
       companyCount={companies.length}

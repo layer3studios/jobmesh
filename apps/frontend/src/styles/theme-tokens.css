@@ -22,25 +22,31 @@
   --surface: #FBFAF8;
   --surface-solid: #FBFAF8;
   --surface-2: #F1F0EC;
-  --surface-alt: rgba(251, 250, 248, 0.85);
+  --surface-alt: #FBFAF8;
   --surface-raised: #FBFAF8;
   --surface-sunken: #EDECE8;
   --surface-muted: #E4E3DE;
   --surface-3: #E4E3DE; --border-hairline: rgba(9, 9, 11, 0.12);
-  --glass-panel: rgba(241, 240, 236, 0.78);
-  --glass-card: rgba(251, 250, 248, 0.55); --glass-strong: rgba(251, 250, 248, 0.82);
+  --glass-panel: #F1F0EC;
+  --glass-card: #FBFAF8; --glass-strong: #F1F0EC;
   /* The sheen along a glass edge and the light it catches at the top. */
-  --glass-sheen: rgba(255, 255, 255, 0.55);
-  --glass-glow: rgba(255, 255, 255, 0.35);
-  --glass-blur: 24px; --glass-sat: 180%;
+  /* Kept so the ~40 files that name them still resolve; the sheen and the
+     blur they described are gone, so they resolve to nothing. */
+  --glass-sheen: transparent;
+  --glass-glow: transparent;
+  --glass-blur: 0px; --glass-sat: 100%;
   --on-indigo: #FFFFFF;
-  --accent: #09090B;
-  --accent-hover: #26262A;
-  --accent-soft: rgba(9, 9, 11, 0.07);
-  --accent-mid: rgba(9, 9, 11, 0.22);
-  --primary: #09090B;
-  --primary-hover: #26262A;
-  --primary-soft: rgba(9, 9, 11, 0.07);
+  /* ── The third colour. Ink and paper carry the structure; indigo carries
+     intent — what you can press, what is selected, what matched you.
+     It is the indigo already in the brand thread, so nothing new is invented.
+     Light: #4F46E5 is 5.72:1 on paper and takes white at 6.29:1. ──────── */
+  --accent: #4F46E5;
+  --accent-hover: #4338CA;
+  --accent-soft: rgba(79, 70, 229, 0.08);
+  --accent-mid: rgba(79, 70, 229, 0.28);
+  --primary: #4F46E5;
+  --primary-hover: #4338CA;
+  --primary-soft: rgba(79, 70, 229, 0.08);
   --text-primary: #09090B;
   --text-secondary: #5C5B60;
   --muted-ink: #5C5B60;
@@ -60,8 +66,11 @@
   --danger-soft: rgba(181, 52, 26, 0.10);
   --info: #3F5FBF;
   --info-soft: rgba(63, 95, 191, 0.10);
-  --focus-ring: 0 0 0 3px rgba(9, 9, 11, 0.18);
-  --link: #09090B;
+  /* Focus is the accent, not a grey ghost: an invisible focus ring is the
+     most common accessibility failure in a dark UI, and a hue reads at a
+     glance where a tint of the text colour does not. */
+  --focus-ring: 0 0 0 3px rgba(79, 70, 229, 0.38);
+  --link: #4F46E5;
   --thread-amber: #D97706;
   --thread-indigo: #4F46E5;
   --thread-gradient: linear-gradient(90deg, var(--thread-amber) 0%, var(--thread-indigo) 100%);
@@ -69,8 +78,8 @@
   --shadow-sm: 0 1px 2px rgba(9, 9, 11, 0.04), 0 2px 6px rgba(9, 9, 11, 0.03);
   --shadow-md: 0 4px 10px rgba(9, 9, 11, 0.07), 0 12px 28px rgba(9, 9, 11, 0.05);
   --shadow-lg: 0 8px 18px rgba(9, 9, 11, 0.09), 0 24px 52px rgba(9, 9, 11, 0.07);
-  --highlight-edge: inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  --glass-bg: rgba(251, 250, 248, 0.72);
+  --highlight-edge: none;
+  --glass-bg: #FBFAF8;
   --glass-stroke: rgba(9, 9, 11, 0.10);
   --text-inverse: #FFFFFF;
   --text-on-accent: #FFFFFF;
@@ -118,24 +127,27 @@
   --surface: #141313;
   --surface-solid: #141313;
   --surface-2: #201F1F;
-  --surface-alt: rgba(20, 19, 19, 0.78);
+  --surface-alt: #141313;
   --surface-raised: #1C1B1B;
   --surface-sunken: #0E0E0E;
   --surface-muted: #2B2A2A;
   --surface-3: #2B2A2A; --border-hairline: rgba(255, 255, 255, 0.12);
-  --glass-panel: rgba(32, 31, 31, 0.72);
-  --glass-card: rgba(24, 23, 23, 0.48); --glass-strong: rgba(20, 19, 19, 0.78);
-  --glass-sheen: rgba(255, 255, 255, 0.10);
-  --glass-glow: rgba(255, 255, 255, 0.05);
-  --glass-blur: 24px; --glass-sat: 180%;
+  --glass-panel: #201F1F;
+  --glass-card: #141313; --glass-strong: #201F1F;
+  --glass-sheen: transparent;
+  --glass-glow: transparent;
+  --glass-blur: 0px; --glass-sat: 100%;
   --on-indigo: #FFFFFF;
-  --accent: #E5E2E1;
-  --accent-hover: #FFFFFF;
-  --accent-soft: rgba(255, 255, 255, 0.08);
-  --accent-mid: rgba(255, 255, 255, 0.24);
-  --primary: #E5E2E1;
-  --primary-hover: #FFFFFF;
-  --primary-soft: rgba(255, 255, 255, 0.08);
+  /* Dark takes the same indigo lightened and desaturated — a saturated accent
+     on near-black haloes for astigmatic readers. #8B95F2 is 7.28:1 on the
+     obsidian ground and still takes ink at 7.28:1 when it is a fill. */
+  --accent: #8B95F2;
+  --accent-hover: #A5B4FC;
+  --accent-soft: rgba(139, 149, 242, 0.14);
+  --accent-mid: rgba(139, 149, 242, 0.34);
+  --primary: #8B95F2;
+  --primary-hover: #A5B4FC;
+  --primary-soft: rgba(139, 149, 242, 0.14);
   --text-primary: #E5E2E1;
   --text-secondary: #A1A1AA;
   --muted-ink: #A1A1AA;
@@ -155,16 +167,16 @@
   --danger-soft: rgba(239, 122, 94, 0.12);
   --info: #8B95F2;
   --info-soft: rgba(139, 149, 242, 0.12);
-  --focus-ring: 0 0 0 3px rgba(255, 255, 255, 0.22);
-  --link: #E5E2E1;
+  --focus-ring: 0 0 0 3px rgba(139, 149, 242, 0.48);
+  --link: #8B95F2;
   --thread-amber: #F59E0B;
   --thread-indigo: #6366F1;
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.25);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.38), 0 12px 28px rgba(0, 0, 0, 0.28);
   --shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.45), 0 24px 56px rgba(0, 0, 0, 0.35);
-  --highlight-edge: inset 0 1px 0 rgba(255, 255, 255, 0.07);
-  --glass-bg: rgba(9, 9, 11, 0.72);
+  --highlight-edge: none;
+  --glass-bg: #09090B;
   --glass-stroke: rgba(255, 255, 255, 0.08);
   --text-inverse: #09090B;
   --text-on-accent: #09090B;

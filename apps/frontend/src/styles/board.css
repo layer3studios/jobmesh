@@ -35,33 +35,19 @@ button:not(:disabled):active, [role="button"]:not([aria-disabled="true"]):active
     radial-gradient(60% 50% at 12% 0%, color-mix(in srgb, var(--thread-amber) 8%, transparent), transparent 70%),
     radial-gradient(55% 45% at 90% 100%, color-mix(in srgb, var(--thread-indigo) 10%, transparent), transparent 70%);
 }
-/* The glass recipe, for anything that is not a Card: a translucent fill, a
-   deep blur with lifted saturation so the ambient colour bleeds through, a
-   sheen along the top edge and a faint light caught at the top of the pane. */
+/* A plain pane, for anything that is not a Card: a solid fill and a hairline.
+   The class is still called .glass because ~40 files name it; the glass itself
+   is gone. It used to carry a 24px backdrop blur, lifted saturation, two
+   gradient "lights", three inset sheens and a 60px drop shadow — depth that
+   read as a 3D sheet floating over the page, blurred whatever sat behind it,
+   and cost a repaint on every scroll. Opaque is also simply easier to read. */
 .glass {
   position: relative;
-  background-color: var(--glass-card);
-  /* Light caught at the top-left and a faint fall-off to the bottom-right,
-     the way a pane sits under a soft key light. */
-  background-image:
-    radial-gradient(120% 80% at 0% 0%, var(--glass-glow) 0%, transparent 55%),
-    linear-gradient(180deg, var(--glass-sheen) 0%, transparent 18%);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(1.04);
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat)) brightness(1.04);
-  border: 1px solid var(--glass-stroke);
-  /* Hairline highlight on the top edge, a whisper on the left, then the
-     ambient shadow: one tight contact shadow and one wide diffuse one. */
-  box-shadow:
-    inset 0 1px 0 var(--glass-sheen),
-    inset 1px 0 0 color-mix(in srgb, var(--glass-sheen) 45%, transparent),
-    inset 0 -1px 0 color-mix(in srgb, var(--glass-sheen) 25%, transparent),
-    0 1px 2px rgba(0, 0, 0, 0.06),
-    0 24px 60px -12px rgba(0, 0, 0, 0.35);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-xs);
 }
-.glass--strong { background-color: var(--glass-strong); }
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .glass { background-color: var(--surface-solid); }
-}
+.glass--strong { background-color: var(--surface-raised); }
 
 /* ── App footer ────────────────────────────────────────────────────────
    Pitch + Navigate + Legal side by side; the two link columns pair up
@@ -106,7 +92,7 @@ button:not(:disabled):active, [role="button"]:not([aria-disabled="true"]):active
 .jb-sort:hover { border-color: var(--border-strong); color: var(--ink); }
 
 /* Filter panels: glass over the canvas; option hover is the next surface up. */
-.jb-panel { backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%); }
+.jb-panel {}
 .jb-option { transition: background-color var(--m-ui) var(--ease-out), transform var(--m-press) var(--ease-out); --stagger: 22ms; }
 .jb-option:hover, .jb-option:focus-visible { background: var(--surface-3); outline: none; }
 .jb-option:active { transform: scale(0.985); }
@@ -134,7 +120,7 @@ button:not(:disabled):active, [role="button"]:not([aria-disabled="true"]):active
 
 /* Link cards (company page, today picks): hover lifts the pane. */
 .jb-link-card { transition: border-color 160ms ease, background-color 160ms ease, transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 160ms ease; }
-.jb-link-card:hover { border-color: var(--border-strong) !important; background-color: var(--glass-strong) !important; transform: translateY(-2px); box-shadow: inset 0 1px 0 var(--glass-sheen), var(--shadow-md); }
+.jb-link-card:hover { border-color: var(--border-strong) !important; background-color: var(--glass-strong) !important; box-shadow: var(--shadow-sm); }
 @media (prefers-reduced-motion: reduce) { .jb-link-card:hover { transform: none; } }
 
 /* Sticky sidebar (employer settings): the ink thread runs down its right edge as a seam. */
@@ -167,7 +153,7 @@ button:not(:disabled):active, [role="button"]:not([aria-disabled="true"]):active
 .eb-row { transition: background 120ms ease; }
 .eb-row:hover { background: var(--accent-soft); }
 .pipeline-card { transition: border-color 120ms ease, background 120ms ease; }
-.pipeline-card:hover { border-color: var(--border-strong) !important; background: var(--glass-strong) !important; transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+.pipeline-card:hover { border-color: var(--border-strong) !important; background: var(--glass-strong) !important; box-shadow: var(--shadow-sm); }
 .cal-cell { transition: background 120ms ease; }
 .cal-cell:not(:disabled):hover { background: var(--accent-soft); }
 .eb-pill { transition: border-color 120ms ease, color 120ms ease; }

@@ -242,9 +242,7 @@
 
 .pp-card {
   background: var(--glass-card);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-  box-shadow: inset 0 1px 0 var(--glass-sheen), var(--shadow-sm);
+box-shadow: var(--shadow-xs);
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 24px;

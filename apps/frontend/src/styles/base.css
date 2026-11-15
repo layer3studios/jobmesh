@@ -83,6 +83,30 @@ a { color: inherit; }
   .panel-scroll { scroll-behavior: smooth; }
 }
 
+/* ── Reduced motion, caught once for the whole product ──────────────────
+   Twenty stylesheets each carried their own reduced-motion block, so every
+   new animation had to remember to opt out and several never did: the
+   ticker, the pulsing dots and the skeleton shimmer all kept moving. This
+   catches everything, including anything added later.
+
+   Durations go to 1ms rather than 0 so animationend/transitionend still
+   fire — JS that waits for them (sheet close, toast dismiss) would hang on
+   `animation: none`. Spinners keep turning, slowly: a frozen spinner reads
+   as a hung page, and the guidance is to calm motion, not to remove the
+   only signal that work is in progress. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+  .pf-spin, .spinner, [data-spinner] {
+    animation-duration: 1.4s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
+
 .font-display {
   font-family: var(--font-instrument-serif), var(--font-source-serif), Georgia, serif;
   font-feature-settings: 'liga', 'kern';

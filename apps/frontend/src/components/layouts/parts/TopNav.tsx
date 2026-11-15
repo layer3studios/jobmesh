@@ -27,6 +27,8 @@ interface Props {
   onToggleTheme: () => void;
   onOpenSkillsEditor: () => void;
   onLogout: () => void;
+  /** Hire half is live; when false the "Post a job" door is not shown. */
+  employerSideEnabled: boolean;
 }
 
 const MONO = 'var(--font-jetbrains-mono), ui-monospace, monospace';
@@ -136,7 +138,7 @@ export default function TopNav(p: Props) {
           />
         ) : (
           <>
-            {!p.isMobile && (
+            {!p.isMobile && p.employerSideEnabled && (
               <Link href="/hire" className="an-link" style={{
                 display: 'inline-flex', alignItems: 'center', padding: '8px 12px',
                 fontSize: 14, fontWeight: 500, color: 'var(--ink-muted)', textDecoration: 'none', whiteSpace: 'nowrap',

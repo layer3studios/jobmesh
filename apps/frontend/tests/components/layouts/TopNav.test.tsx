@@ -23,6 +23,7 @@ function renderTopNav(overrides: Record<string, unknown> = {}) {
       todayCount={2}
       streak={3}
       themeMode="light"
+      employerSideEnabled={false}
       onToggleTheme={onToggleTheme}
       onOpenSkillsEditor={onOpenSkillsEditor}
       onLogout={onLogout}

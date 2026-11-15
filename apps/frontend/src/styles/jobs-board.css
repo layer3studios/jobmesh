@@ -124,7 +124,7 @@
   transition: border-color var(--m-ui) var(--ease-out), transform var(--m-press) var(--ease-out);
 }
 .jb-stack__chip--mine { border-color: var(--accent-mid); color: var(--ink); background: var(--accent-soft); }
-@media (hover: hover) { .jb-stack__chip:hover { border-color: var(--border-strong); transform: translateY(-1px); } }
+@media (hover: hover) { .jb-stack__chip:hover { border-color: var(--border-strong); } }
 
 /* The description, structured: one measure, real heading rhythm, hanging
    bullets, a hairline between sections. Scraped headings arrive at every

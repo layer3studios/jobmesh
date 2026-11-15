@@ -25,7 +25,7 @@ describe('SeekerAppShell', () => {
 
   it('renders TopNav + Footer on desktop (no BottomNav)', () => {
     viewport.w = 1280;
-    render(<SeekerAppShell><p>child</p></SeekerAppShell>);
+    render(<SeekerAppShell employerSideEnabled={false}><p>child</p></SeekerAppShell>);
     expect(screen.getByTestId('topnav')).toBeTruthy();
     expect(screen.getByTestId('footer')).toBeTruthy();
     expect(screen.queryByTestId('bottomnav')).toBeNull();
@@ -34,7 +34,7 @@ describe('SeekerAppShell', () => {
 
   it('renders TopNav + BottomNav on mobile (no Footer)', () => {
     viewport.w = 500;
-    render(<SeekerAppShell><p>child</p></SeekerAppShell>);
+    render(<SeekerAppShell employerSideEnabled={false}><p>child</p></SeekerAppShell>);
     expect(screen.getByTestId('topnav')).toBeTruthy();
     expect(screen.getByTestId('bottomnav')).toBeTruthy();
     expect(screen.queryByTestId('footer')).toBeNull();

@@ -95,6 +95,14 @@ export const SEEKER_HOME_COPY = {
     navGetStarted: 'Get started',
     heroStatement: 'Where talent finds its next chapter',
     heroLede: 'One mesh for both sides of hiring. Seekers get their work scored before they apply. Companies get every applicant ranked before they look.',
+    /**
+     * The lede while the hire half is switched off. The two-sided line above
+     * promises a product half the visitor cannot reach, so the seeker-only
+     * site makes the seeker promise instead — and says the thing that is
+     * actually true of this board: every role links to the company's own
+     * posting.
+     */
+    heroLedeSeekerOnly: 'Fresh tech jobs from Indian companies, collected daily. Every role links straight to the company’s own posting — no recruiters, no reposts, no account needed to look.',
     heroPrimaryCTA: 'Find roles',
     heroSecondaryCTA2: 'Hire talent',
     scrollCue: 'Scroll',

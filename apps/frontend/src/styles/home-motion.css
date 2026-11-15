@@ -19,11 +19,10 @@ html.lenis { scroll-behavior: auto !important; }
    changes — here a live WebGL canvas and cards sliding in. Mobile GPUs drop
    frames doing it, so on touch screens the panes go near-opaque instead. */
 @media (max-width: 900px), (hover: none) {
-  .hm-root .hm-nav { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(9, 9, 11, 0.92); }
+  .hm-root .hm-nav {background: rgba(9, 9, 11, 0.92); }
   .hm-root .hm-card, .hm-root .hm-glass, .hm-root .hm-panel--score, .hm-root .hm-hero__badge,
   .hm-root .hm-pill--ghost, .hm-root .hr-kanban {
-    backdrop-filter: none; -webkit-backdrop-filter: none;
-  }
+}
   .hm-root .hm-card, .hm-root .hm-glass, .hm-root .hr-kanban { background: rgba(19, 19, 22, 0.9); }
   .hm-root .hm-panel--score { background: rgba(19, 19, 22, 0.92); }
 }
@@ -36,7 +35,6 @@ html.lenis { scroll-behavior: auto !important; }
 .hm-root [id] { scroll-margin-top: 84px; }
 
 /* ── The Three.js scene ─────────────────────────────────────────────── */
-.hm-scene-host { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
 .hm-scene { width: 100% !important; height: 100% !important; }
 
 /* ── Hero words rise out of a clipped line ──────────────────────────── */

@@ -8,7 +8,6 @@ import LandingNav from '../home/LandingNav';
 import LandingFooter from '../home/LandingFooter';
 import LogoStrip from '../home/LogoStrip';
 import ScrollMotion from '../home/ScrollMotion';
-import InkImage from '../home/InkImage';
 import HireHero from './HireHero';
 import HireFeatures from './HireFeatures';
 import HireProcess from './HireProcess';
@@ -24,13 +23,12 @@ export default function HireClient({ companies, companyCount, jobCount }: Props)
   return (
     <div className="hm-root">
       <ScrollMotion scope=".hm-root" />
-      <LandingNav />
+      <LandingNav employerSideEnabled={true} />
       <HireHero companyCount={companyCount} jobCount={jobCount} />
       <HireFeatures />
       <HireProcess />
       <LogoStrip companies={companies} />
       <div className="hm-final-wrap">
-        <InkImage name="ink-spine" treatment="final" opacity={0.6} />
         <HireFinal />
         <LandingFooter />
       </div>

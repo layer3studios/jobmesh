@@ -62,6 +62,19 @@ const companyTargets = [
 { subdomain: 'gorillas-personio', tld: 'de' },
 { subdomain: 'holidu',          tld: 'de' },
 { subdomain: 'omio',            tld: 'de' },
-    ];
+    
+// ── Discovery run 2026-09-15: verified ≥1 live India job ──
+{ subdomain: 'cuculus-gmbh', tld: 'de' },  // Added via discovery — 4 India / 7 total
+{ subdomain: 'sfc', tld: 'de' },  // Added via discovery — 3 India / 7 total
+{ subdomain: 'astormueller-ag', tld: 'de' },  // Added via discovery — 2 India / 7 total
+{ subdomain: 'tradetracker', tld: 'de' },  // Added via discovery — 2 India / 14 total
+{ subdomain: 'avow', tld: 'de' },  // Added via discovery — 1 India / 2 total
+{ subdomain: 'dynamix', tld: 'de' },  // Added via discovery — 1 India / 11 total
+{ subdomain: 'stanley-stella', tld: 'de' },  // Added via discovery — 1 India / 11 total
+{ subdomain: 'transitionzero', tld: 'de' },  // Added via discovery — 1 India / 4 total
+
+// ── Discovery run 2026-09-15T10:36: verified ≥1 live India job ──
+{ subdomain: 'bfgroup', tld: 'de' },  // Added via discovery — 1 India / 5 total
+];
 
 export { companyTargets };

@@ -5,6 +5,7 @@
 // twelve companies with the most open roles. Server component.
 import type { Metadata } from 'next';
 import { getSeekerDirectoryServer, getSeekerTodayCountServer } from '../../../lib/server-api/seeker';
+import { isEmployerSideEnabled } from '../../../lib/server-api/flags';
 import { absoluteUrl } from '../../../lib/site-url';
 import { BRAND, COPY } from '../../../theme/brand';
 import CompaniesClient from '../../../components/seeker/companies/CompaniesClient';
@@ -27,6 +28,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CompaniesPage() {
+  const employerSideEnabled = await isEmployerSideEnabled();
   const [directoryResult, todayResult] = await Promise.allSettled([
     getSeekerDirectoryServer(), getSeekerTodayCountServer(),
   ]);
@@ -38,6 +40,7 @@ export default async function CompaniesPage() {
 
   return (
     <CompaniesClient
+      employerSideEnabled={employerSideEnabled}
       companies={sorted}
       jobCount={jobCount}
       companyCount={companies.length}

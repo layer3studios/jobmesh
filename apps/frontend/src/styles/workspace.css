@@ -126,7 +126,7 @@
 .rs-drop[data-dragging="true"] { border-color: var(--thread-indigo); background: var(--accent-soft); transform: scale(1.01); }
 .rs-drop:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .rs-drop__icon { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--border); color: var(--ink); transition: transform var(--m-ui) var(--ease-out); }
-.rs-drop:hover .rs-drop__icon, .rs-drop[data-dragging="true"] .rs-drop__icon { transform: translateY(-3px); }
+.rs-drop:hover .rs-drop__icon, .rs-drop[data-dragging="true"] .rs-drop__icon { }
 .rs-drop__title { font-family: var(--font-instrument-serif), Georgia, serif; font-size: 26px; letter-spacing: -0.03em; color: var(--ink); line-height: 1.1; }
 .rs-drop__sub { font-size: 13.5px; color: var(--ink-muted); }
 .rs-drop__meta { font-family: var(--font-jetbrains-mono), ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); margin-top: 4px; }

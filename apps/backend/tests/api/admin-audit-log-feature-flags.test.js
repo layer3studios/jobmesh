@@ -111,6 +111,9 @@ test('GET /feature-flags defaults every flag to TRUE when the collection is empt
     jdExtractionEnabled: true,
     aiScoringEnabled: true,
     publicApplyEnabled: true,
+    // The hire half is the one flag that fails closed: it guards a surface
+    // that has not launched, so a missing doc must not switch it on.
+    employerSideEnabled: false,
   });
   assert.equal(res.body.data.updatedAt, null);
 });

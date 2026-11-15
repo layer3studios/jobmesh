@@ -31,7 +31,7 @@
 .hr-kanban__head > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hr-kanban__count { flex-shrink: 0; padding: 1px 6px; border-radius: var(--r-sm); background: var(--surface-2); color: var(--ink); }
 .hr-card { min-width: 0; overflow: hidden; padding: var(--s-3); background: rgba(9, 9, 11, 0.8); border: 1px solid var(--border); border-radius: var(--r-sm); transition: border-color var(--m-base) var(--ease), transform var(--m-base) var(--ease); }
-.hr-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+.hr-card:hover { border-color: var(--border-strong); }
 .hr-card--offer { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 .hr-card__row { display: flex; align-items: center; gap: var(--s-2); }
 .hr-card__avatar { width: 26px; height: 26px; flex-shrink: 0; border-radius: 50%; border: 1px solid currentColor; display: grid; place-items: center; font-size: 9px; opacity: 0.85; }
@@ -51,7 +51,7 @@
 @media (min-width: 640px) { .hr-proof__grid { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 1000px) { .hr-proof__grid { grid-template-columns: repeat(3, 1fr); gap: var(--s-5); } }
 .hr-feature { padding: var(--s-6); cursor: default; }
-.hr-kanban { background: rgba(19, 19, 22, 0.58); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); }
+.hr-kanban { background: rgba(19, 19, 22, 0.58);}
 .hr-feature__icon { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: var(--s-5); border: 1px solid var(--border-strong); border-radius: var(--r-sm); color: var(--ink); transition: border-color var(--m-base) var(--ease); }
 .hr-feature:hover .hr-feature__icon { border-color: var(--ink); }
 .hr-feature__title { margin-bottom: var(--s-2); font-size: var(--t-title-lg); line-height: 1.3; color: var(--ink); }

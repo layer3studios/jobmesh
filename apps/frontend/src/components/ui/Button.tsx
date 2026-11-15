@@ -28,7 +28,9 @@ const SIZE: Record<Size, CSSProperties> = {
 };
 
 const VARIANT: Record<Variant, CSSProperties> = {
-  primary: { background: 'var(--ink)', color: 'var(--paper)', borderColor: 'var(--ink)' },
+  // The one action on a screen that carries the accent. Everything else stays
+  // ink and paper, so the indigo means "this is the thing to press".
+  primary: { background: 'var(--accent)', color: 'var(--text-on-accent)', borderColor: 'var(--accent)' },
   secondary: { background: 'var(--paper-2)', color: 'var(--ink)', borderColor: 'var(--border)' },
   ghost: { background: 'transparent', color: 'var(--ink-2)', borderColor: 'var(--border)' },
   danger: { background: 'var(--danger-soft)', color: 'var(--danger)', borderColor: 'transparent' },

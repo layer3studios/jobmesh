@@ -7,7 +7,6 @@
 import { ArrowRight, CalendarCheck, ClipboardCheck, Kanban, MoreHorizontal } from 'lucide-react';
 import { COPY } from '../../../theme/brand';
 import { getEmployerUrl } from '../../../lib/subdomain-urls';
-import InkImage from './InkImage';
 
 const ICONS = [ClipboardCheck, Kanban, CalendarCheck];
 // Illustrative pipeline — a picture of the kanban, not live data.
@@ -20,8 +19,6 @@ const STAGES = [
 export default function CompanyShowcase() {
   return (
     <section className="hm-section hm-show hm-show--band" aria-labelledby="companies-heading">
-      <InkImage name="ink-companies" treatment="band" />
-      <div className="hm-show__veil" aria-hidden="true" />
 
       <div className="hm-wrap hm-show__grid hm-show__grid--flip">
         <div className="hm-glass hm-panel hm-panel--pipeline" aria-hidden="true" data-reveal>

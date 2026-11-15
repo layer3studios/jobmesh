@@ -40,6 +40,13 @@ export const FLAG_COPY: Record<FeatureFlagName, FlagCopy> = {
     whenOff: 'Candidates can still browse and read every job page, but submitting an application returns a "temporarily disabled" message. This is candidate-visible — use it only during an incident.',
     confirmTitle: 'Stop accepting applications?',
   },
+  // The only switch here that starts OFF: the hire half has not launched.
+  employerSideEnabled: {
+    title: 'Hire side',
+    description: 'The whole employer half: the /hire pitch page, the "Post a job" and "Hire talent" doors, and the employer app at hire.jobmesh.in.',
+    whenOff: 'Visitors see a seeker-only site. /hire and every employer page return 404, and no link to them is rendered anywhere. Nothing is deleted — every employer feature, job and account is untouched and comes straight back when this is switched on.',
+    confirmTitle: 'Hide the hire side?',
+  },
 };
 
 /** Order shown on the page: least to most candidate-visible. */
@@ -48,4 +55,5 @@ export const FLAG_ORDER: FeatureFlagName[] = [
   'jdExtractionEnabled',
   'aiScoringEnabled',
   'publicApplyEnabled',
+  'employerSideEnabled',
 ];
