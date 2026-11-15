@@ -1,7 +1,7 @@
 'use client';
 // FILE: src/hooks/useAnalyticsConsent.ts
 // React binding over the analytics-consent module store. useSyncExternalStore keeps
-// every subscriber (banner, footer link, PostHogProvider, audience contexts) in sync
+// every subscriber (banner, footer link, TrackingProvider, audience contexts) in sync
 // and stays SSR-safe: the server snapshot renders the banner hidden, matching the
 // client's pre-hydration render (no mismatch).
 import { useSyncExternalStore } from 'react';

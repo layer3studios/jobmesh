@@ -62,7 +62,9 @@ export function FilterPanel({ open, onClose, anchorRef, children, minWidth = 200
   maxHeight?: number | string;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
-  const position = useAnchoredPosition(anchorRef, panelRef, open);
+  // Left-aligned: these panels are far wider than the chip that opens them, and
+  // right-aligning a 320px panel to an 80px chip left it looking unattached.
+  const position = useAnchoredPosition(anchorRef, panelRef, open, { align: 'start' });
 
   useEffect(() => {
     if (!open) return;
@@ -90,7 +92,14 @@ export function FilterPanel({ open, onClose, anchorRef, children, minWidth = 200
         position: 'fixed',
         top: position?.top ?? 0, left: position?.left ?? 0,
         visibility: position ? 'visible' : 'hidden',
-        zIndex: Z.dropdown, minWidth, maxHeight, overflowY: 'auto',
+        zIndex: Z.dropdown, minWidth, overflowY: 'auto',
+        // The caller's cap AND the room actually available, so the panel always
+        // scrolls inside the viewport rather than overflowing it.
+        maxHeight: position
+          ? (typeof maxHeight === 'number'
+            ? Math.min(maxHeight, position.maxHeight)
+            : `min(${maxHeight}, ${position.maxHeight}px)`)
+          : maxHeight,
         background: 'var(--glass-panel)',
         border: '1px solid var(--border-hairline)', borderRadius: 10,
         boxShadow: 'var(--shadow-md)', padding: 6,

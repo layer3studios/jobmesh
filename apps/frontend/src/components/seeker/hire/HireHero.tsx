@@ -5,29 +5,16 @@
 // band, the quietest of the four signature objects: a slow lattice of nodes
 // (Lattice), because this hero already carries a product panel and a big
 // centred object would fight it.
-import dynamic from 'next/dynamic';
-import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { COPY } from '../../../theme/brand';
 import { getEmployerUrl } from '../../../lib/subdomain-urls';
-import InkImage from '../home/InkImage';
-import { trackPointer } from '../home/three/pointer-store';
-import { useSceneQuality } from '../home/three/use-scene-quality';
 import HireKanban from './HireKanban';
 
-const PageScene = dynamic(() => import('../home/three/PageScene'), { ssr: false });
 
 interface Props { companyCount: number; jobCount: number }
 
 export default function HireHero({ companyCount, jobCount }: Props) {
-  const hostRef = useRef<HTMLDivElement>(null);
-  const { reducedMotion, isLite, isReady } = useSceneQuality();
-
-  useEffect(() => {
-    const host = hostRef.current;
-    return host ? trackPointer(host) : undefined;
-  }, []);
 
   const stats = [
     { value: `${jobCount.toLocaleString('en-IN')}+`, label: COPY.home.metricRolesLabel },
@@ -37,11 +24,6 @@ export default function HireHero({ companyCount, jobCount }: Props) {
 
   return (
     <section className="hm-section hr-hero" aria-labelledby="hire-heading">
-      <InkImage name="ink-companies" treatment="hero" opacity={0.5} />
-      <div ref={hostRef} className="hm-scene-host">
-        {isReady && <PageScene variant="lattice" reducedMotion={reducedMotion} isLite={isLite} />}
-      </div>
-      <div className="hm-hero__veil" aria-hidden="true" />
 
       <div className="hm-wrap hr-hero__grid">
         <div className="hr-hero__copy">

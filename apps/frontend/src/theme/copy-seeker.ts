@@ -26,8 +26,15 @@ export const SEEKER_COPY = {
     pageTitle: 'All tech jobs',
     rolesAvailable: 'roles available',
     noJobsTitle: 'No jobs found',
-    noJobsBody: 'Try a different company or view all roles.',
+    // Said when nothing is filtered at all — "try a different company" was the
+    // old catch-all and read as nonsense next to six applied filters.
+    noJobsBody: 'No roles are live here right now. Check back shortly.',
     noEntryJobsBody: 'No entry-level roles found. Try turning off the fresher filter.',
+    /** Shown with filters on: names how many are narrowing the list. */
+    noJobsFilteredBody: (n: number) =>
+      n === 1
+        ? 'No roles match that filter. Remove it, or widen it, to see more.'
+        : `No roles match these ${n} filters. Remove one, or widen it, to see more.`,
     clearFilters: 'Clear filters',
     allJobs: 'All jobs',
     allCompanies: 'All companies',

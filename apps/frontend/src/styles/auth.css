@@ -74,7 +74,7 @@
 }
 @media (hover: hover) and (pointer: fine) {
   .auth-benefit:hover { background: var(--accent-soft); color: var(--ink); }
-  .auth-benefit:hover .auth-benefit__icon { border-color: var(--border-strong); transform: translateY(-1px); }
+  .auth-benefit:hover .auth-benefit__icon { border-color: var(--border-strong); }
 }
 .auth-benefit__icon {
   width: 26px; height: 26px; border-radius: 8px; border: 1px solid var(--border); color: var(--ink);

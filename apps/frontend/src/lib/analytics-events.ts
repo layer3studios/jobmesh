@@ -1,19 +1,21 @@
 // FILE: src/lib/analytics-events.ts
-// Typed custom-event layer over Chunk 1's PostHog client. Every funnel event flows
-// through trackEvent(), which:
-//   • no-ops when PostHog is not initialised (i.e. consent not granted) — via
-//     getPostHogClient() returning null;
+// Typed custom-event layer over the analytics stack. Every funnel event flows
+// through trackEvent(), which fans out to PostHog, GA4 (via GTM) and Clarity, and:
+//   • no-ops per tool when that tool is not running (no consent, no key, or our
+//     own traffic) — PostHog via getPostHogClient() returning null, the tag tools
+//     via their own guards in lib/tracking.ts;
 //   • never throws (defensive try/catch, warns once);
 //   • strips any personal-data-shaped keys before sending (belt-and-suspenders — the
 //     typed schemas below already exclude PII; D7/C8).
 // Event names are past-tense verb_noun snake_case; property names are camelCase (D5/D6).
 import { getPostHogClient } from './posthog';
+import { trackEventGA, trackEventClarity } from './tracking';
 
 type ApplyMethod = 'public' | 'seeker_authenticated';
 type AuthMethod = 'google';
 type MoveMethod = 'drag' | 'select';
 type ScoreDecile = number | 'unscored';
-type FilterType = 'search' | 'company' | 'role' | 'exp' | 'wp' | 'date' | 'entry' | 'newOnly' | 'hideApplied' | 'sort' | 'loc' | 'tech' | 'sal';
+export type FilterType = 'search' | 'company' | 'role' | 'exp' | 'wp' | 'date' | 'entry' | 'newOnly' | 'hideApplied' | 'sort' | 'loc' | 'tech' | 'sal';
 type FilterAction = 'added' | 'removed';
 type InviteStatus = 'valid' | 'expired' | 'revoked' | 'accepted';
 type InvitableRoleName = 'owner' | 'member' | 'interviewer';
@@ -143,12 +145,31 @@ function stripPii(properties: Record<string, unknown>): Record<string, unknown> 
   return safe;
 }
 
+/**
+ * Capture one funnel event into every analytics tool that is running.
+ *
+ * The three tools answer different questions, so each event goes to all three:
+ *   • PostHog — the funnels and the numbers.
+ *   • GA4 (via GTM) — so the same conversions can be marked as key events and
+ *     attributed to the acquisition channel GA already tracks.
+ *   • Clarity — so the SESSIONS in which an event happened can be watched and
+ *     filtered, which is the one thing the other two cannot show.
+ *
+ * PII is stripped ONCE, before the fan-out, so no tool can receive what PostHog
+ * would not. Each sink no-ops when its own tool has not started, so a missing
+ * key or a declined consent silently means "fewer sinks", never an error. The
+ * whole body is wrapped: analytics must never throw into product code.
+ */
 export function trackEvent<E extends AnalyticsEvent>(event: E, properties?: EventPropertyMap[E]): void {
   try {
-    const client = getPostHogClient();
-    if (!client) return; // not initialised → no consent → no-op
     const safe = properties ? stripPii(properties as Record<string, unknown>) : undefined;
-    client.capture(event, safe);
+
+    // PostHog stays gated on its own client being live, as before.
+    getPostHogClient()?.capture(event, safe);
+
+    // The tag-based tools gate themselves internally (lib/tracking.ts).
+    trackEventGA(event, safe);
+    trackEventClarity(event);
   } catch (err) {
     if (!hasWarned) {
       hasWarned = true;

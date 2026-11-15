@@ -1,105 +1,65 @@
 'use client';
 // FILE: src/components/seeker/dashboard/DashboardControls.tsx
-// Search bar + filter bar + active chips row, picked based on viewport.
+// Search bar + filter bar + applied-chips row, picked based on viewport.
+//
+// The filters hook arrives whole rather than exploded into forty props: it is
+// one cohesive value (state + the single writer), and passing it through means
+// a new filter needs no change here.
 
 import DashboardSearchBar from '../DashboardSearchBar';
 import DashboardMobileFilters from '../DashboardMobileFilters';
 import DashboardFilterBar from '../DashboardFilterBar';
 import ActiveChips from './ActiveChips';
 import { ROLE_OPTIONS, EXPERIENCE_OPTIONS, desktopSelectStyle } from './constants';
+import type { DashboardFilters } from './useDashboardFilters';
 import type { JobFacets } from './useJobFacets';
 
 interface Props {
   isMobile: boolean;
-  // Search
-  searchInput: string;
-  setSearchInput: (v: string) => void;
-  sortByMatch: boolean;
-  toggleSortByMatch: () => void;
-  hasSkills: boolean;
-  // Filters
-  sel: string;
-  roleCategoryFilter: string;
-  experienceBandFilter: string[];
-  workplaceFilter: string[];
-  dateFilter: string;
-  entryLevelFilter: boolean;
-  hideApplied: boolean;
-  showNewOnly: boolean;
-  newJobsCount: number;
-  setRoleCategoryFilter: (v: string) => void;
-  setExperienceBandFilter: (v: string[]) => void;
-  setWorkplaceFilter: (v: string[]) => void;
-  setDateFilter: (v: string) => void;
-  setEntryLevelFilter: (v: boolean) => void;
-  setHideApplied: (v: boolean) => void;
-  setShowNewOnly: (v: boolean) => void;
+  f: DashboardFilters;
   facets: JobFacets;
-  locationsFilter: string[];
-  setLocationsFilter: (v: string[]) => void;
-  techStackFilter: string[];
-  setTechStackFilter: (v: string[]) => void;
-  salaryMinFilter: string;
-  salaryMaxFilter: string;
-  setSalaryFilter: (min: string, max: string) => void;
-  // Chips
-  activeFilters: { label: string; clear: () => void }[];
-  onClearAllFilters: () => void;
+  hasSkills: boolean;
+  newJobsCount: number;
   onOpenMobileFilters: () => void;
-  setSp: (fn: (sp: URLSearchParams) => void) => void;
 }
 
-export default function DashboardControls(p: Props) {
+export default function DashboardControls({
+  isMobile, f, facets, hasSkills, newJobsCount, onOpenMobileFilters,
+}: Props) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
       <DashboardSearchBar
-        search={p.searchInput}
-        onSearchChange={p.setSearchInput}
-        sortByMatch={p.sortByMatch}
-        onToggleSortByMatch={p.toggleSortByMatch}
-        hasSkills={p.hasSkills}
+        search={f.searchInput}
+        onSearchChange={f.setSearchInput}
+        sortByMatch={f.filters.sortByMatch}
+        onToggleSortByMatch={() => f.setFilters({ sortByMatch: !f.filters.sortByMatch })}
+        hasSkills={hasSkills}
       />
-      {p.isMobile ? (
+      {isMobile ? (
         <DashboardMobileFilters
-          hideApplied={p.hideApplied}
-          entryLevelFilter={p.entryLevelFilter}
-          showNewOnly={p.showNewOnly}
-          newJobsCount={p.newJobsCount}
-          setHideApplied={p.setHideApplied}
-          setEntryLevelFilter={p.setEntryLevelFilter}
-          setShowNewOnly={p.setShowNewOnly}
-          setSp={p.setSp}
-          activeMobileFilters={p.activeFilters.length}
-          onOpenFilters={p.onOpenMobileFilters}
+          filters={f.filters}
+          setFilters={f.setFilters}
+          newJobsCount={newJobsCount}
+          activeMobileFilters={f.chips.length}
+          onOpenFilters={onOpenMobileFilters}
         />
       ) : (
         <DashboardFilterBar
-          roleCategoryFilter={p.roleCategoryFilter}
-          experienceBandFilter={p.experienceBandFilter}
-          workplaceFilter={p.workplaceFilter}
-          dateFilter={p.dateFilter}
-          roleOptions={ROLE_OPTIONS} experienceOptions={EXPERIENCE_OPTIONS}
+          filters={f.filters}
+          setFilters={f.setFilters}
+          moreCount={f.moreCount}
+          roleOptions={ROLE_OPTIONS}
+          experienceOptions={EXPERIENCE_OPTIONS}
           desktopSelectStyle={desktopSelectStyle}
-          setRoleCategoryFilter={p.setRoleCategoryFilter}
-          setExperienceBandFilter={p.setExperienceBandFilter}
-          setWorkplaceFilter={p.setWorkplaceFilter}
-          setDateFilter={p.setDateFilter}
-          setSp={p.setSp}
-          facets={p.facets}
-          locationsFilter={p.locationsFilter}
-          setLocationsFilter={p.setLocationsFilter}
-          techStackFilter={p.techStackFilter}
-          setTechStackFilter={p.setTechStackFilter}
-          salaryMinFilter={p.salaryMinFilter}
-          salaryMaxFilter={p.salaryMaxFilter}
-          setSalaryFilter={p.setSalaryFilter}
-          showNewOnly={p.showNewOnly} setShowNewOnly={p.setShowNewOnly}
-          hideApplied={p.hideApplied} setHideApplied={p.setHideApplied}
-          entryLevelFilter={p.entryLevelFilter} setEntryLevelFilter={p.setEntryLevelFilter}
-          newJobsCount={p.newJobsCount}
+          facets={facets}
+          newJobsCount={newJobsCount}
         />
       )}
-      <ActiveChips filters={p.activeFilters} onClearAll={p.onClearAllFilters} />
+      <ActiveChips
+        chips={f.chips}
+        onRemove={chip => f.setFilters(chip.patch)}
+        onClearAll={f.clearAll}
+      />
     </div>
   );
 }

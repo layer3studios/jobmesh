@@ -187,9 +187,7 @@
   padding: 12px 20px;
   padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
   background: var(--glass-strong);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-  box-shadow: inset 0 1px 0 var(--glass-sheen), var(--shadow-sm);
+box-shadow: var(--shadow-xs);
   border-top: 1px solid var(--border);
   box-shadow: var(--shadow-md);
 }

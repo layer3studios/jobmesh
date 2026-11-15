@@ -11,8 +11,7 @@
 .hm-glass {
   position: relative;
   background: rgba(19, 19, 22, 0.72);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border-strong);
+border: 1px solid var(--border-strong);
   border-radius: var(--r-md);
 }
 
@@ -35,10 +34,6 @@
 /* ── Showcase — the two audience sections share one grammar. ────────── */
 .hm-show { position: relative; padding-top: var(--s-10); padding-bottom: var(--s-10); }
 .hm-show--band { overflow: hidden; isolation: isolate; }
-.hm-show__veil {
-  position: absolute; inset: 0; z-index: 1; pointer-events: none;
-  background: linear-gradient(to bottom, var(--paper) 0%, transparent 20%, transparent 80%, var(--paper) 100%);
-}
 .hm-show__grid { position: relative; z-index: 2; display: grid; grid-template-columns: 1fr; gap: var(--s-8); align-items: center; }
 @media (min-width: 900px) { .hm-show__grid { grid-template-columns: 1fr 1fr; gap: var(--s-8); } }
 .hm-show__title { margin: var(--s-4) 0 var(--s-6); font-size: var(--t-display-3); font-weight: 600; line-height: 1.12; letter-spacing: -0.025em; color: var(--ink); }
@@ -51,7 +46,7 @@
 
 /* The product panels. */
 .hm-panel { padding: var(--s-6); cursor: default; }
-.hm-panel--score { background: rgba(19, 19, 22, 0.6); backdrop-filter: blur(14px) saturate(130%); -webkit-backdrop-filter: blur(14px) saturate(130%); }
+.hm-panel--score { background: rgba(19, 19, 22, 0.6);}
 .hm-panel--score { position: relative; }
 .hm-panel__label { margin-bottom: var(--s-6); font-size: var(--t-label); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); }
 .hm-panel__score { position: absolute; top: var(--s-5); right: var(--s-6); text-align: right; }
@@ -81,7 +76,7 @@
 .hm-logos { padding-top: var(--s-7); padding-bottom: var(--s-7); border-bottom: 1px solid var(--border); }
 .hm-logos__row { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: var(--s-6); }
 .hm-logos__row > * { filter: grayscale(1) brightness(1.4); opacity: 0.42; transition: filter var(--m-base) var(--ease), opacity var(--m-base) var(--ease), transform var(--m-base) var(--ease); }
-.hm-logos__row > *:hover { filter: none; opacity: 1; transform: translateY(-2px); }
+.hm-logos__row > *:hover { filter: none; opacity: 1; }
 
 /* ── How it works. ──────────────────────────────────────────────────── */
 .hm-how { padding-top: var(--s-9); padding-bottom: var(--s-9); border-bottom: 1px solid var(--border); }

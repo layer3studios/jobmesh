@@ -6,7 +6,6 @@
 import { COPY } from '../../../theme/brand';
 import { ResumeScoreVisual, SalaryBandsVisual, ProofOfWorkVisual } from './SpineSeekerVisuals';
 import { RankedVisual, PipelineVisual, AvailabilityVisual } from './SpineCompanyVisuals';
-import InkImage from './InkImage';
 
 interface Beat {
   audience: string;
@@ -15,22 +14,34 @@ interface Beat {
   visual: React.ReactNode;
 }
 
-const BEATS: Beat[] = [
+const SEEKER_BEATS: Beat[] = [
   { audience: COPY.home.spineSeekers, title: COPY.home.spine1Title, body: COPY.home.spine1Body, visual: <ResumeScoreVisual /> },
   { audience: COPY.home.spineSeekers, title: COPY.home.spine2Title, body: COPY.home.spine2Body, visual: <SalaryBandsVisual /> },
   { audience: COPY.home.spineSeekers, title: COPY.home.spine3Title, body: COPY.home.spine3Body, visual: <ProofOfWorkVisual /> },
+];
+
+const COMPANY_BEATS: Beat[] = [
   { audience: COPY.home.spineCompanies, title: COPY.home.spine4Title, body: COPY.home.spine4Body, visual: <RankedVisual /> },
   { audience: COPY.home.spineCompanies, title: COPY.home.spine5Title, body: COPY.home.spine5Body, visual: <PipelineVisual /> },
   { audience: COPY.home.spineCompanies, title: COPY.home.spine6Title, body: COPY.home.spine6Body, visual: <AvailabilityVisual /> },
 ];
 
-export default function MeshSpine() {
+/**
+ * The spine alternates left and right down a centre hairline. With the hire
+ * half switched off the three company beats go: they describe a product the
+ * visitor cannot reach, and the "Companies" eyebrow on half the rail reads as
+ * a section that failed to load.
+ */
+export default function MeshSpine({ employerSideEnabled }: { employerSideEnabled: boolean }) {
+  const BEATS = employerSideEnabled ? [...SEEKER_BEATS, ...COMPANY_BEATS] : SEEKER_BEATS;
+  return <Spine beats={BEATS} />;
+}
+
+function Spine({ beats: BEATS }: { beats: Beat[] }) {
   return (
     <section className="hm-section hm-spine" aria-labelledby="spine-heading">
       {/* The third ink photograph, at the reference's 0.4 — quiet enough for
           the hairline illustrations to read over it. */}
-      <InkImage name="ink-spine" treatment="band" opacity={0.4} />
-      <div className="hm-show__veil" aria-hidden="true" />
 
       <h2 id="spine-heading" className="hm-serif hm-spine__title" data-reveal>{COPY.home.spineHeading}</h2>
 

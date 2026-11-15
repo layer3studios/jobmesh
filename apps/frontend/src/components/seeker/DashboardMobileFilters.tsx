@@ -1,25 +1,22 @@
 'use client';
 // FILE: src/components/seeker/DashboardMobileFilters.tsx
+// The phone filter strip: one button into the full sheet, then the three
+// toggles worth a tap without opening it. What is actually applied is shown by
+// the ActiveChips row underneath, not by this strip's count.
 import { CheckCircle2, Sparkles, Bell } from 'lucide-react';
 import type { CSSProperties } from 'react';
+import type { FilterState } from './dashboard/filter-schema';
 
 interface Props {
-  hideApplied: boolean;
-  entryLevelFilter: boolean;
-  showNewOnly: boolean;
+  filters: FilterState;
+  setFilters: (patch: Partial<FilterState>) => void;
   newJobsCount: number;
-  setHideApplied: (v: boolean) => void;
-  setEntryLevelFilter: (v: boolean) => void;
-  setShowNewOnly: (v: boolean) => void;
-  setSp: (fn: (sp: URLSearchParams) => void) => void;
   activeMobileFilters: number;
   onOpenFilters: () => void;
 }
 
 export default function DashboardMobileFilters({
-  hideApplied, entryLevelFilter, showNewOnly, newJobsCount,
-  setHideApplied, setEntryLevelFilter, setShowNewOnly, setSp,
-  activeMobileFilters, onOpenFilters,
+  filters, setFilters, newJobsCount, activeMobileFilters, onOpenFilters,
 }: Props) {
   const pill = (active: boolean): CSSProperties => ({
     display: 'inline-flex',
@@ -47,7 +44,9 @@ export default function DashboardMobileFilters({
       padding: '6px 0',
     }} className="no-scrollbar">
       <button
+        type="button"
         onClick={onOpenFilters}
+        aria-haspopup="dialog"
         style={{
           ...pill(activeMobileFilters > 0),
           background: activeMobileFilters > 0 ? 'var(--ink)' : 'var(--paper-2)',
@@ -58,24 +57,29 @@ export default function DashboardMobileFilters({
         Filters {activeMobileFilters > 0 && `· ${activeMobileFilters}`}
       </button>
       <button
-        onClick={() => { setHideApplied(!hideApplied); setSp(sp => { if (!hideApplied) sp.set('hideApplied', '1'); else sp.delete('hideApplied'); sp.delete('page'); }); }}
-        style={pill(hideApplied)}
+        type="button"
+        onClick={() => setFilters({ hideApplied: !filters.hideApplied })}
+        aria-pressed={filters.hideApplied}
+        style={pill(filters.hideApplied)}
       >
-        <CheckCircle2 size={12} /> Hide applied
+        <CheckCircle2 size={12} aria-hidden /> Hide applied
       </button>
       <button
-        onClick={() => { setEntryLevelFilter(!entryLevelFilter); setSp(sp => { if (!entryLevelFilter) sp.set('entry', '1'); else sp.delete('entry'); sp.delete('page'); }); }}
-        style={pill(entryLevelFilter)}
+        type="button"
+        onClick={() => setFilters({ entryLevel: !filters.entryLevel })}
+        aria-pressed={filters.entryLevel}
+        style={pill(filters.entryLevel)}
       >
-        <Sparkles size={12} /> Fresher
+        <Sparkles size={12} aria-hidden /> Fresher
       </button>
       <button
-        onClick={() => { setShowNewOnly(!showNewOnly); setSp(sp => { if (!showNewOnly) sp.set('newOnly', '1'); else sp.delete('newOnly'); sp.delete('page'); }); }}
-        style={pill(showNewOnly)}
+        type="button"
+        onClick={() => setFilters({ newOnly: !filters.newOnly })}
+        aria-pressed={filters.newOnly}
+        style={pill(filters.newOnly)}
       >
-        <Bell size={12} /> New only {newJobsCount > 0 && `· ${newJobsCount}`}
+        <Bell size={12} aria-hidden /> New only {newJobsCount > 0 && `· ${newJobsCount}`}
       </button>
-
     </div>
   );
 }

@@ -11,24 +11,26 @@ import ScrollMotion from '../home/ScrollMotion';
 import TrustStrip from '../home/TrustStrip';
 import SeekerShowcase from '../home/SeekerShowcase';
 import LogoStrip from '../home/LogoStrip';
-import InkImage from '../home/InkImage';
 import FinalCTA from '../home/FinalCTA';
 import FindWorkHero from './FindWorkHero';
 
-interface Props extends HomeCounts { companies: ICompany[] }
+interface Props extends HomeCounts {
+  companies: ICompany[];
+  /** Hire half is live; off hides the employer door in the landing nav. */
+  employerSideEnabled: boolean;
+}
 
-export default function FindWorkClient({ companies, jobCount, companyCount, todayCount, topHiringNames }: Props) {
+export default function FindWorkClient({ companies, jobCount, companyCount, todayCount, topHiringNames, employerSideEnabled }: Props) {
   const counts: HomeCounts = { jobCount, companyCount, todayCount, topHiringNames };
   return (
     <div className="hm-root">
       <ScrollMotion scope=".hm-root" />
-      <LandingNav />
+      <LandingNav employerSideEnabled={employerSideEnabled} />
       <FindWorkHero todayCount={todayCount} />
       <TrustStrip counts={counts} />
       <SeekerShowcase />
       <LogoStrip companies={companies} />
       <div className="hm-final-wrap">
-        <InkImage name="ink-hero" treatment="final" />
         <FinalCTA />
         <LandingFooter />
       </div>

@@ -1,25 +1,40 @@
 'use client';
 // FILE: src/components/seeker/dashboard/ActiveChips.tsx
-// The row of applied filters under the filter bar. Each chip rises in and its
-// × presses; "Clear all" resets everything (board.css .jb-active).
+// The applied-filters row under the filter bar: what is actually narrowing the
+// list, each one removable where it stands, plus "Clear all".
+//
+// Each chip names its filter type above the value ("Posted" / "Last 3 days").
+// Baymard's applied-filter testing: show the selected options rather than a
+// count, carry the type when a value alone is ambiguous — "0-2" or "3d" tells
+// nobody what it filtered — keep the type secondary to the value, and be
+// consistent instead of prefixing some chips and not others.
+// https://baymard.com/blog/how-to-design-applied-filters
 import { X } from 'lucide-react';
-
-interface Chip { label: string; clear: () => void; }
+import type { FilterChip } from './filter-schema';
 
 interface Props {
-  filters: Chip[];
+  chips: FilterChip[];
+  onRemove: (chip: FilterChip) => void;
   onClearAll: () => void;
 }
 
-export default function ActiveChips({ filters, onClearAll }: Props) {
-  if (filters.length === 0) return null;
+export default function ActiveChips({ chips, onRemove, onClearAll }: Props) {
+  if (chips.length === 0) return null;
   return (
-    <div className="jb-active" aria-label="Active filters">
-      {filters.map((f, i) => (
-        <span key={`${f.label}-${i}`} className="jb-active__chip" style={{ animationDelay: `${Math.min(i, 6) * 30}ms` }}>
-          {f.label}
-          <button type="button" className="jb-active__x" onClick={f.clear} aria-label={`Remove ${f.label}`}>
-            <X size={10} />
+    <div className="jb-active" aria-label={`${chips.length} ${chips.length === 1 ? 'filter' : 'filters'} applied`}>
+      {chips.map((chip, i) => (
+        <span key={chip.key} className="jb-active__chip" style={{ animationDelay: `${Math.min(i, 6) * 30}ms` }}>
+          <span className="jb-active__text">
+            <span className="jb-active__group">{chip.group}</span>
+            <span className="jb-active__value">{chip.label}</span>
+          </span>
+          <button
+            type="button"
+            className="jb-active__x"
+            onClick={() => onRemove(chip)}
+            aria-label={`Remove ${chip.group} filter ${chip.label}`}
+          >
+            <X size={10} aria-hidden />
           </button>
         </span>
       ))}

@@ -4,7 +4,9 @@
 // hire.jobmesh.in asks them to sign in. Server component: metadata + the
 // same directory counts the landing advertises, then <HireClient/>.
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { getSeekerDirectoryServer } from '../../../lib/server-api/seeker';
+import { isEmployerSideEnabled } from '../../../lib/server-api/flags';
 import { absoluteUrl } from '../../../lib/site-url';
 import { BRAND, COPY } from '../../../theme/brand';
 import HireClient from '../../../components/seeker/hire/HireClient';
@@ -31,6 +33,11 @@ export const metadata: Metadata = {
 };
 
 export default async function HirePage() {
+  // The hire half is written and working but not launched. Until an admin
+  // turns it on at /admin/flags this page does not exist to a visitor — a 404
+  // rather than a redirect, so nothing is indexed and no link half-works.
+  if (!(await isEmployerSideEnabled())) notFound();
+
   let companies: ICompany[] = [];
   try {
     companies = await getSeekerDirectoryServer();

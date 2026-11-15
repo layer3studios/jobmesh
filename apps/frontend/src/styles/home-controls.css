@@ -35,13 +35,15 @@
 .hm-pill--sm { height: var(--h-control-sm); padding: 0 var(--s-4); font-size: var(--t-body-sm); }
 
 /* Solid — one per screen. Ink-on-white: the loudest thing the page can do. */
-.hm-pill--solid { background: var(--ink); color: var(--paper); box-shadow: var(--shadow-sm); }
-.hm-pill--solid:hover { background: #FFFFFF; transform: translateY(-1px); box-shadow: var(--shadow-md); }
-.hm-pill--solid:active { background: var(--ink-2); transform: translateY(0) scale(0.98); box-shadow: var(--shadow-xs); transition-duration: var(--m-fast); transition-timing-function: var(--ease-press); }
+/* The one door that carries the accent. Everything else on the landing is
+   ink and paper, so the colour reads as "this is the way in". */
+.hm-pill--solid { background: var(--accent); color: var(--text-on-accent); box-shadow: none; }
+.hm-pill--solid:hover { background: var(--accent-hover); }
+.hm-pill--solid:active { background: var(--accent); transform: scale(0.98); transition-duration: var(--m-fast); transition-timing-function: var(--ease-press); }
 
 /* Ghost — hairline, for the secondary path. */
-.hm-pill--ghost { background: rgba(19, 19, 22, 0.35); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--ink); border-color: var(--border-strong); }
-.hm-pill--ghost:hover { border-color: var(--border-loud); background: rgba(255, 255, 255, 0.05); transform: translateY(-1px); }
+.hm-pill--ghost { background: transparent; color: var(--ink); border-color: var(--border-strong); }
+.hm-pill--ghost:hover { border-color: var(--border-loud); background: rgba(255, 255, 255, 0.05); }
 .hm-pill--ghost:active { background: rgba(255, 255, 255, 0.02); transform: translateY(0) scale(0.98); transition-duration: var(--m-fast); transition-timing-function: var(--ease-press); }
 
 .hm-pill:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
@@ -76,8 +78,7 @@
   /* Glass: a translucent pane with a hairline and a lit top edge, so the
      ink (and the scene) reads faintly through every card. */
   background: rgba(19, 19, 22, 0.55);
-  backdrop-filter: blur(14px) saturate(130%); -webkit-backdrop-filter: blur(14px) saturate(130%);
-  border: 1px solid var(--border-mid);
+border: 1px solid var(--border-mid);
   border-radius: var(--r-lg); box-shadow: var(--highlight-edge);
   text-decoration: none; cursor: pointer;
   transition:
@@ -86,7 +87,7 @@
     transform var(--m-base) var(--ease),
     box-shadow var(--m-base) var(--ease);
 }
-.hm-card:hover { border-color: var(--border-strong); background: rgba(26, 26, 30, 0.62); transform: translateY(-2px); box-shadow: var(--shadow-md), var(--highlight-edge); }
+.hm-card:hover { border-color: var(--border-strong); background: rgba(26, 26, 30, 0.62); box-shadow: var(--shadow-md), var(--highlight-edge); }
 .hm-card:active { transform: translateY(0) scale(0.995); box-shadow: var(--shadow-xs); transition-duration: var(--m-fast); transition-timing-function: var(--ease-press); }
 .hm-card:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .hm-card[aria-disabled="true"] { opacity: 0.38; cursor: not-allowed; pointer-events: none; transform: none; }

@@ -34,6 +34,7 @@ import { createResendWebhookRouter } from './api/public/resend-webhook-route.js'
 import { createSeoRouter } from './api/admin/seo-routes.js';
 import { createBlogAdminRouter } from './api/admin/blog-routes.js';
 import { createPublicBlogRouter } from './api/public/public-blog-routes.js';
+import { createPublicFlagsRouter } from './api/public/public-flags-routes.js';
 import { createCompanyHealthRouter } from './api/admin/company-health-routes.js';
 import { createMissionControlRouter } from './api/admin/mission-control-routes.js';
 import newsRouter from './api/seeker/news-routes.js';
@@ -139,6 +140,7 @@ export function registerRoutes(app) {
   app.use('/api/admin/alerts', requireAdmin, createAlertSettingsRouter());
   app.use('/api/admin/seo', requireAdmin, createSeoRouter());
   app.use('/api/admin/blog', requireAdmin, createBlogAdminRouter());
+  app.use('/api/public/flags', createPublicFlagsRouter());
   app.use('/api/public/webhooks/resend', createResendWebhookRouter());
   app.use('/api/admin', adminRouter);
   // Admin analytics: jm_admin_token via new require-admin-middleware (D5 — standalone,

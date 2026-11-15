@@ -111,6 +111,12 @@ test('GET /feature-flags defaults every flag to TRUE when the collection is empt
     jdExtractionEnabled: true,
     aiScoringEnabled: true,
     publicApplyEnabled: true,
+    // The liveness sweep fails open with the rest of the machinery flags: dead
+    // listings staying up is the worse failure, so a missing doc leaves it on.
+    validatorCronEnabled: true,
+    // The hire half is the one flag that fails closed: it guards a surface
+    // that has not launched, so a missing doc must not switch it on.
+    employerSideEnabled: false,
   });
   assert.equal(res.body.data.updatedAt, null);
 });
@@ -152,7 +158,7 @@ test('PATCH rejects an unknown flag and a non-boolean value', async () => {
 
 test('a missing feature_flags doc fails OPEN for the runtime gate', async () => {
   await dropCollections('feature_flags');
-  for (const name of ['scraperCronEnabled', 'jdExtractionEnabled', 'aiScoringEnabled', 'publicApplyEnabled']) {
+  for (const name of ['scraperCronEnabled', 'jdExtractionEnabled', 'aiScoringEnabled', 'publicApplyEnabled', 'validatorCronEnabled']) {
     assert.equal(await isFeatureEnabled(name), true, `${name} must fail open`);
   }
   // An unknown name is enabled too — a gate must never be closed by a typo.

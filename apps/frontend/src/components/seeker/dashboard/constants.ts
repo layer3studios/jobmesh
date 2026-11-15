@@ -26,11 +26,11 @@ export const EXPERIENCE_OPTIONS = [
   { value: 'Staff+ (8y+)', label: 'Staff+ (8y+)' },
 ];
 
-export const WORKPLACE_OPTIONS = [
-  { value: 'remote', label: 'Remote' },
-  { value: 'hybrid', label: 'Hybrid' },
-  { value: 'on-site', label: 'On-site' },
-];
+// Work mode and posted-date options live in filter-schema.ts, which also labels
+// the applied-filter chips — re-exported so the controls keep one import.
+// Mobile used to carry its own copy and said "3 days" where desktop said
+// "Last 3 days".
+export { WORKPLACE_OPTIONS, DATE_OPTIONS } from './filter-schema';
 
 export const PAGE_SIZE = 30;
 

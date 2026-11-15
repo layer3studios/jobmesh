@@ -22,7 +22,21 @@ export const FEATURE_FLAGS = Object.freeze({
   jdExtractionEnabled: true,
   aiScoringEnabled: true,
   publicApplyEnabled: true,
+  // The nightly liveness sweep (tasks/runValidator.js). Fails OPEN like the
+  // other machinery flags: the sweep is what keeps dead listings off the board,
+  // so a database hiccup should not silently leave them up. Pausing it is the
+  // right move while an ATS is misbehaving — that is what this switch is for.
+  validatorCronEnabled: true,
+  // The one flag that fails CLOSED, deliberately. The others guard machinery
+  // that is already live, so a database hiccup must not switch it off. This
+  // one guards a side of the product that has not launched: the hire surface
+  // is written and working, and stays hidden until someone turns it on here.
+  // Failing open would mean an admin-panel outage launches it by accident.
+  employerSideEnabled: false,
 });
+
+/** Flags that stay off when nobody has said otherwise. */
+const FAIL_CLOSED = Object.freeze(new Set(['employerSideEnabled']));
 
 export const FEATURE_FLAG_NAMES = Object.freeze(Object.keys(FEATURE_FLAGS));
 
@@ -41,7 +55,10 @@ export async function getFeatureFlags() {
   const flags = defaultFlags();
   if (!doc) return { flags, updatedAt: null, updatedByAdminUserId: null };
   for (const name of FEATURE_FLAG_NAMES) {
-    if (doc[name] === false) flags[name] = false;
+    // Fail-open flags: only an explicit false turns them off.
+    // Fail-closed flags: only an explicit true turns them on.
+    if (FAIL_CLOSED.has(name)) flags[name] = doc[name] === true;
+    else if (doc[name] === false) flags[name] = false;
   }
   return {
     flags,
@@ -57,13 +74,15 @@ export async function getFeatureFlags() {
  */
 export async function isFeatureEnabled(name) {
   if (!isKnownFlag(name)) return true;
+  const failClosed = FAIL_CLOSED.has(name);
   try {
     const collection = await flagsCol();
     const doc = await collection.findOne({ _id: CONFIG_ID }, { projection: { [name]: 1 } });
-    return doc?.[name] !== false;
+    return failClosed ? doc?.[name] === true : doc?.[name] !== false;
   } catch (err) {
-    console.warn(`[feature-flags] read failed for ${name}, failing open: ${err.message}`);
-    return true;
+    const fallback = !failClosed;
+    console.warn(`[feature-flags] read failed for ${name}, failing ${fallback ? 'open' : 'closed'}: ${err.message}`);
+    return fallback;
   }
 }
 

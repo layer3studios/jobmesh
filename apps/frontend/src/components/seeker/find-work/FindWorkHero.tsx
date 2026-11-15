@@ -4,14 +4,9 @@
 // centred badge, "Find your next tech role in India" with the accent in
 // italic, the lede, the search console, the suggestion row. Behind it, cubes
 // all over the page (CubeField) in real 3D. Search hands off to /jobs.
-import dynamic from 'next/dynamic';
-import { useEffect, useRef } from 'react';
 import { COPY } from '../../../theme/brand';
-import { trackPointer } from '../home/three/pointer-store';
-import { useSceneQuality } from '../home/three/use-scene-quality';
 import FindWorkSearch from './FindWorkSearch';
 
-const PageScene = dynamic(() => import('../home/three/PageScene'), { ssr: false });
 
 function Words({ text, isAccent }: { text: string; isAccent?: boolean }) {
   return (
@@ -26,22 +21,11 @@ function Words({ text, isAccent }: { text: string; isAccent?: boolean }) {
 }
 
 export default function FindWorkHero({ todayCount }: { todayCount: number }) {
-  const hostRef = useRef<HTMLDivElement>(null);
-  const { reducedMotion, isLite, isReady } = useSceneQuality();
-
-  useEffect(() => {
-    const host = hostRef.current;
-    return host ? trackPointer(host) : undefined;
-  }, []);
 
   const badgeText = todayCount > 0 ? `${todayCount} ${COPY.home.rolesAddedToday}` : COPY.home.rolesAddedDaily;
 
   return (
     <section className="hm-section lp-hero" aria-labelledby="find-work-heading">
-      <div ref={hostRef} className="hm-scene-host">
-        {isReady && <PageScene variant="field" reducedMotion={reducedMotion} isLite={isLite} />}
-      </div>
-      <div className="lp-hero__veil" aria-hidden="true" />
 
       <div className="lp-hero__content">
         <div className="hm-hero__badge hm-mono">

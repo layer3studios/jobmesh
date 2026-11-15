@@ -5,7 +5,9 @@ export type FeatureFlagName =
   | 'scraperCronEnabled'
   | 'jdExtractionEnabled'
   | 'aiScoringEnabled'
-  | 'publicApplyEnabled';
+  | 'publicApplyEnabled'
+  | 'validatorCronEnabled'
+  | 'employerSideEnabled';
 
 export type FeatureFlagMap = Record<FeatureFlagName, boolean>;
 

@@ -116,7 +116,11 @@ export default function DashboardBody(p: Props) {
       <EmptyState
         icon={<Briefcase size={28} />}
         title={COPY.jobs.noJobsTitle}
-        body={p.entryLevelFilter ? COPY.jobs.noEntryJobsBody : COPY.jobs.noJobsBody}
+        body={
+          p.entryLevelFilter ? COPY.jobs.noEntryJobsBody
+            : p.activeFiltersCount > 0 ? COPY.jobs.noJobsFilteredBody(p.activeFiltersCount)
+              : COPY.jobs.noJobsBody
+        }
         action={p.activeFiltersCount > 0 ? (
           <Button variant="primary" size="md" onClick={p.onClearFilters}>{COPY.jobs.clearFilters}</Button>
         ) : null}

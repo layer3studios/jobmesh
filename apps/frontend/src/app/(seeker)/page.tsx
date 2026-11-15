@@ -11,6 +11,7 @@ import { buildOrganizationSchema, buildWebSiteSchema, buildItemListSchema } from
 import {
   getSeekerMeServer, getSeekerJobsServer, getSeekerDirectoryServer, getSeekerTodayCountServer,
 } from '../../lib/server-api/seeker';
+import { isEmployerSideEnabled } from '../../lib/server-api/flags';
 import { absoluteUrl } from '../../lib/site-url';
 import { BRAND } from '../../theme/brand';
 import HomeClient from '../../components/seeker/home/HomeClient';
@@ -59,6 +60,7 @@ export default async function HomePage() {
   let jobs: IJob[] = [];
   let companies: ICompany[] = [];
   let todayCount = 0;
+  const employerSideEnabled = await isEmployerSideEnabled();
   try {
     [jobs, companies, todayCount] = await Promise.all([
       getSeekerJobsServer(JOBS_SHOWN),
@@ -101,6 +103,7 @@ export default async function HomePage() {
         companyCount={companyCount}
         todayCount={todayCount}
         topHiringNames={topHiringNames}
+        employerSideEnabled={employerSideEnabled}
       />
     </>
   );

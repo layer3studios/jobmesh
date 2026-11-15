@@ -11,7 +11,7 @@
 // the unparsed jobs are picked up next run (extraction is idempotent).
 
 import { SITES_CONFIG } from '../config.js';
-import { loadAllExistingIDs, deleteOldJobs, deleteExpiredJobs } from '../Db/jobs/index.js';
+import { loadAllExistingIDs, expireStaleJobs, expireUnseenJobs } from '../Db/jobs/index.js';
 import { scrapeSite } from '../core/scraperEngine.js';
 import { runParsePhase } from './scraper-parse-phase.js';
 import { newRunId, recordScrapeRun } from '../models/admin/scrape-run-model.js';
@@ -47,10 +47,10 @@ async function fetchAllSites(existingIDsMap, runId) {
 
       // Cleanup stays per-site and immediate — it depends on that site's crawl.
       if (scrapedSuccessfully && seenJobIds.size > 0) {
-        deletedExpired = await deleteExpiredJobs(siteConfig.siteName, seenJobIds);
+        deletedExpired = await expireUnseenJobs(siteConfig.siteName, seenJobIds);
       } else {
         console.log(`[${siteConfig.siteName}] scrape incomplete — 7-day fallback cleanup`);
-        deletedExpired = await deleteOldJobs(siteConfig.siteName);
+        deletedExpired = await expireStaleJobs(siteConfig.siteName);
       }
 
       await recordScrapeRun({

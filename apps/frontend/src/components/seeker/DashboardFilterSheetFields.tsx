@@ -11,12 +11,14 @@
 // down would look tidier and would quietly change behaviour: the sheet renders
 // null while closed but stays mounted, so the draft survives a close/reopen. A
 // child would unmount with it and lose the numbers mid-edit.
+//
+// Options come from filter-schema.ts, the same list the desktop bar and the
+// applied-filter chips read, so the labels cannot drift apart per viewport.
 
 import { Group, Chips, MultiChips } from './DashboardFilterSheetParts';
 import { MAX_LOCATIONS, SALARY_MAX_LPA } from './dashboard/constants';
+import { DATE_OPTIONS, WORKPLACE_OPTIONS, type FilterState, type Option } from './dashboard/filter-schema';
 import type { JobFacets } from './dashboard/useJobFacets';
-
-interface Option { value: string; label: string; }
 
 const salaryInputStyle = {
   flex: 1, padding: '9px 12px', borderRadius: 9,
@@ -32,109 +34,77 @@ const clampLpa = (v: string) => {
 };
 
 export interface DashboardFilterSheetFieldsProps {
-  roleCategoryFilter: string;
-  experienceBandFilter: string[];
-  workplaceFilter: string[];
-  dateFilter: string;
+  filters: FilterState;
+  setFilters: (patch: Partial<FilterState>) => void;
   roleOptions: Option[];
   experienceOptions: Option[];
-  setRoleCategoryFilter: (v: string) => void;
-  setExperienceBandFilter: (v: string[]) => void;
-  setWorkplaceFilter: (v: string[]) => void;
-  setDateFilter: (v: string) => void;
-  setSp: (fn: (sp: URLSearchParams) => void) => void;
   facets: JobFacets;
-  locationsFilter: string[];
-  setLocationsFilter: (v: string[]) => void;
-  techStackFilter: string[];
-  setTechStackFilter: (v: string[]) => void;
   salMin: string;
   salMax: string;
   setSalMin: (v: string) => void;
   setSalMax: (v: string) => void;
 }
 
+const toggle = (list: string[], v: string): string[] =>
+  list.includes(v) ? list.filter(x => x !== v) : [...list, v];
+
 export default function DashboardFilterSheetFields({
-  roleCategoryFilter, experienceBandFilter, workplaceFilter, dateFilter,
-  roleOptions, experienceOptions,
-  setRoleCategoryFilter, setExperienceBandFilter, setWorkplaceFilter,
-  setDateFilter, setSp,
-  facets, locationsFilter, setLocationsFilter,
-  techStackFilter, setTechStackFilter,
+  filters, setFilters, roleOptions, experienceOptions, facets,
   salMin, salMax, setSalMin, setSalMax,
 }: DashboardFilterSheetFieldsProps) {
+  const cityCapped = filters.locations.length >= MAX_LOCATIONS;
+
   return (
     <div className="thin-scroll" style={{ overflowY: 'auto', flex: 1, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
       <Group label="Role">
         <Chips
-          value={roleCategoryFilter}
+          value={filters.role}
           options={roleOptions}
-          onChange={v => { setRoleCategoryFilter(v); setSp(sp => { sp.set('role', v); sp.delete('page'); }); }}
+          onChange={v => setFilters({ role: v })}
         />
       </Group>
       <Group label="Experience">
         <MultiChips
-          values={experienceBandFilter}
+          values={filters.experience}
           options={experienceOptions.filter(o => o.value !== 'all')}
-          onToggle={band => setExperienceBandFilter(
-            experienceBandFilter.includes(band)
-              ? experienceBandFilter.filter(b => b !== band)
-              : [...experienceBandFilter, band],
-          )}
+          onToggle={band => setFilters({ experience: toggle(filters.experience, band) })}
         />
       </Group>
       <Group label="Work mode">
         <MultiChips
-          values={workplaceFilter}
-          options={[
-            { value: 'remote', label: 'Remote' },
-            { value: 'hybrid', label: 'Hybrid' },
-            { value: 'on-site', label: 'On-site' },
-          ]}
-          onToggle={mode => setWorkplaceFilter(
-            workplaceFilter.includes(mode)
-              ? workplaceFilter.filter(m => m !== mode)
-              : [...workplaceFilter, mode],
-          )}
+          values={filters.workplace}
+          options={WORKPLACE_OPTIONS}
+          onToggle={mode => setFilters({ workplace: toggle(filters.workplace, mode) })}
         />
       </Group>
       <Group label="Posted">
         <Chips
-          value={dateFilter}
-          options={[
-            { value: 'all', label: 'Any time' },
-            { value: 'today', label: 'Today' },
-            { value: '3d', label: '3 days' },
-            { value: '7d', label: '1 week' },
-            { value: '30d', label: '1 month' },
-          ]}
-          onChange={v => { setDateFilter(v); setSp(sp => { sp.set('date', v); sp.delete('page'); }); }}
+          value={filters.date}
+          options={DATE_OPTIONS}
+          onChange={v => setFilters({ date: v as FilterState['date'] })}
         />
       </Group>
       {facets.cities.length > 0 && (
-        <Group label={`Location${locationsFilter.length ? ` · ${locationsFilter.length}/${MAX_LOCATIONS}` : ''}`}>
+        <Group label={`Location${filters.locations.length ? ` · ${filters.locations.length}/${MAX_LOCATIONS}` : ''}`}>
           <MultiChips
-            values={locationsFilter}
+            values={filters.locations}
             options={facets.cities.slice(0, 12).map(c => ({ value: c.city, label: c.city }))}
-            disabledWhenUnselected={locationsFilter.length >= MAX_LOCATIONS}
-            onToggle={city => setLocationsFilter(
-              locationsFilter.includes(city)
-                ? locationsFilter.filter(c => c !== city)
-                : [...locationsFilter, city],
-            )}
+            disabledWhenUnselected={cityCapped}
+            onToggle={city => setFilters({ locations: toggle(filters.locations, city) })}
           />
+          {cityCapped && (
+            <p style={{ margin: '6px 0 0', fontSize: '0.74rem', color: 'var(--ink-muted)' }}>
+              Up to {MAX_LOCATIONS} cities. Remove one to add another.
+            </p>
+          )}
         </Group>
       )}
       {facets.techStack.length > 0 && (
         <Group label="Tech stack">
           <MultiChips
-            values={techStackFilter}
+            values={filters.techStack}
             options={facets.techStack.slice(0, 18).map(t => ({ value: t.tag, label: t.tag }))}
-            onToggle={tag => setTechStackFilter(
-              techStackFilter.includes(tag)
-                ? techStackFilter.filter(t => t !== tag)
-                : [...techStackFilter, tag],
-            )}
+            onToggle={tag => setFilters({ techStack: toggle(filters.techStack, tag) })}
           />
         </Group>
       )}
@@ -143,6 +113,7 @@ export default function DashboardFilterSheetFields({
           <input
             type="number" inputMode="numeric" min={0} max={SALARY_MAX_LPA}
             value={salMin} placeholder="Min"
+            aria-label="Minimum salary in lakhs per annum"
             onChange={e => setSalMin(clampLpa(e.target.value))}
             style={salaryInputStyle}
           />
@@ -150,6 +121,7 @@ export default function DashboardFilterSheetFields({
           <input
             type="number" inputMode="numeric" min={0} max={SALARY_MAX_LPA}
             value={salMax} placeholder="Max"
+            aria-label="Maximum salary in lakhs per annum"
             onChange={e => setSalMax(clampLpa(e.target.value))}
             style={salaryInputStyle}
           />

@@ -4,82 +4,63 @@
 // (role, experience, work mode) stay out; everything else — posted, city,
 // tech stack, salary and the quick toggles — sits behind one "More" chip
 // that carries a count of what is set inside it.
+//
+// This file names filters, never URL params: every change goes through
+// `setFilters`, which owns the param spelling, drops defaults and resets
+// paging (see dashboard/filter-schema.ts).
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
-import { trackEvent } from '../../lib/analytics-events';
 import { SALARY_MAX_LPA, MAX_LOCATIONS } from './dashboard/constants';
+import { DATE_OPTIONS, WORKPLACE_OPTIONS, type FilterState, type Option } from './dashboard/filter-schema';
 import type { JobFacets } from './dashboard/useJobFacets';
 import { MultiSelectDropdown } from './DashboardMultiSelect';
 import { FilterDropdown } from './FilterDropdown';
 import { FilterPanel } from './FilterPanel';
 
-interface Option { value: string; label: string; }
-
-// A select value of 'all' clears that dimension (removed); anything else adds it.
-type DiscoveryFilter = 'role' | 'exp' | 'wp' | 'date';
-function emitFilter(filterType: DiscoveryFilter, value: string): void {
-  trackEvent('jobs_filter_applied', { filterType, action: value === 'all' ? 'removed' : 'added' });
-}
-
 interface Props {
-  roleCategoryFilter: string;
-  experienceBandFilter: string[];
-  workplaceFilter: string[];
-  dateFilter: string;
+  filters: FilterState;
+  setFilters: (patch: Partial<FilterState>) => void;
+  /** How many of the filters inside "More" are set. */
+  moreCount: number;
   roleOptions: Option[];
   experienceOptions: Option[];
   desktopSelectStyle: CSSProperties;
-  setRoleCategoryFilter: (v: string) => void;
-  setExperienceBandFilter: (v: string[]) => void;
-  setWorkplaceFilter: (v: string[]) => void;
-  setDateFilter: (v: string) => void;
-  setSp: (fn: (sp: URLSearchParams) => void) => void;
   facets: JobFacets;
-  locationsFilter: string[];
-  setLocationsFilter: (v: string[]) => void;
-  techStackFilter: string[];
-  setTechStackFilter: (v: string[]) => void;
-  salaryMinFilter: string;
-  salaryMaxFilter: string;
-  setSalaryFilter: (min: string, max: string) => void;
-  // Quick toggles (client-side)
-  showNewOnly: boolean; setShowNewOnly: (v: boolean) => void;
-  hideApplied: boolean; setHideApplied: (v: boolean) => void;
-  entryLevelFilter: boolean; setEntryLevelFilter: (v: boolean) => void;
   newJobsCount: number;
 }
 
-const DATE_OPTIONS: Option[] = [
-  { value: 'all', label: 'Any time' },
-  { value: 'today', label: 'Today' },
-  { value: '3d', label: 'Last 3 days' },
-  { value: '7d', label: 'Last week' },
-  { value: '30d', label: 'Last month' },
-];
-
-const WORK_MODE_OPTIONS: Option[] = [
-  { value: 'remote', label: 'Remote' },
-  { value: 'hybrid', label: 'Hybrid' },
-  { value: 'on-site', label: 'On-site' },
-];
-
-function Pill({ on, onClick, children }: { on: boolean; onClick: () => void; children: React.ReactNode }) {
-  return <button type="button" className="jb-more__pill" aria-pressed={on} onClick={onClick}>{children}</button>;
+function Pill({ on, onClick, children, disabled }: {
+  on: boolean; onClick: () => void; children: React.ReactNode; disabled?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      className="jb-more__pill"
+      aria-pressed={on}
+      disabled={disabled}
+      onClick={onClick}
+      style={disabled ? { opacity: 0.45, cursor: 'not-allowed' } : undefined}
+    >
+      {children}
+    </button>
+  );
 }
 
-export default function DashboardFilterBar(p: Props) {
+export default function DashboardFilterBar({
+  filters, setFilters, moreCount, roleOptions, experienceOptions, desktopSelectStyle, facets, newJobsCount,
+}: Props) {
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLButtonElement>(null);
   const closeMore = useCallback(() => setMoreOpen(false), []);
 
   // Salary inputs commit on a short debounce so each keystroke does not
   // rewrite the URL and trigger a refetch.
-  const [salMin, setSalMin] = useState(p.salaryMinFilter);
-  const [salMax, setSalMax] = useState(p.salaryMaxFilter);
-  useEffect(() => { setSalMin(p.salaryMinFilter); setSalMax(p.salaryMaxFilter); }, [p.salaryMinFilter, p.salaryMaxFilter]);
+  const [salMin, setSalMin] = useState(filters.salaryMin);
+  const [salMax, setSalMax] = useState(filters.salaryMax);
+  useEffect(() => { setSalMin(filters.salaryMin); setSalMax(filters.salaryMax); }, [filters.salaryMin, filters.salaryMax]);
   useEffect(() => {
-    if (salMin === p.salaryMinFilter && salMax === p.salaryMaxFilter) return;
-    const t = setTimeout(() => p.setSalaryFilter(salMin, salMax), 400);
+    if (salMin === filters.salaryMin && salMax === filters.salaryMax) return;
+    const t = setTimeout(() => setFilters({ salaryMin: salMin, salaryMax: salMax }), 400);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [salMin, salMax]);
@@ -90,50 +71,38 @@ export default function DashboardFilterBar(p: Props) {
     return String(n);
   };
 
-  const toggleIn = (list: string[], v: string, set: (n: string[]) => void, max?: number) => {
-    if (list.includes(v)) set(list.filter(x => x !== v));
-    else if (!max || list.length < max) set([...list, v]);
-  };
+  const toggle = (list: string[], v: string): string[] =>
+    list.includes(v) ? list.filter(x => x !== v) : [...list, v];
 
-  const moreCount =
-    (p.dateFilter !== 'all' ? 1 : 0) + p.locationsFilter.length + p.techStackFilter.length +
-    (p.salaryMinFilter || p.salaryMaxFilter ? 1 : 0) +
-    (p.showNewOnly ? 1 : 0) + (p.hideApplied ? 1 : 0) + (p.entryLevelFilter ? 1 : 0);
+  const cityCapped = filters.locations.length >= MAX_LOCATIONS;
 
-  const clearMore = () => {
-    p.setDateFilter('all'); p.setSp(sp => { sp.delete('date'); sp.delete('page'); });
-    p.setLocationsFilter([]); p.setTechStackFilter([]); p.setSalaryFilter('', '');
-    p.setShowNewOnly(false); p.setHideApplied(false); p.setEntryLevelFilter(false);
-    p.setSp(sp => { sp.delete('newOnly'); sp.delete('hideApplied'); sp.delete('entry'); });
-  };
-
-  const setToggle = (key: 'newOnly' | 'hideApplied' | 'entry', set: (v: boolean) => void, v: boolean) => {
-    set(v);
-    p.setSp(sp => { if (v) sp.set(key, '1'); else sp.delete(key); });
-  };
+  const clearMore = () => setFilters({
+    date: 'all', locations: [], techStack: [], salaryMin: '', salaryMax: '',
+    newOnly: false, hideApplied: false, entryLevel: false,
+  });
 
   return (
     <div className="jb-filters">
       <FilterDropdown
         label="All roles"
-        options={p.roleOptions}
-        value={p.roleCategoryFilter}
-        onChange={v => { p.setRoleCategoryFilter(v); emitFilter('role', v); p.setSp(sp => { sp.set('role', v); sp.delete('page'); }); }}
-        baseStyle={p.desktopSelectStyle}
+        options={roleOptions}
+        value={filters.role}
+        onChange={v => setFilters({ role: v })}
+        baseStyle={desktopSelectStyle}
       />
       <MultiSelectDropdown
         label="Experience"
-        options={p.experienceOptions.filter(o => o.value !== 'all')}
-        selected={p.experienceBandFilter}
-        onChange={p.setExperienceBandFilter}
-        baseStyle={p.desktopSelectStyle}
+        options={experienceOptions.filter(o => o.value !== 'all')}
+        selected={filters.experience}
+        onChange={v => setFilters({ experience: v })}
+        baseStyle={desktopSelectStyle}
       />
       <MultiSelectDropdown
         label="Work mode"
-        options={WORK_MODE_OPTIONS}
-        selected={p.workplaceFilter}
-        onChange={p.setWorkplaceFilter}
-        baseStyle={p.desktopSelectStyle}
+        options={WORKPLACE_OPTIONS}
+        selected={filters.workplace}
+        onChange={v => setFilters({ workplace: v })}
+        baseStyle={desktopSelectStyle}
       />
 
       <button
@@ -144,7 +113,7 @@ export default function DashboardFilterBar(p: Props) {
         aria-expanded={moreOpen}
         onClick={() => setMoreOpen(o => !o)}
         style={{
-          ...p.desktopSelectStyle, backgroundImage: 'none', paddingRight: 10,
+          ...desktopSelectStyle, backgroundImage: 'none', paddingRight: 10,
           display: 'inline-flex', alignItems: 'center', gap: 7,
           fontWeight: moreCount ? 600 : 500,
           borderColor: moreCount || moreOpen ? 'var(--border-strong)' : 'var(--border)',
@@ -162,35 +131,45 @@ export default function DashboardFilterBar(p: Props) {
             <p className="jb-more__label">Posted</p>
             <div className="jb-more__wrap">
               {DATE_OPTIONS.map(o => (
-                <Pill key={o.value} on={p.dateFilter === o.value}
-                  onClick={() => { p.setDateFilter(o.value); emitFilter('date', o.value); p.setSp(sp => { if (o.value === 'all') sp.delete('date'); else sp.set('date', o.value); sp.delete('page'); }); }}>
+                <Pill key={o.value} on={filters.date === o.value}
+                  onClick={() => setFilters({ date: o.value as FilterState['date'] })}>
                   {o.label}
                 </Pill>
               ))}
             </div>
           </div>
 
-          {p.facets.cities.length > 0 && (
+          {facets.cities.length > 0 && (
             <div className="jb-more__section">
-              <p className="jb-more__label">City {p.locationsFilter.length > 0 && `· ${p.locationsFilter.length}/${MAX_LOCATIONS}`}</p>
+              <p className="jb-more__label">
+                City {filters.locations.length > 0 && `· ${filters.locations.length}/${MAX_LOCATIONS}`}
+              </p>
               <div className="jb-more__wrap">
-                {p.facets.cities.slice(0, 10).map(c => (
-                  <Pill key={c.city} on={p.locationsFilter.includes(c.city)}
-                    onClick={() => toggleIn(p.locationsFilter, c.city, p.setLocationsFilter, MAX_LOCATIONS)}>
-                    {c.city}
-                  </Pill>
-                ))}
+                {facets.cities.slice(0, 10).map(c => {
+                  const on = filters.locations.includes(c.city);
+                  // At the cap the unpicked cities go disabled rather than
+                  // swallowing the click with no explanation.
+                  return (
+                    <Pill key={c.city} on={on} disabled={!on && cityCapped}
+                      onClick={() => setFilters({ locations: toggle(filters.locations, c.city) })}>
+                      {c.city}
+                    </Pill>
+                  );
+                })}
               </div>
+              {cityCapped && (
+                <p className="jb-more__hint">Up to {MAX_LOCATIONS} cities. Remove one to add another.</p>
+              )}
             </div>
           )}
 
-          {p.facets.techStack.length > 0 && (
+          {facets.techStack.length > 0 && (
             <div className="jb-more__section">
               <p className="jb-more__label">Tech stack</p>
               <div className="jb-more__wrap">
-                {p.facets.techStack.slice(0, 16).map(t => (
-                  <Pill key={t.tag} on={p.techStackFilter.includes(t.tag)}
-                    onClick={() => toggleIn(p.techStackFilter, t.tag, p.setTechStackFilter)}>
+                {facets.techStack.slice(0, 16).map(t => (
+                  <Pill key={t.tag} on={filters.techStack.includes(t.tag)}
+                    onClick={() => setFilters({ techStack: toggle(filters.techStack, t.tag) })}>
                     {t.tag}
                   </Pill>
                 ))}
@@ -212,11 +191,15 @@ export default function DashboardFilterBar(p: Props) {
           <div className="jb-more__section">
             <p className="jb-more__label">Show</p>
             <div className="jb-more__wrap">
-              <Pill on={p.showNewOnly} onClick={() => setToggle('newOnly', p.setShowNewOnly, !p.showNewOnly)}>
-                New this week{p.newJobsCount > 0 ? ` · ${p.newJobsCount}` : ''}
+              <Pill on={filters.newOnly} onClick={() => setFilters({ newOnly: !filters.newOnly })}>
+                New this week{newJobsCount > 0 ? ` · ${newJobsCount}` : ''}
               </Pill>
-              <Pill on={p.entryLevelFilter} onClick={() => setToggle('entry', p.setEntryLevelFilter, !p.entryLevelFilter)}>Fresher-friendly</Pill>
-              <Pill on={p.hideApplied} onClick={() => setToggle('hideApplied', p.setHideApplied, !p.hideApplied)}>Hide applied</Pill>
+              <Pill on={filters.entryLevel} onClick={() => setFilters({ entryLevel: !filters.entryLevel })}>
+                Fresher-friendly
+              </Pill>
+              <Pill on={filters.hideApplied} onClick={() => setFilters({ hideApplied: !filters.hideApplied })}>
+                Hide applied
+              </Pill>
             </div>
           </div>
 
