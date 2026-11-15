@@ -9,6 +9,7 @@
 // visitor has consented. Only non-sensitive, already-known fields go in properties.
 import { useEffect, useRef } from 'react';
 import { identifyUser, resetUser } from '@/lib/posthog';
+import { identifyForTags } from '@/lib/tracking';
 import { useAnalyticsConsent } from './useAnalyticsConsent';
 
 export interface AnalyticsIdentity {
@@ -25,6 +26,10 @@ export function useAnalyticsIdentity(identity: AnalyticsIdentity | null): void {
 
     if (nextId && consent === 'granted') {
       identifyUser(nextId, identity?.properties);
+      // The same internal id in Clarity and GA4, so a replay in Clarity and a
+      // conversion in GA can be tied to the person PostHog identified. Never an
+      // email — only the opaque id PostHog already uses as its distinct_id.
+      identifyForTags(nextId);
       identifiedIdRef.current = nextId;
       return;
     }

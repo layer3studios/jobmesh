@@ -7,7 +7,7 @@
 //
 // Three states: 'pending' (undecided — no init), 'granted' (init PostHog),
 // 'declined' (never init). A module-level store (not React context) so the root
-// PostHogProvider, the banner, the footer link, and the audience contexts can all
+// TrackingProvider, the banner, the footer link, and the audience contexts can all
 // read/observe it regardless of where they mount in the tree.
 
 export type AnalyticsConsent = 'pending' | 'granted' | 'declined';
