@@ -164,6 +164,7 @@
 .jb-more__section + .jb-more__section { border-top: 1px solid var(--border-hairline); }
 .jb-more__label { font-family: var(--font-jetbrains-mono), ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px; }
 .jb-more__wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+.jb-more__hint { margin: 7px 0 0; font-size: 11.5px; color: var(--ink-muted); }
 .jb-more__pill {
   padding: 5px 11px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--ink-muted);
   font-family: inherit; font-size: 12.5px; cursor: pointer;
@@ -188,23 +189,54 @@
 .jb-panel.panel-scroll:hover::-webkit-scrollbar-thumb, .jb-panel.panel-scroll::-webkit-scrollbar-thumb:hover { background: var(--border-strong); background-clip: padding-box; }
 .jb-panel { animation: jb-panel-in 160ms var(--ease-out) both; transform-origin: top left; }
 
-/* Active chips row: each chip rises in; the × presses. */
+/* Applied-filters row: each chip rises in; the × presses.
+   The chip names its filter type above the value, so "Last 3 days" is never
+   just "3d" and "Pune" is never just a word floating on its own
+   (baymard.com/blog/how-to-design-applied-filters). */
 .jb-active { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 .jb-active__chip {
   display: inline-flex; align-items: center; gap: 6px; padding: 4px 6px 4px 11px; border-radius: 999px;
   background: var(--accent-soft); color: var(--accent); font-size: 12.5px; font-weight: 500;
   animation: rise 220ms var(--ease-out) both;
 }
+.jb-active__text { display: flex; flex-direction: column; line-height: 1.15; text-align: left; }
+.jb-active__group {
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: 8.5px; letter-spacing: 0.09em; text-transform: uppercase;
+  font-weight: 500; opacity: 0.62;
+}
+.jb-active__value { font-size: 12.5px; font-weight: 500; }
 .jb-active__x {
   width: 18px; height: 18px; border-radius: 999px; border: none; padding: 0; cursor: pointer;
   background: color-mix(in srgb, var(--ink) 10%, transparent); color: inherit;
   display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
   transition: background-color var(--m-ui) var(--ease-out), transform var(--m-press) var(--ease-out);
 }
 .jb-active__x:hover { background: color-mix(in srgb, var(--ink) 20%, transparent); }
 .jb-active__x:active { transform: scale(0.85); }
 .jb-active__clear { font-size: 12.5px; color: var(--ink-muted); background: transparent; border: none; cursor: pointer; padding: 4px 8px; font-family: inherit; text-decoration: underline; text-underline-offset: 2px; }
 .jb-active__clear:hover { color: var(--ink); }
+
+/* On a phone the row scrolls sideways on one line instead of wrapping into
+   three and shoving the first job below the fold. The right edge fades as the
+   cue that there is more, and the × grows to a thumb-sized target. */
+@media (max-width: 767px) {
+  .jb-active {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+    /* The fade is a mask, so it works on any page background. */
+    -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 28px), transparent 100%);
+    mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 28px), transparent 100%);
+  }
+  .jb-active::-webkit-scrollbar { display: none; }
+  .jb-active__chip { flex-shrink: 0; padding: 5px 6px 5px 12px; }
+  .jb-active__x { width: 24px; height: 24px; }
+  /* Last in the row, so it must not be masked away. */
+  .jb-active__clear { flex-shrink: 0; padding: 4px 14px 4px 8px; }
+}
 
 /* ── Waiting and failing ───────────────────────────────────────────────── */
 .jb-skel-row { display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: center; padding: 11px 12px 11px 14px; }

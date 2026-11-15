@@ -1,143 +1,136 @@
 'use client';
 // FILE: src/components/seeker/dashboard/useDashboardFilters.ts
-// Owns all filter state. Syncs writes to the URL via setSp.
+// Filter state for the jobs board. The URL is the state — nothing here mirrors
+// a param in useState, so a shared link, a back/forward step and the controls
+// can never disagree. Components call `setFilters({ role: 'Backend' })` and
+// never touch a param name; filter-schema.ts owns the spelling, the defaults
+// and the chip labels.
+//
+// The one exception is the search box: it keeps a local draft so typing stays
+// at keystroke speed, and commits to the URL on a debounce.
 
-import { useState, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { trackEvent } from '../../../lib/analytics-events';
+import { trackEvent, type FilterType } from '../../../lib/analytics-events';
+import {
+  parseFilters, writeFilters, filterChips, clearedFilters, moreFilterCount,
+  PARAM, DEFAULT_FILTERS, type FilterState, type FilterChip, type Option,
+} from './filter-schema';
+import { ROLE_OPTIONS } from './constants';
 
-type DiscoveryFilter = 'company' | 'role' | 'exp' | 'wp' | 'date' | 'loc' | 'tech' | 'sal';
-const emitRemoved = (filterType: DiscoveryFilter) =>
-  trackEvent('jobs_filter_applied', { filterType, action: 'removed' });
+const SEARCH_DEBOUNCE_MS = 300;
 
-const parseCsvParam = (v: string | null): string[] =>
-  v ? v.split(',').map(s => s.trim()).filter(Boolean) : [];
+/** Which filter a patch touched, for the analytics event. */
+const FILTER_EVENT: Partial<Record<keyof FilterState, FilterType>> = {
+  company: 'company', role: 'role', experience: 'exp', workplace: 'wp',
+  date: 'date', locations: 'loc', techStack: 'tech',
+  salaryMin: 'sal', salaryMax: 'sal',
+  entryLevel: 'entry', hideApplied: 'hideApplied', newOnly: 'newOnly',
+};
 
-export function useDashboardFilters() {
+function trackPatch(patch: Partial<FilterState>): void {
+  const seen = new Set<string>();
+  for (const [key, value] of Object.entries(patch) as [keyof FilterState, unknown][]) {
+    const filterType = FILTER_EVENT[key];
+    if (!filterType || seen.has(filterType)) continue;
+    seen.add(filterType);
+    const cleared = Array.isArray(value)
+      ? value.length === 0
+      : value === DEFAULT_FILTERS[key] || value === '' || value === false;
+    trackEvent('jobs_filter_applied', { filterType, action: cleared ? 'removed' : 'added' });
+  }
+}
+
+export interface DashboardFilters {
+  filters: FilterState;
+  /** Merge a patch into the URL. Defaults are dropped and paging resets. */
+  setFilters: (patch: Partial<FilterState>) => void;
+  /** The search box draft — local, committed to the URL on a debounce. */
+  searchInput: string;
+  setSearchInput: (v: string) => void;
+  /** The committed search term, i.e. what the list should be fetched with. */
+  search: string;
+  roleOptions: Option[];
+  chips: FilterChip[];
+  moreCount: number;
+  clearAll: () => void;
+  /** The job open in the detail panel, which filters must not close. */
+  selectedJobParam: string;
+  setSelectedJobParam: (id: string) => void;
+}
+
+export function useDashboardFilters(): DashboardFilters {
   const sp = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
-  const setSp = useCallback((fn: (sp: URLSearchParams) => void) => {
-    const next = new URLSearchParams(Array.from(sp.entries()));
-    fn(next);
+  // Derived, not copied: a URL change re-renders with the new filters.
+  const spKey = sp.toString();
+  const filters = useMemo(() => parseFilters(sp), [spKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const commit = useCallback((mutate: (next: URLSearchParams) => void) => {
+    const next = new URLSearchParams(spKey);
+    mutate(next);
     const qs = next.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname);
-  }, [sp, pathname, router]);
+    // scroll: false — a filter refines the list you are looking at; yanking the
+    // page back to the top on every toggle lost the reader's place.
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [spKey, pathname, router]);
 
-  const sel = sp.get('company') || '';
-  const selectedJobParam = sp.get('selectedJob') || '';
-  const [roleCategoryFilter, setRoleCategoryFilter] = useState(sp.get('role') || 'all');
-  const [experienceBandFilter, setExperienceBandFilterState] = useState<string[]>(
-    parseCsvParam(sp.get('exp')).filter(v => v !== 'all'));
-  const [workplaceFilter, setWorkplaceFilterState] = useState<string[]>(
-    parseCsvParam(sp.get('wp')).filter(v => v !== 'all'));
-  const [dateFilter, setDateFilter] = useState(sp.get('date') || 'all');
-  const [entryLevelFilter, setEntryLevelFilter] = useState(sp.get('entry') === '1');
-  const [hideApplied, setHideApplied] = useState(sp.get('hideApplied') === '1');
-  const [showNewOnly, setShowNewOnly] = useState(sp.get('newOnly') === '1');
-  const [searchInput, setSearchInput] = useState(sp.get('q') || '');
-  const [sortByMatch, setSortByMatch] = useState(sp.get('sort') === 'match');
-  const [locationsFilter, setLocationsFilterState] = useState<string[]>(parseCsvParam(sp.get('loc')));
-  const [techStackFilter, setTechStackFilterState] = useState<string[]>(parseCsvParam(sp.get('tech')));
-  const [salaryMinFilter, setSalaryMinFilterState] = useState(sp.get('salMin') || '');
-  const [salaryMaxFilter, setSalaryMaxFilterState] = useState(sp.get('salMax') || '');
+  const setFilters = useCallback((patch: Partial<FilterState>) => {
+    trackPatch(patch);
+    commit(next => writeFilters(next, patch));
+  }, [commit]);
 
-  // Multi-value + salary setters keep state and URL in lockstep and reset paging.
-  const setExperienceBandFilter = useCallback((next: string[]) => {
-    setExperienceBandFilterState(next);
-    trackEvent('jobs_filter_applied', { filterType: 'exp', action: next.length ? 'added' : 'removed' });
-    setSp(p => { if (next.length) p.set('exp', next.join(',')); else p.delete('exp'); p.delete('page'); });
-  }, [setSp]);
-
-  const setWorkplaceFilter = useCallback((next: string[]) => {
-    setWorkplaceFilterState(next);
-    trackEvent('jobs_filter_applied', { filterType: 'wp', action: next.length ? 'added' : 'removed' });
-    setSp(p => { if (next.length) p.set('wp', next.join(',')); else p.delete('wp'); p.delete('page'); });
-  }, [setSp]);
-
-  const setLocationsFilter = useCallback((next: string[]) => {
-    setLocationsFilterState(next);
-    trackEvent('jobs_filter_applied', { filterType: 'loc', action: next.length ? 'added' : 'removed' });
-    setSp(p => { if (next.length) p.set('loc', next.join(',')); else p.delete('loc'); p.delete('page'); });
-  }, [setSp]);
-
-  const setTechStackFilter = useCallback((next: string[]) => {
-    setTechStackFilterState(next);
-    trackEvent('jobs_filter_applied', { filterType: 'tech', action: next.length ? 'added' : 'removed' });
-    setSp(p => { if (next.length) p.set('tech', next.join(',')); else p.delete('tech'); p.delete('page'); });
-  }, [setSp]);
-
-  const setSalaryFilter = useCallback((min: string, max: string) => {
-    setSalaryMinFilterState(min);
-    setSalaryMaxFilterState(max);
-    trackEvent('jobs_filter_applied', { filterType: 'sal', action: min || max ? 'added' : 'removed' });
-    setSp(p => {
-      if (min) p.set('salMin', min); else p.delete('salMin');
-      if (max) p.set('salMax', max); else p.delete('salMax');
-      p.delete('page');
-    });
-  }, [setSp]);
-
-  const activeFilters = [
-    sel ? { label: sel, clear: () => { emitRemoved('company'); setSp(p => { p.delete('company'); }); } } : null,
-    roleCategoryFilter !== 'all' ? { label: roleCategoryFilter, clear: () => { emitRemoved('role'); setRoleCategoryFilter('all'); setSp(p => { p.delete('role'); }); } } : null,
-    ...experienceBandFilter.map(band => ({
-      label: band,
-      clear: () => { emitRemoved('exp'); setExperienceBandFilter(experienceBandFilter.filter(b => b !== band)); },
-    })),
-    ...workplaceFilter.map(mode => ({
-      label: mode,
-      clear: () => { emitRemoved('wp'); setWorkplaceFilter(workplaceFilter.filter(m => m !== mode)); },
-    })),
-    dateFilter !== 'all' ? { label: dateFilter, clear: () => { emitRemoved('date'); setDateFilter('all'); setSp(p => { p.delete('date'); }); } } : null,
-    ...locationsFilter.map(city => ({
-      label: city,
-      clear: () => { emitRemoved('loc'); setLocationsFilter(locationsFilter.filter(c => c !== city)); },
-    })),
-    ...techStackFilter.map(tag => ({
-      label: tag,
-      clear: () => { emitRemoved('tech'); setTechStackFilter(techStackFilter.filter(t => t !== tag)); },
-    })),
-    (salaryMinFilter || salaryMaxFilter) ? {
-      label: salaryMinFilter && salaryMaxFilter
-        ? `₹${salaryMinFilter}–${salaryMaxFilter} LPA`
-        : salaryMinFilter ? `₹${salaryMinFilter}+ LPA` : `Up to ₹${salaryMaxFilter} LPA`,
-      clear: () => { emitRemoved('sal'); setSalaryFilter('', ''); },
-    } : null,
-  ].filter(Boolean) as { label: string; clear: () => void }[];
-
-  const clearAll = () => {
-    setRoleCategoryFilter('all');
-    setExperienceBandFilterState([]);
-    setWorkplaceFilterState([]);
-    setDateFilter('all');
-    setEntryLevelFilter(false);
-    setHideApplied(false);
-    setShowNewOnly(false);
+  const clearAll = useCallback(() => {
     setSearchInput('');
-    setLocationsFilterState([]);
-    setTechStackFilterState([]);
-    setSalaryMinFilterState('');
-    setSalaryMaxFilterState('');
-    router.replace(pathname);
-  };
+    // Only the filter params go. `selectedJob` used to be collateral damage
+    // here — clearing filters closed the job you had open.
+    commit(next => writeFilters(next, { ...clearedFilters(), search: '' }));
+  }, [commit]);
+
+  const setSelectedJobParam = useCallback((id: string) => {
+    commit(next => { if (id) next.set('selectedJob', id); else next.delete('selectedJob'); });
+  }, [commit]);
+
+  // ── Search draft ──────────────────────────────────────────────────────────
+  const [searchInput, setSearchInput] = useState(filters.search);
+  // Keep the draft honest when the URL moves under it (back/forward, Clear all,
+  // a link with ?q=). Only when it actually differs, so typing is untouched.
+  const committedSearch = filters.search;
+  const lastCommitted = useRef(committedSearch);
+  useEffect(() => {
+    if (committedSearch === lastCommitted.current) return;
+    lastCommitted.current = committedSearch;
+    setSearchInput(committedSearch);
+  }, [committedSearch]);
+
+  useEffect(() => {
+    const draft = searchInput.trim();
+    if (draft === committedSearch) return;
+    const t = setTimeout(() => {
+      lastCommitted.current = draft;
+      commit(next => writeFilters(next, { search: draft }));
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(t);
+  }, [searchInput, committedSearch, commit]);
+
+  const chips = useMemo(() => filterChips(filters, ROLE_OPTIONS), [filters]);
+  const moreCount = useMemo(() => moreFilterCount(filters), [filters]);
 
   return {
-    sp, setSp,
-    sel, selectedJobParam,
-    roleCategoryFilter, setRoleCategoryFilter,
-    experienceBandFilter, setExperienceBandFilter,
-    workplaceFilter, setWorkplaceFilter,
-    dateFilter, setDateFilter,
-    entryLevelFilter, setEntryLevelFilter,
-    hideApplied, setHideApplied,
-    showNewOnly, setShowNewOnly,
-    searchInput, setSearchInput,
-    sortByMatch, setSortByMatch,
-    locationsFilter, setLocationsFilter,
-    techStackFilter, setTechStackFilter,
-    salaryMinFilter, salaryMaxFilter, setSalaryFilter,
-    activeFilters, clearAll,
+    filters,
+    setFilters,
+    searchInput,
+    setSearchInput,
+    search: committedSearch,
+    roleOptions: ROLE_OPTIONS,
+    chips,
+    moreCount,
+    clearAll,
+    selectedJobParam: sp.get('selectedJob') || '',
+    setSelectedJobParam,
   };
 }
+
+export { PARAM };

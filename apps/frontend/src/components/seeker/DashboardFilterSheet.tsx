@@ -9,10 +9,9 @@ import { X } from 'lucide-react';
 import { Button } from '../ui';
 import DashboardFilterSheetFields from './DashboardFilterSheetFields';
 import type { JobFacets } from './dashboard/useJobFacets';
+import type { FilterState, Option } from './dashboard/filter-schema';
 import { Z } from '@/theme/tokens';
 import { useFocusTrap } from '../ui/useFocusTrap';
-
-interface Option { value: string; label: string; }
 
 interface Props {
   isOpen: boolean;
@@ -20,36 +19,16 @@ interface Props {
   activeFilterCount: number;
   visibleJobsCount: number;
   clearAllFilters: () => void;
-  roleCategoryFilter: string;
-  experienceBandFilter: string[];
-  workplaceFilter: string[];
-  dateFilter: string;
+  filters: FilterState;
+  setFilters: (patch: Partial<FilterState>) => void;
   roleOptions: Option[];
   experienceOptions: Option[];
-  setRoleCategoryFilter: (v: string) => void;
-  setExperienceBandFilter: (v: string[]) => void;
-  setWorkplaceFilter: (v: string[]) => void;
-  setDateFilter: (v: string) => void;
-  setSp: (fn: (sp: URLSearchParams) => void) => void;
   facets: JobFacets;
-  locationsFilter: string[];
-  setLocationsFilter: (v: string[]) => void;
-  techStackFilter: string[];
-  setTechStackFilter: (v: string[]) => void;
-  salaryMinFilter: string;
-  salaryMaxFilter: string;
-  setSalaryFilter: (min: string, max: string) => void;
 }
 
 export default function DashboardFilterSheet({
   isOpen, onClose, activeFilterCount, visibleJobsCount, clearAllFilters,
-  roleCategoryFilter, experienceBandFilter, workplaceFilter, dateFilter,
-  roleOptions, experienceOptions,
-  setRoleCategoryFilter, setExperienceBandFilter, setWorkplaceFilter,
-  setDateFilter, setSp,
-  facets, locationsFilter, setLocationsFilter,
-  techStackFilter, setTechStackFilter,
-  salaryMinFilter, salaryMaxFilter, setSalaryFilter,
+  filters, setFilters, roleOptions, experienceOptions, facets,
 }: Props) {
   const [mounted, setMounted] = useState(isOpen);
   const [closing, setClosing] = useState(false);
@@ -58,12 +37,12 @@ export default function DashboardFilterSheet({
   useEffect(() => { setHydrated(true); }, []);
 
   // Salary committed on a short debounce to avoid a refetch per keystroke.
-  const [salMin, setSalMin] = useState(salaryMinFilter);
-  const [salMax, setSalMax] = useState(salaryMaxFilter);
-  useEffect(() => { setSalMin(salaryMinFilter); setSalMax(salaryMaxFilter); }, [salaryMinFilter, salaryMaxFilter]);
+  const [salMin, setSalMin] = useState(filters.salaryMin);
+  const [salMax, setSalMax] = useState(filters.salaryMax);
+  useEffect(() => { setSalMin(filters.salaryMin); setSalMax(filters.salaryMax); }, [filters.salaryMin, filters.salaryMax]);
   useEffect(() => {
-    if (salMin === salaryMinFilter && salMax === salaryMaxFilter) return;
-    const t = setTimeout(() => setSalaryFilter(salMin, salMax), 400);
+    if (salMin === filters.salaryMin && salMax === filters.salaryMax) return;
+    const t = setTimeout(() => setFilters({ salaryMin: salMin, salaryMax: salMax }), 400);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [salMin, salMax]);
@@ -154,22 +133,11 @@ export default function DashboardFilterSheet({
         </div>
 
         <DashboardFilterSheetFields
-          roleCategoryFilter={roleCategoryFilter}
-          experienceBandFilter={experienceBandFilter}
-          workplaceFilter={workplaceFilter}
-          dateFilter={dateFilter}
+          filters={filters}
+          setFilters={setFilters}
           roleOptions={roleOptions}
           experienceOptions={experienceOptions}
-          setRoleCategoryFilter={setRoleCategoryFilter}
-          setExperienceBandFilter={setExperienceBandFilter}
-          setWorkplaceFilter={setWorkplaceFilter}
-          setDateFilter={setDateFilter}
-          setSp={setSp}
           facets={facets}
-          locationsFilter={locationsFilter}
-          setLocationsFilter={setLocationsFilter}
-          techStackFilter={techStackFilter}
-          setTechStackFilter={setTechStackFilter}
           salMin={salMin} salMax={salMax}
           setSalMin={setSalMin} setSalMax={setSalMax}
         />

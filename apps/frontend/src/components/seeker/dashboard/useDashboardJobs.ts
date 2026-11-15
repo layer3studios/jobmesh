@@ -3,19 +3,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { IJob } from '../../../types';
 import { PAGE_SIZE } from './constants';
+import { DEFAULT_FILTERS, type FilterState } from './filter-schema';
 
 interface FilterParams {
-  sel: string;
-  roleCategoryFilter: string;
-  experienceBandFilter: string[];
-  entryLevelFilter: boolean;
-  workplaceFilter: string[];
-  dateFilter: string;
-  debouncedSearch: string;
-  locationsFilter: string[];
-  techStackFilter: string[];
-  salaryMinFilter: string;
-  salaryMaxFilter: string;
+  /** The applied filters, straight off the URL. */
+  filters: FilterState;
+  /** The committed search term (the debounced draft, not the keystrokes). */
+  search: string;
 }
 
 interface JobsResponse {
@@ -38,7 +32,7 @@ function getCached(key: string): JobsResponse | null {
 }
 
 /** Owns the jobs array, pagination state, and the server fetch. */
-export function useDashboardJobs(filters: FilterParams) {
+export function useDashboardJobs({ filters, search }: FilterParams) {
   const [jobs, setJobs] = useState<IJob[]>([]);
   const [totalJobs, setTotalJobs] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -50,19 +44,19 @@ export function useDashboardJobs(filters: FilterParams) {
 
   const fetchJobs = useCallback(async (pageNum: number, append: boolean) => {
     const p = new URLSearchParams({ page: String(pageNum), limit: String(PAGE_SIZE) });
-    if (filters.sel) p.set('company', filters.sel);
-    if (filters.roleCategoryFilter !== 'all') p.set('roleCategory', filters.roleCategoryFilter);
-    if (filters.experienceBandFilter.length > 0) p.set('experienceBand', filters.experienceBandFilter.join(','));
+    if (filters.company) p.set('company', filters.company);
+    if (filters.role !== DEFAULT_FILTERS.role) p.set('roleCategory', filters.role);
+    if (filters.experience.length > 0) p.set('experienceBand', filters.experience.join(','));
     // entryLevel only matters when no bands are selected — the backend ORs the
     // fresher band with isEntryLevel itself when bands are present.
-    if (filters.entryLevelFilter && filters.experienceBandFilter.length === 0) p.set('entryLevel', 'true');
-    if (filters.workplaceFilter.length > 0) p.set('workplace', filters.workplaceFilter.join(','));
-    if (filters.dateFilter !== 'all') p.set('date', filters.dateFilter);
-    if (filters.debouncedSearch.length >= 2) p.set('search', filters.debouncedSearch);
-    if (filters.locationsFilter.length > 0) p.set('locations', filters.locationsFilter.join(','));
-    if (filters.techStackFilter.length > 0) p.set('techStack', filters.techStackFilter.join(','));
-    if (filters.salaryMinFilter) p.set('salaryMin', filters.salaryMinFilter);
-    if (filters.salaryMaxFilter) p.set('salaryMax', filters.salaryMaxFilter);
+    if (filters.entryLevel && filters.experience.length === 0) p.set('entryLevel', 'true');
+    if (filters.workplace.length > 0) p.set('workplace', filters.workplace.join(','));
+    if (filters.date !== DEFAULT_FILTERS.date) p.set('date', filters.date);
+    if (search.length >= 2) p.set('search', search);
+    if (filters.locations.length > 0) p.set('locations', filters.locations.join(','));
+    if (filters.techStack.length > 0) p.set('techStack', filters.techStack.join(','));
+    if (filters.salaryMin) p.set('salaryMin', filters.salaryMin);
+    if (filters.salaryMax) p.set('salaryMax', filters.salaryMax);
 
     const cacheKey = p.toString();
     const applyResponse = (d: JobsResponse) => {
@@ -106,9 +100,9 @@ export function useDashboardJobs(filters: FilterParams) {
         if (append) setLoadingMore(false); else setLoading(false);
       }
     }
-  }, [filters.sel, filters.roleCategoryFilter, filters.experienceBandFilter, filters.entryLevelFilter,
-      filters.workplaceFilter, filters.dateFilter, filters.debouncedSearch,
-      filters.locationsFilter, filters.techStackFilter, filters.salaryMinFilter, filters.salaryMaxFilter]);
+    // `filters` is derived from the URL, so it is a new object only when the URL
+    // changed — one dep instead of eleven, and no array-identity churn.
+  }, [filters, search]);
 
   // Debounced refetch: rapid filter toggles collapse into one request.
   useEffect(() => {

@@ -19,7 +19,6 @@ import { useDashboardAnalytics, trackJobResultClick } from './useDashboardAnalyt
 
 export default function Dashboard() {
   const f = useDashboardFilters();
-  const [debouncedSearch, setDebouncedSearch] = useState(f.searchInput);
 
   const [selectedJob, setSelectedJob] = useState<IJob | null>(null);
   const [cos, setCos] = useState<ICompany[]>([]);
@@ -35,30 +34,9 @@ export default function Dashboard() {
 
   const {
     jobs, totalJobs, totalPages, currentPage, loading, loadingMore, error, retry, fetchJobs,
-  } = useDashboardJobs({
-    sel: f.sel,
-    roleCategoryFilter: f.roleCategoryFilter,
-    experienceBandFilter: f.experienceBandFilter,
-    entryLevelFilter: f.entryLevelFilter,
-    workplaceFilter: f.workplaceFilter,
-    dateFilter: f.dateFilter,
-    debouncedSearch,
-    locationsFilter: f.locationsFilter,
-    techStackFilter: f.techStackFilter,
-    salaryMinFilter: f.salaryMinFilter,
-    salaryMaxFilter: f.salaryMaxFilter,
-  });
+  } = useDashboardJobs({ filters: f.filters, search: f.search });
 
   const facets = useJobFacets();
-
-  // Debounce search input → debouncedSearch → URL
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(f.searchInput.trim()), 300);
-    return () => clearTimeout(t);
-  }, [f.searchInput]);
-  useEffect(() => {
-    f.setSp(p => { if (debouncedSearch) p.set('q', debouncedSearch); else p.delete('q'); p.delete('page'); });
-  }, [debouncedSearch]);
 
   useEffect(() => { document.title = COPY.site.documentTitleJobs; }, []);
 
@@ -125,19 +103,19 @@ export default function Dashboard() {
   }, [cos]);
 
   const visibleJobs = useMemo(
-    () => applyClientFilters(jobs, dismissedJobIds, appliedJobIds, f.hideApplied, f.showNewOnly),
-    [jobs, dismissedJobIds, f.hideApplied, appliedJobIds, f.showNewOnly],
+    () => applyClientFilters(jobs, dismissedJobIds, appliedJobIds, f.filters.hideApplied, f.filters.newOnly),
+    [jobs, dismissedJobIds, f.filters.hideApplied, appliedJobIds, f.filters.newOnly],
   );
 
   const skillRe = useMemo(() => buildSkillsRegex(userSkills), [userSkills]);
   const finalJobs = useMemo(() => {
-    if (!f.sortByMatch || !skillRe) return visibleJobs;
+    if (!f.filters.sortByMatch || !skillRe) return visibleJobs;
     return [...visibleJobs].sort((a, b) => {
       const ha = `${a.JobTitle} ${a.DescriptionPlain || ''} ${(a.autoTags?.techStack || []).join(' ')}`;
       const hb = `${b.JobTitle} ${b.DescriptionPlain || ''} ${(b.autoTags?.techStack || []).join(' ')}`;
       return (hb.match(skillRe) || []).length - (ha.match(skillRe) || []).length;
     });
-  }, [visibleJobs, f.sortByMatch, skillRe]);
+  }, [visibleJobs, f.filters.sortByMatch, skillRe]);
 
   // Auto-select first job on desktop split view ONLY.
   // Must not run in sheet mode — it would write selectedJob into the URL on a
@@ -146,14 +124,14 @@ export default function Dashboard() {
     if (layoutMode !== 'split') return;
     if (!selectedJob && finalJobs.length > 0) {
       setSelectedJob(finalJobs[0]);
-      f.setSp(p => { p.set('selectedJob', finalJobs[0]._id); });
+      f.setSelectedJobParam(finalJobs[0]._id);
     }
   }, [layoutMode, finalJobs, selectedJob]);
 
   const handleSelectJob = useCallback((job: IJob) => {
     trackJobResultClick(job._id, finalJobs.findIndex(j => j._id === job._id));
     setSelectedJob(job);
-    f.setSp(p => { p.set('selectedJob', job._id); });
+    f.setSelectedJobParam(job._id);
     // In sheet mode (any viewport that is not split), open the bottom sheet.
     if (layoutMode === 'sheet') setJobSheetOpen(true);
   }, [layoutMode, finalJobs]);
@@ -161,19 +139,11 @@ export default function Dashboard() {
   const handleCloseJobSheet = useCallback(() => {
     setJobSheetOpen(false);
     // Clear selectedJob from URL so the back button doesn't re-open the sheet.
-    f.setSp(p => { p.delete('selectedJob'); });
+    f.setSelectedJobParam('');
   }, []);
 
   const newJobsCount = useMemo(() => countNewJobs(jobs), [jobs]);
-  useDashboardAnalytics({ loading, totalResults: totalJobs, filterCount: f.activeFilters.length, searchInput: f.searchInput });
-
-  // The sort toggle stays HERE rather than moving into the layout: it writes both
-  // filter state and the URL, and the layout is deliberately free of state changes.
-  const handleToggleSortByMatch = useCallback(() => {
-    const v = !f.sortByMatch;
-    f.setSortByMatch(v);
-    f.setSp(p => { if (v) p.set('sort', 'match'); else p.delete('sort'); });
-  }, [f.sortByMatch]);
+  useDashboardAnalytics({ loading, totalResults: totalJobs, filterCount: f.chips.length, searchInput: f.searchInput });
 
   return (
     <DashboardLayout
@@ -204,7 +174,6 @@ export default function Dashboard() {
       onOpenFilterSheet={() => setFilterSheetOpen(true)}
       onCloseJobSheet={handleCloseJobSheet}
       onCloseFilterSheet={() => setFilterSheetOpen(false)}
-      onToggleSortByMatch={handleToggleSortByMatch}
       onSelectJob={handleSelectJob}
       onDismiss={toggleDismissed}
       onToggleApplied={toggleApplied}

@@ -7,6 +7,7 @@ import DashboardJobSheet from '../DashboardJobSheet';
 import DashboardFilterSheet from '../DashboardFilterSheet';
 import { ROLE_OPTIONS, EXPERIENCE_OPTIONS } from './constants';
 import type { JobFacets } from './useJobFacets';
+import type { FilterState } from './filter-schema';
 
 interface Props {
   // Job sheet
@@ -26,23 +27,9 @@ interface Props {
   activeFilterCount: number;
   visibleJobsCount: number;
   clearAllFilters: () => void;
-  roleCategoryFilter: string;
-  experienceBandFilter: string[];
-  workplaceFilter: string[];
-  dateFilter: string;
-  setRoleCategoryFilter: (v: string) => void;
-  setExperienceBandFilter: (v: string[]) => void;
-  setWorkplaceFilter: (v: string[]) => void;
-  setDateFilter: (v: string) => void;
-  setSp: (fn: (sp: URLSearchParams) => void) => void;
+  filters: FilterState;
+  setFilters: (patch: Partial<FilterState>) => void;
   facets: JobFacets;
-  locationsFilter: string[];
-  setLocationsFilter: (v: string[]) => void;
-  techStackFilter: string[];
-  setTechStackFilter: (v: string[]) => void;
-  salaryMinFilter: string;
-  salaryMaxFilter: string;
-  setSalaryFilter: (min: string, max: string) => void;
 }
 
 export default function MobileSheets(p: Props) {
@@ -66,25 +53,11 @@ export default function MobileSheets(p: Props) {
         activeFilterCount={p.activeFilterCount}
         visibleJobsCount={p.visibleJobsCount}
         clearAllFilters={p.clearAllFilters}
-        roleCategoryFilter={p.roleCategoryFilter}
-        experienceBandFilter={p.experienceBandFilter}
-        workplaceFilter={p.workplaceFilter}
-        dateFilter={p.dateFilter}
+        filters={p.filters}
+        setFilters={p.setFilters}
         roleOptions={ROLE_OPTIONS}
         experienceOptions={EXPERIENCE_OPTIONS}
-        setRoleCategoryFilter={p.setRoleCategoryFilter}
-        setExperienceBandFilter={p.setExperienceBandFilter}
-        setWorkplaceFilter={p.setWorkplaceFilter}
-        setDateFilter={p.setDateFilter}
-        setSp={p.setSp}
         facets={p.facets}
-        locationsFilter={p.locationsFilter}
-        setLocationsFilter={p.setLocationsFilter}
-        techStackFilter={p.techStackFilter}
-        setTechStackFilter={p.setTechStackFilter}
-        salaryMinFilter={p.salaryMinFilter}
-        salaryMaxFilter={p.salaryMaxFilter}
-        setSalaryFilter={p.setSalaryFilter}
       />
     </>
   );

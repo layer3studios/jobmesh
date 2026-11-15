@@ -59,7 +59,6 @@ export interface DashboardLayoutProps {
   onCloseJobSheet: () => void;
   onCloseFilterSheet: () => void;
 
-  onToggleSortByMatch: () => void;
   onSelectJob: (job: IJob) => void;
   onDismiss: Seeker['toggleDismissed'];
   onToggleApplied: Seeker['toggleApplied'];
@@ -83,28 +82,11 @@ export default function DashboardLayout(p: DashboardLayoutProps) {
 
       <DashboardControls
         isMobile={layoutMode === 'sheet'}
-        searchInput={f.searchInput} setSearchInput={f.setSearchInput}
-        sortByMatch={f.sortByMatch}
-        toggleSortByMatch={p.onToggleSortByMatch}
-        hasSkills={p.hasSkills}
-        sel={f.sel}
-        roleCategoryFilter={f.roleCategoryFilter} setRoleCategoryFilter={f.setRoleCategoryFilter}
-        experienceBandFilter={f.experienceBandFilter} setExperienceBandFilter={f.setExperienceBandFilter}
-        workplaceFilter={f.workplaceFilter} setWorkplaceFilter={f.setWorkplaceFilter}
-        dateFilter={f.dateFilter} setDateFilter={f.setDateFilter}
-        entryLevelFilter={f.entryLevelFilter} setEntryLevelFilter={f.setEntryLevelFilter}
-        hideApplied={f.hideApplied} setHideApplied={f.setHideApplied}
-        showNewOnly={f.showNewOnly} setShowNewOnly={f.setShowNewOnly}
-        newJobsCount={p.newJobsCount}
+        f={f}
         facets={facets}
-        locationsFilter={f.locationsFilter} setLocationsFilter={f.setLocationsFilter}
-        techStackFilter={f.techStackFilter} setTechStackFilter={f.setTechStackFilter}
-        salaryMinFilter={f.salaryMinFilter} salaryMaxFilter={f.salaryMaxFilter}
-        setSalaryFilter={f.setSalaryFilter}
-        activeFilters={f.activeFilters}
-        onClearAllFilters={f.clearAll}
+        hasSkills={p.hasSkills}
+        newJobsCount={p.newJobsCount}
         onOpenMobileFilters={p.onOpenFilterSheet}
-        setSp={f.setSp}
       />
 
       <DashboardBody
@@ -115,8 +97,8 @@ export default function DashboardLayout(p: DashboardLayoutProps) {
         appliedJobIds={p.appliedJobIds} comeBackMap={p.comeBackMap}
         skillRe={p.skillRe} userSkillsLength={p.userSkillsLength}
         hasMore={p.currentPage < p.totalPages} loadingMore={p.loadingMore} currentPage={p.currentPage}
-        entryLevelFilter={f.entryLevelFilter}
-        activeFiltersCount={f.activeFilters.length}
+        entryLevelFilter={f.filters.entryLevel}
+        activeFiltersCount={f.chips.length}
         listRef={p.listRef}
         onLoadMore={p.fetchJobs}
         onSelect={p.onSelectJob}
@@ -143,23 +125,12 @@ export default function DashboardLayout(p: DashboardLayoutProps) {
           onSelectJob={p.onSelectJob}
           filterSheetOpen={p.filterSheetOpen}
           onCloseFilterSheet={p.onCloseFilterSheet}
-          activeFilterCount={f.activeFilters.length}
+          activeFilterCount={f.chips.length}
           visibleJobsCount={p.finalJobs.length}
           clearAllFilters={f.clearAll}
-          roleCategoryFilter={f.roleCategoryFilter}
-          experienceBandFilter={f.experienceBandFilter}
-          workplaceFilter={f.workplaceFilter}
-          dateFilter={f.dateFilter}
-          setRoleCategoryFilter={f.setRoleCategoryFilter}
-          setExperienceBandFilter={f.setExperienceBandFilter}
-          setWorkplaceFilter={f.setWorkplaceFilter}
-          setDateFilter={f.setDateFilter}
-          setSp={f.setSp}
+          filters={f.filters}
+          setFilters={f.setFilters}
           facets={facets}
-          locationsFilter={f.locationsFilter} setLocationsFilter={f.setLocationsFilter}
-          techStackFilter={f.techStackFilter} setTechStackFilter={f.setTechStackFilter}
-          salaryMinFilter={f.salaryMinFilter} salaryMaxFilter={f.salaryMaxFilter}
-          setSalaryFilter={f.setSalaryFilter}
         />
       )}
     </Container>
