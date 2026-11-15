@@ -26,6 +26,17 @@ function validThroughFrom(postedDate: string | null): string {
   return valid.toISOString();
 }
 
+/**
+ * A job the liveness sweep (backend tasks/runValidator.js) found gone at its
+ * source, or that the scraper stopped seeing. Expiry is SOFT — the document
+ * survives so applications still resolve and a wrong verdict can be undone —
+ * which means this page can be asked for a job that is no longer open, where
+ * previously such jobs were deleted and 404'd.
+ */
+function isExpired(job: IJob): boolean {
+  return job.Status === 'expired';
+}
+
 /** First city of a job's location string ("Bengaluru, Karnataka, India" → "Bengaluru"). */
 function primaryCity(job: IJob): string {
   if (job.IsRemote) return 'Remote';
@@ -68,8 +79,14 @@ export async function generateMetadata(
   const title = jobMetaTitle(job);
   const description = jobMetaDescription(job);
   return {
-    title,
+    title: isExpired(job) ? `${title} (closed)` : title,
     description,
+    // An expired posting must leave the index. Google's guidance on expired
+    // jobs is explicit that leaving them crawlable — especially still carrying
+    // JobPosting markup — risks a manual action against the whole site. The
+    // page stays reachable for anyone holding the link; it just stops being a
+    // search result. The markup is dropped in the page body below.
+    ...(isExpired(job) ? { robots: { index: false, follow: true } } : {}),
     alternates: { canonical: absoluteUrl(`/jobs/${jobId}`) },
     openGraph: { type: 'article', title, description, url: absoluteUrl(`/jobs/${jobId}`) },
   };
@@ -80,7 +97,15 @@ export default async function JobDetailPage({ params }: { params: Promise<{ jobI
   const job: IJob | null = await getSeekerJobServer(jobId).catch(() => null);
   if (!job) notFound();
 
-  const jobPostingSchema = buildJobPostingSchema(
+  const expired = isExpired(job);
+
+  // Google's own removal options for an expired posting are: a past
+  // validThrough, a 404/410, or removing the markup. Removing it is the one
+  // that keeps the page useful to a person holding the link while making the
+  // listing unambiguously gone to a crawler — a past validThrough on a page
+  // that still describes an open role is the mismatch that gets sites
+  // penalised. BreadcrumbList is unaffected and stays.
+  const jobPostingSchema = expired ? null : buildJobPostingSchema(
     {
       title: job.JobTitle,
       descriptionHtml: job.Description ?? '',
@@ -110,8 +135,22 @@ export default async function JobDetailPage({ params }: { params: Promise<{ jobI
 
   return (
     <main className="container-lg" style={{ padding: '32px 16px' }}>
-      <JsonLd schema={jobPostingSchema} />
+      {jobPostingSchema && <JsonLd schema={jobPostingSchema} />}
       <JsonLd schema={breadcrumbSchema} />
+      {expired && (
+        <p
+          role="status"
+          style={{
+            margin: '0 0 20px', padding: '12px 16px',
+            border: '1px solid var(--border)', borderRadius: 8,
+            background: 'var(--surface-2)', color: 'var(--ink-muted)', fontSize: 14,
+          }}
+        >
+          This role is no longer open. It is kept here for reference — browse{' '}
+          <Link href={`/company/${slugifyCompanyName(job.Company)}`}>other {job.Company} roles</Link>
+          {' or '}<Link href="/jobs">everything hiring now</Link>.
+        </p>
+      )}
       <JobDetailStandalone job={job} />
       <nav aria-label="More jobs" style={{ marginTop: 24, fontSize: 14, color: 'var(--ink-muted)' }}>
         More roles: <Link href={`/company/${slugifyCompanyName(job.Company)}`}>all {job.Company} jobs</Link>
