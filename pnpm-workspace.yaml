@@ -1,3 +1,13 @@
 packages:
-  - 'apps/*'
-  - 'packages/*'
+  - apps/*
+  - packages/*
+
+# pnpm 10 refuses to run a dependency's install scripts unless it is listed
+# here. These three genuinely need theirs — sharp and unrs-resolver ship native
+# binaries, core-js runs a postinstall — and without this the production build
+# fails on a fresh install. This was previously an untracked hand-edit on the
+# server, which meant a clean checkout could not build; it belongs in the repo.
+onlyBuiltDependencies:
+  - core-js
+  - sharp
+  - unrs-resolver
