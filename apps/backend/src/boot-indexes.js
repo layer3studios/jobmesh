@@ -12,7 +12,7 @@ import {
 } from './models/seeker/index.js';
 import { ensureJobIndexes } from './models/shared/job-model.js';
 import { ensureRecommendationCacheIndexes } from './models/employer/recommendation-cache-model.js';
-import { ensureAdminUserIndexes, ensureScrapeRunIndexes } from './models/admin/index.js';
+import { ensureAdminUserIndexes, ensureScrapeRunIndexes, ensureValidatorRunIndexes } from './models/admin/index.js';
 import { ensureInterviewIndexes, ensureInterviewReminderJobIndexes, ensureInterviewTimeIndexes } from './models/interview/index.js';
 import { ensureUsageStatsIndexes } from './gemma/usage-stats.js';
 import { ensureIndexingJobIndexes } from './models/admin/indexing-job-model.js';
@@ -59,6 +59,7 @@ export async function runBootSequence() {
     await ensureAdminUserIndexes();
     await ensureUsageStatsIndexes();
     await ensureScrapeRunIndexes();
+    await ensureValidatorRunIndexes();
     await ensureEmailEventIndexes();
     await ensureIndexingJobIndexes();
     await ensureBlogPostIndexes();

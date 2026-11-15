@@ -13,6 +13,7 @@ import { startInterviewReminderWorker } from './services/interview/interview-rem
 import { initGemma } from './gemma/index.js';
 
 import { runScraper } from './tasks/runScraper.js';
+import { runValidator } from './tasks/runValidator.js';
 
 import employerTeamRouter, { acceptRouter as employerInviteAcceptRouter } from './api/employer/employer-team-routes.js';
 import {
@@ -91,6 +92,20 @@ const server = app.listen(PORT, async () => {
         }
         console.log('[cron] daily scrape');
         runScraper();
+      });
+      // The liveness sweep at 09:00, three hours after the scrape starts, so it
+      // runs against a finished crawl. Order matters: the scrape expires jobs it
+      // did not see — a guess it gets wrong whenever a board times out — and the
+      // sweep's second pass asks each ATS directly and resurrects those. Running
+      // it before the scrape would leave a bad crawl's casualties off the board
+      // for a whole day.
+      cron.schedule('0 9 * * *', async () => {
+        if (!(await isFeatureEnabled('validatorCronEnabled'))) {
+          console.log('[cron] liveness sweep SKIPPED (validatorCronEnabled=false)');
+          return;
+        }
+        console.log('[cron] daily liveness sweep');
+        runValidator({ source: 'cron' });
       });
       console.log('[cron] scheduled');
     } else {

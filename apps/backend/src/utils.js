@@ -6,6 +6,30 @@ import he from 'he';
 
 export const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+/**
+ * Map over items with at most `limit` tasks in flight, preserving input order.
+ *
+ * Promise.all over a few thousand jobs would open a few thousand sockets at
+ * once; chunking into batches of `limit` instead makes every batch wait for its
+ * slowest member. This keeps exactly `limit` workers busy, pulling from a shared
+ * cursor, so one slow host cannot stall the rest of the sweep.
+ *
+ * A rejected task rejects the whole call, like Promise.all — callers that must
+ * not fail on one item should resolve to an error value instead of throwing.
+ */
+export async function mapWithConcurrency(items, limit, task) {
+  const results = new Array(items.length);
+  let next = 0;
+  const workers = Array.from({ length: Math.max(1, Math.min(limit, items.length)) }, async () => {
+    while (next < items.length) {
+      const index = next++;
+      results[index] = await task(items[index], index);
+    }
+  });
+  await Promise.all(workers);
+  return results;
+}
+
 /** Strip HTML tags from a string and collapse whitespace. */
 export function StripHtml(html) {
   if (!html) return '';

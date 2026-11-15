@@ -12,38 +12,66 @@ import { generateJobTags, getPlainTextForTagging } from '../../core/jobTags/inde
 const JOBS = 'jobs';
 
 /**
- * Delete jobs that the scraper no longer sees on a site (expired listings).
+ * Expire the jobs the scraper no longer sees on a site.
+ *
+ * SOFT, and that is the whole point. This used to be a deleteMany, which made
+ * every verdict final — and the verdict is only ever a guess: scraperEngine.js
+ * skips any page whose fetch throws or returns null (a timeout, a 429, one
+ * company's board 404ing) and still reports the site a success, so every job
+ * behind that skipped fetch looks unseen. Hard-deleting them destroyed live
+ * listings with no way back.
+ *
+ * Marking Status:'expired' instead means:
+ *   • the job leaves the board immediately — every read filters Status:'active'
+ *     (Db/jobs/jobs-query-builder.js, queries.js), so nothing else must change;
+ *   • saveJobs() sets Status:'active', so a job seen again on the next crawl
+ *     resurrects itself with no special case;
+ *   • tasks/runValidator.js can ask the source ATS directly and resurrect
+ *     anything expired by a bad crawl;
+ *   • an application pointing at the job still resolves.
+ *
  * @param {string} siteName
  * @param {Set<string>} seenJobIds
+ * @returns {Promise<number>} jobs newly expired
  */
-export async function deleteExpiredJobs(siteName, seenJobIds) {
+export async function expireUnseenJobs(siteName, seenJobIds) {
   const jobs = await col(JOBS);
   const seen = Array.from(seenJobIds);
-  const result = await jobs.deleteMany({
-    sourceSite: siteName,
-    JobID: { $nin: seen },
-  });
-  if (result.deletedCount > 0) {
-    console.log(`[${siteName}] Deleted ${result.deletedCount} expired jobs.`);
+  // An empty `seen` would match the whole site; the caller already refuses that
+  // case, and this guard makes the function safe on its own terms too.
+  if (seen.length === 0) return 0;
+
+  const result = await jobs.updateMany(
+    { sourceSite: siteName, JobID: { $nin: seen }, Status: 'active' },
+    { $set: { Status: 'expired', expiredAt: new Date(), expiredReason: 'not seen in crawl' } },
+  );
+  if (result.modifiedCount > 0) {
+    console.log(`[${siteName}] Expired ${result.modifiedCount} jobs no longer on the board.`);
   }
-  return result.deletedCount;
+  return result.modifiedCount;
 }
 
 /**
- * Fallback cleanup when a scrape fails partway through — anything older than
- * 7 days for that site is removed. Avoids wrongly deleting valid jobs.
+ * Fallback for a scrape that failed partway through: expire that site's jobs
+ * not refreshed in 7 days, rather than trusting a crawl we know was incomplete.
+ *
+ * Also soft, for a sharper reason than above — `updatedAt` tracks when WE last
+ * wrote the document, not whether the posting is open, so a live job on a site
+ * whose crawl keeps failing ages past this cutoff while still being live. As an
+ * expiry that is recoverable (and that runValidator.js will undo on sight);
+ * as a delete it was data loss on a timer.
  */
-export async function deleteOldJobs(siteName) {
+export async function expireStaleJobs(siteName) {
   const jobs = await col(JOBS);
   const sevenDaysAgo = new Date(Date.now() - 7 * 86400000);
-  const result = await jobs.deleteMany({
-    sourceSite: siteName,
-    updatedAt: { $lt: sevenDaysAgo },
-  });
-  if (result.deletedCount > 0) {
-    console.log(`[${siteName}] Deleted ${result.deletedCount} jobs older than 7 days.`);
+  const result = await jobs.updateMany(
+    { sourceSite: siteName, updatedAt: { $lt: sevenDaysAgo }, Status: 'active' },
+    { $set: { Status: 'expired', expiredAt: new Date(), expiredReason: 'stale — no refresh in 7 days' } },
+  );
+  if (result.modifiedCount > 0) {
+    console.log(`[${siteName}] Expired ${result.modifiedCount} jobs not refreshed in 7 days.`);
   }
-  return result.deletedCount;
+  return result.modifiedCount;
 }
 
 /**

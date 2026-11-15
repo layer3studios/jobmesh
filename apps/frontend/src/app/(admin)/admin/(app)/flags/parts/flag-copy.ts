@@ -40,6 +40,12 @@ export const FLAG_COPY: Record<FeatureFlagName, FlagCopy> = {
     whenOff: 'Candidates can still browse and read every job page, but submitting an application returns a "temporarily disabled" message. This is candidate-visible — use it only during an incident.',
     confirmTitle: 'Stop accepting applications?',
   },
+  validatorCronEnabled: {
+    title: 'Dead-job sweep',
+    description: 'The 09:00 sweep that asks each ATS whether its jobs still exist, expires the ones that are gone, and re-opens any the scrape expired by mistake.',
+    whenOff: 'Dead listings stay on the board until they are seen missing by a scrape, and jobs wrongly expired by a failed crawl are not re-opened. Nothing is deleted either way — pause this while an ATS is misbehaving, then switch it back on.',
+    confirmTitle: 'Pause the dead-job sweep?',
+  },
   // The only switch here that starts OFF: the hire half has not launched.
   employerSideEnabled: {
     title: 'Hire side',

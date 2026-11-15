@@ -22,6 +22,11 @@ export const FEATURE_FLAGS = Object.freeze({
   jdExtractionEnabled: true,
   aiScoringEnabled: true,
   publicApplyEnabled: true,
+  // The nightly liveness sweep (tasks/runValidator.js). Fails OPEN like the
+  // other machinery flags: the sweep is what keeps dead listings off the board,
+  // so a database hiccup should not silently leave them up. Pausing it is the
+  // right move while an ATS is misbehaving — that is what this switch is for.
+  validatorCronEnabled: true,
   // The one flag that fails CLOSED, deliberately. The others guard machinery
   // that is already live, so a database hiccup must not switch it off. This
   // one guards a side of the product that has not launched: the hire surface

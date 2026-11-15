@@ -3,3 +3,4 @@
 export * from './admin-user-model.js';
 export * from './admin-team-helpers.js';
 export * from './scrape-run-model.js';
+export * from './validator-run-model.js';
