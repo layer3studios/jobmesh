@@ -80,6 +80,22 @@ for (const [canonical, aliases] of Object.entries(CITY_ALIASES)) {
 const NON_CITY_SEGMENTS = new Set([
   // countries and codes
   'india', 'ind', 'in', 'bharat', 'apac', 'emea', 'global', 'worldwide',
+  // States and union territories. A location is very often
+  // "<city>, <state>, India", and without these the state becomes its own pill
+  // whenever the city is unknown or absent — "Karnataka" and "Mahārāshtra" are
+  // not places a seeker filters by on a tech board. Both spellings of the ones
+  // that carry macrons in the scraped data are listed.
+  'andhra pradesh', 'arunachal pradesh', 'assam', 'bihar', 'chhattisgarh', 'goa',
+  'gujarat', 'haryana', 'himachal pradesh', 'jharkhand', 'karnataka', 'karnātaka',
+  'kerala', 'madhya pradesh', 'maharashtra', 'mahārāshtra', 'manipur', 'meghalaya',
+  'mizoram', 'nagaland', 'odisha', 'orissa', 'punjab', 'rajasthan', 'sikkim',
+  'tamil nadu', 'tamilnadu', 'telangana', 'tripura', 'uttar pradesh', 'uttarakhand',
+  'west bengal', 'jammu and kashmir', 'ladakh', 'puducherry', 'pondicherry',
+  'andaman and nicobar islands', 'dadra and nagar haveli', 'daman and diu',
+  'lakshadweep', 'chandigarh ut',
+  // Two-letter state codes that appear as their own segment ("Bengaluru, KA").
+  'ka', 'mh', 'tn', 'ts', 'ap', 'up', 'wb', 'gj', 'rj', 'kl', 'hr', 'pb', 'mp',
+  'br', 'od', 'jh', 'cg', 'as', 'hp', 'uk', 'ut', 'dl', 'ch', 'ga',
   // work modes
   'remote', 'hybrid', 'on-site', 'onsite', 'on site', 'in-office', 'in office',
   'office', 'work from home', 'wfh', 'work from office', 'flexible',
@@ -206,6 +222,62 @@ export function cityMatchTerms(city) {
   const canonical = ALIAS_TO_CANONICAL.get(trimmed.toLowerCase());
   if (canonical) return [...CITY_ALIASES[canonical]];
   return [trimmed];
+}
+
+/**
+ * EVERY canonical city mentioned across a job's location fields.
+ *
+ * This is what the facet must count, because it is what the filter matches.
+ * Measured on live data: 1,892 active jobs had "Bengaluru" in `Location` and
+ * 1,983 matched the Bengaluru filter once `AllLocations` was included — while
+ * the pill read 856, because the facet read only `Location` and took only the
+ * FIRST city out of it. A job posted in "Bengaluru, Hyderabad" is a Bengaluru
+ * job AND a Hyderabad job; the filter already agrees, so the count must too.
+ *
+ * Only KNOWN aliases are collected across segments. The single-city fallback in
+ * canonicalCity() — which accepts an unfamiliar but plausible name — is applied
+ * only when no known city was found anywhere, so a state or a region sitting
+ * beside a real city can never become a pill of its own.
+ *
+ * @param {Array<string|null|undefined>} values Location plus AllLocations entries
+ * @returns {Set<string>} canonical city names, deduplicated
+ */
+export function canonicalCitiesFrom(values) {
+  const found = new Set();
+
+  for (const value of values) {
+    if (typeof value !== 'string' || value.includes('://')) continue;
+    for (const part of value.split(/[,/|;]|\s[-–—]\s/)) {
+      const seg = part.trim().replace(/\s+/g, ' ');
+      if (!seg) continue;
+      const direct = ALIAS_TO_CANONICAL.get(seg.toLowerCase());
+      if (direct) { found.add(direct); continue; }
+      const cleaned = denoise(seg).toLowerCase();
+      if (cleaned) {
+        const viaNoise = ALIAS_TO_CANONICAL.get(cleaned);
+        if (viaNoise) { found.add(viaNoise); continue; }
+      }
+      // A known city welded into a longer segment ("Hyderabad-Waverock").
+      let best = null;
+      for (const [alias, canonical] of ALIAS_TO_CANONICAL) {
+        if (alias.length < 4) continue;
+        if (best && alias.length <= best.alias.length) continue;
+        const re = new RegExp(`(^|[^\\p{L}])${alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|[^\\p{L}])`, 'iu');
+        if (re.test(seg)) best = { alias, canonical };
+      }
+      if (best) found.add(best.canonical);
+    }
+  }
+
+  if (found.size > 0) return found;
+
+  // Nothing recognised: fall back to the single-city reading, so a genuine town
+  // missing from the table still gets a pill.
+  for (const value of values) {
+    const city = canonicalCity(value);
+    if (city) { found.add(city); break; }
+  }
+  return found;
 }
 
 export const __testing = { titleCase, denoise, ALIAS_TO_CANONICAL, NON_CITY_SEGMENTS };

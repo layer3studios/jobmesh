@@ -5,7 +5,7 @@ import { ObjectId } from 'mongodb';
 import { col } from '../connection.js';
 import { buildJobsQuery, hasTextSearch, NOT_ADMIN_HIDDEN } from './jobs-query-builder.js';
 import { FEED_PROJECTION, clampFeedLimit } from './jobs-feed-projection.js';
-import { canonicalCity } from './city-canonical.js';
+import { canonicalCity, canonicalCitiesFrom } from './city-canonical.js';
 
 const JOBS = 'jobs';
 
@@ -120,21 +120,39 @@ export async function getJobFacets() {
       { $sort: { count: -1, _id: 1 } },
       { $limit: 30 },
     ]).toArray(),
+    // Location UNION AllLocations — the same pair the filter matches against
+    // (jobs-query-builder.js). Reading only `Location` is what made the pills
+    // lie: measured live, 1,983 active jobs matched the Bengaluru filter while
+    // its pill read 856. Grouping by the whole location SET collapses identical
+    // jobs, so this stays one small aggregation rather than 8,000 documents.
     jobs.aggregate([
       { $match: { Status: 'active', ...NOT_ADMIN_HIDDEN } },
-      { $group: { _id: '$Location', count: { $sum: 1 } } },
+      {
+        $project: {
+          locs: {
+            $setUnion: [
+              [{ $ifNull: ['$Location', ''] }],
+              { $ifNull: ['$AllLocations', []] },
+            ],
+          },
+        },
+      },
+      { $group: { _id: '$locs', count: { $sum: 1 } } },
     ]).toArray(),
   ]);
 
-  // Collapse raw Location strings into city counts (case-insensitive merge).
+  // Count a job under EVERY city it mentions, once each. A job posted in
+  // "Bengaluru, Hyderabad" belongs to both pills, which is already how the
+  // filter treats it — canonicalCitiesFrom returns a Set, so a job whose
+  // Location and AllLocations both say Bengaluru is still counted once.
   const cityCounts = new Map();
-  for (const { _id: locationString, count } of locAgg) {
-    const city = extractCity(locationString);
-    if (!city) continue;
-    const key = city.toLowerCase();
-    const entry = cityCounts.get(key);
-    if (entry) entry.count += count;
-    else cityCounts.set(key, { city, count });
+  for (const { _id: locationStrings, count } of locAgg) {
+    for (const city of canonicalCitiesFrom(locationStrings || [])) {
+      const key = city.toLowerCase();
+      const entry = cityCounts.get(key);
+      if (entry) entry.count += count;
+      else cityCounts.set(key, { city, count });
+    }
   }
   const cities = [...cityCounts.values()]
     .sort((a, b) => b.count - a.count || a.city.localeCompare(b.city))
