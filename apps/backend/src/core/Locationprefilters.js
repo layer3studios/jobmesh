@@ -1,31 +1,29 @@
 // FILE: src/core/Locationprefilters.js
-// India-specific location detection + ATS field normalizers.
+// Location gating for the scraper, plus ATS field normalizers.
+//
+// The country lists themselves live in core/target-countries.js — one entry
+// per country, one switch to enable it. This file used to hold two hardcoded
+// India arrays, and four ATS configs held their own copies besides; adding a
+// country meant editing all of them and remembering which was which.
+import { isTargetLocation, countryOf } from './target-countries.js';
 
-const INDIA_LOCATIONS = [
-  'bangalore', 'bengaluru', 'mumbai', 'delhi', 'new delhi',
-  'hyderabad', 'pune', 'chennai', 'noida', 'gurgaon', 'gurugram',
-  'kolkata', 'ahmedabad', 'india', 'remote', 'work from home',
-  'wfh', 'pan india', 'anywhere in india',
-];
+export { isTargetLocation, countryOf };
 
-const INDIAN_CITIES = [
-  'bangalore', 'bengaluru', 'mumbai', 'delhi', 'new delhi',
-  'hyderabad', 'pune', 'chennai', 'noida', 'gurgaon', 'gurugram',
-  'kolkata', 'ahmedabad', 'jaipur', 'lucknow', 'chandigarh',
-  'indore', 'nagpur', 'coimbatore', 'kochi', 'cochin',
-  'thiruvananthapuram', 'trivandrum', 'visakhapatnam', 'vizag',
-  'bhubaneswar', 'mangalore', 'mysore', 'mysuru', 'vadodara',
-  'surat', 'patna', 'ranchi', 'guwahati', 'bhopal',
-];
-
-/** True if the string mentions India or any known Indian city. */
+/**
+ * True if the string names an enabled country.
+ *
+ * Kept under its original name because four ATS configs import it, but it is
+ * no longer India-specific — it follows TARGET_COUNTRIES. Prefer
+ * isTargetLocation in new code; this is the compatibility shim.
+ *
+ * Two behaviours changed, both deliberately:
+ *   • Matching is whole-word. The old substring test let "IN" match
+ *     "Indianapolis", which is how US cities reached an India-only board.
+ *   • "Remote" and "Work from home" are matched as country-agnostic rather
+ *     than as Indian locations, which is what they were listed as before.
+ */
 export function isIndiaString(location) {
-  if (!location || typeof location !== 'string') return false;
-  const lower = location.toLowerCase().trim();
-  if (!lower) return false;
-  if (lower.includes('india')) return true;
-  if (lower === 'in' || lower === 'ind') return true;
-  return INDIAN_CITIES.some(city => lower.includes(city));
+  return isTargetLocation(location);
 }
 
 /** Normalize workplace-type strings to: Remote / Hybrid / On-site / null. */
@@ -69,8 +67,7 @@ export function universalLocationPreFilter(job, options = {}) {
     }
   }
   if (!text || text.trim() === '') return true;
-  const lower = text.toLowerCase();
-  return INDIA_LOCATIONS.some(term => lower.includes(term));
+  return isTargetLocation(text);
 }
 
 export function createLocationPreFilter(options = {}) {

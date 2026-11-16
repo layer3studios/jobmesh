@@ -1,3 +1,4 @@
+import { isTargetLocation } from '../core/target-countries.js';
 // FILE: src/CompanyConfig/ashby-extractors.js
 // Per-field readers for one Ashby posting, plus the India string test they use.
 // Split out of ashbyConfig.js (section 2): these change when Ashby's JSON shape
@@ -53,18 +54,9 @@ const ashbyExtractors = {
     },
     
     // Helper to check if a location string is India-related
+    // Delegates to core/target-countries.js; see hasIndiaLocation in ashbyConfig.
     isIndiaString(locationStr) {
-        const indianCities = [
-            'bangalore', 'bengaluru', 'mumbai', 'delhi', 'new delhi',
-            'hyderabad', 'pune', 'chennai', 'noida', 'gurgaon', 'gurugram',
-            'kolkata', 'ahmedabad', 'jaipur', 'lucknow', 'chandigarh',
-            'indore', 'nagpur', 'coimbatore', 'kochi', 'cochin',
-            'thiruvananthapuram', 'trivandrum'
-        ];
-        
-        const locLower = locationStr.toLowerCase();
-        return locLower.includes('india') || 
-               indianCities.some(city => locLower.includes(city));
+        return isTargetLocation(locationStr);
     },
     
     // Extract description

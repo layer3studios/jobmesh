@@ -142,6 +142,18 @@ export async function saveJobs(rawJobs) {
             createdAt: now,
             updatedAt: now,
             scrapedAt: now,
+            // The feed's ordering key. A date sort advertises staleness: filter
+            // to one skill and city, see that the newest match is three weeks
+            // old, and a board with thousands of live jobs looks abandoned.
+            //
+            // It has to be a STORED key rather than no sort at all. Without a
+            // stable sort Mongo's natural order can differ between the page-1
+            // and page-2 queries, so the same job appears twice and another is
+            // never shown — worse for a visitor than staleness. Assigned once
+            // at insert, so paging is consistent for as long as the job lives,
+            // while the order of the board as a whole still turns over as
+            // inventory does (about 960 new jobs a day).
+            shuffleKey: Math.random(),
           },
         },
         upsert: true,

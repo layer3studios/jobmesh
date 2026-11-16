@@ -62,7 +62,21 @@ export async function getJobsPaginated(
     cursor.project({ ...FEED_PROJECTION, _searchScore: { $meta: 'textScore' } })
       .sort({ _searchScore: { $meta: 'textScore' }, PostedDate: -1 });
   } else {
-    cursor.project(FEED_PROJECTION).sort({ PostedDate: -1, scrapedAt: -1 });
+    // NOT reverse-chronological. A date sort tells every visitor how stale the
+    // narrowest slice of the board is: filter to one skill in one city, find
+    // the newest match is three weeks old, and leave — even though the board
+    // holds thousands of live jobs. Shuffled order shows the same inventory
+    // without leading with its worst fact.
+    //
+    // Two things this is NOT. It is not "no sort": without a stable key,
+    // natural order can shift between the page-1 and page-2 queries, so a job
+    // shows twice while another never shows at all. And it is not random per
+    // request: shuffleKey is stored, so paging stays consistent.
+    //
+    // It also unburies the 930 jobs (10.8%) whose PostedDate is null — nulls
+    // sort last in a descending sort, so they sat at the bottom of every page
+    // of results, effectively invisible.
+    cursor.project(FEED_PROJECTION).sort({ shuffleKey: 1, _id: 1 });
   }
 
   const [totalJobs, rows, companies] = await Promise.all([
