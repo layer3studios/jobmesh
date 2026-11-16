@@ -1,3 +1,4 @@
+import { isTargetLocation } from '../core/target-countries.js';
 import fetch from 'node-fetch';
 import { companyBoardNames } from './ashby-boards.js';
 import { ashbyExtractors } from './ashby-extractors.js';
@@ -68,54 +69,13 @@ export const ashbyConfig = {
     },
     
     // Check if job has India location
+    // Delegates to core/target-countries.js. This used to be a private copy of
+    // an Indian city list — one of four such copies — so enabling a country
+    // meant editing every ATS config and the shared prefilter besides.
     hasIndiaLocation(job) {
-        const indianCities = [
-            'bangalore', 'bengaluru', 'mumbai', 'delhi', 'new delhi',
-            'hyderabad', 'pune', 'chennai', 'noida', 'gurgaon', 'gurugram',
-            'kolkata', 'ahmedabad', 'jaipur', 'lucknow', 'chandigarh',
-            'indore', 'nagpur', 'coimbatore', 'kochi', 'cochin',
-            'thiruvananthapuram', 'trivandrum', 'visakhapatnam', 'vizag',
-            'bhubaneswar', 'mangalore', 'mysore', 'mysuru', 'vadodara',
-            'surat', 'patna', 'ranchi', 'guwahati', 'bhopal'
-        ];
-        
-        // Check primary location
-        if (job.location) {
-            const locationLower = job.location.toLowerCase();
-            if (locationLower.includes('india') || 
-                indianCities.some(city => locationLower.includes(city))) {
-                return true;
-            }
-        }
-        
-        // Check address
-        if (job.address?.postalAddress?.addressCountry) {
-            const country = job.address.postalAddress.addressCountry.toLowerCase();
-            if (country.includes('india') || country === 'in' || country === 'ind') {
-                return true;
-            }
-        }
-        
-        // Check secondary locations
-        if (job.secondaryLocations && job.secondaryLocations.length > 0) {
-            for (const secLoc of job.secondaryLocations) {
-                if (secLoc.location) {
-                    const locLower = secLoc.location.toLowerCase();
-                    if (locLower.includes('india') || 
-                        indianCities.some(city => locLower.includes(city))) {
-                        return true;
-                    }
-                }
-                if (secLoc.address?.addressCountry) {
-                    const country = secLoc.address.addressCountry.toLowerCase();
-                    if (country.includes('india') || country === 'in' || country === 'ind') {
-                        return true;
-                    }
-                }
-            }
-        }
-        
-        return false;
+        if (job.location && isTargetLocation(job.location)) return true;
+        const secondary = Array.isArray(job.secondaryLocations) ? job.secondaryLocations : [];
+        return secondary.some((loc) => isTargetLocation(loc?.location));
     },
     
     // Fetch jobs page (required by scraperEngine)

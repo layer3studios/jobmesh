@@ -1,3 +1,4 @@
+import { isTargetLocation } from '../core/target-countries.js';
 import fetch from 'node-fetch';
 import { companyBoardTokens } from './greenhouse-boards.js';
 
@@ -140,26 +141,9 @@ export const greenhouseConfig = {
     },
     
     // Check if location is in India
+    // Delegates to core/target-countries.js. The old version matched /in/,
+    // which treated any location containing the word "in" as Indian.
     isIndiaLocation(location) {
-        const indianCities = [
-            'bangalore', 'bengaluru', 'mumbai', 'delhi', 'new delhi',
-            'hyderabad', 'pune', 'chennai', 'noida', 'gurgaon', 'gurugram',
-            'kolkata', 'ahmedabad', 'jaipur', 'lucknow', 'chandigarh',
-            'indore', 'nagpur', 'coimbatore', 'kochi', 'cochin',
-            'thiruvananthapuram', 'trivandrum', 'visakhapatnam', 'vizag',
-            'bhubaneswar', 'mangalore', 'mysore', 'mysuru', 'vadodara',
-            'surat', 'patna', 'ranchi', 'guwahati', 'bhopal'
-        ];
-        
-        const locationLower = location.toLowerCase();
-        
-        // Check for India or IN
-        if (locationLower.includes('india') || 
-            locationLower.match(/\bin\b/)) {
-            return true;
-        }
-        
-        // Check for Indian cities
-        return indianCities.some(city => locationLower.includes(city));
+        return isTargetLocation(location);
     }
 };
