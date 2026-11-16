@@ -16,9 +16,11 @@
 import {
   GEMMA_API_KEYS, GEMMA_SCRAPER_API_KEYS, GEMMA_MODEL, GEMMA_BASE_URL,
   EMPLOYER_AI_MODELS, SEEKER_AI_MODELS, SCRAPER_AI_MODELS,
+  GROQ_API_KEYS, GROQ_BASE_URL, GROQ_SEEKER_MODELS,
   AI_SAFETY_MARGIN, SCRAPER_JD_EXTRACTION_ENABLED,
 } from '../env.js';
 import { KeyManager } from './key-manager.js';
+import { GroqClient } from './groq-client.js';
 import { GemmaClient } from './gemma-client.js';
 import { RateLimitTracker } from './rate-limit-tracker.js';
 import { CircuitBreaker } from './circuit-breaker.js';
@@ -37,6 +39,7 @@ let seekerCascade = null;
 let scraperCascade = null;
 let scoringKeyManager = null;
 let scraperKeyManager = null;
+let groqKeyManager = null;
 
 /** One cascade over a key pool, or null when that pool has no live keys. */
 function buildCascade({ models, keyManager, tier }) {
@@ -46,6 +49,21 @@ function buildCascade({ models, keyManager, tier }) {
   const client = new GemmaClient({ keyManager, model: GEMMA_MODEL, baseUrl: GEMMA_BASE_URL });
   return new ModelCascade({
     models: models.length > 0 ? models : [GEMMA_MODEL],
+    keys: keyManager.keys,
+    keyManager, client, rateLimitTracker, circuitBreaker, responseCache, tier,
+  });
+}
+
+/**
+ * The same cascade over Groq instead of Gemini. GroqClient mirrors
+ * GemmaClient's interface exactly, so everything downstream — rotation, rate
+ * tracking, the breaker, the cache — is shared rather than duplicated.
+ */
+function buildGroqCascade({ models, keyManager, tier }) {
+  if (!keyManager.hasLiveKeys() || models.length === 0) return null;
+  const client = new GroqClient({ keyManager, model: models[0], baseUrl: GROQ_BASE_URL });
+  return new ModelCascade({
+    models,
     keys: keyManager.keys,
     keyManager, client, rateLimitTracker, circuitBreaker, responseCache, tier,
   });
@@ -69,7 +87,7 @@ function logTier(tier, cascade, disabledReason) {
  * Returns { scoringLiveKeys, scraperLiveKeys, scraperUsesFallback } — the same
  * shape the previous implementation returned, so callers are unchanged.
  */
-export function initGemma(scoringKeysString = GEMMA_API_KEYS, scraperKeysString = GEMMA_SCRAPER_API_KEYS) {
+export function initGemma(scoringKeysString = GEMMA_API_KEYS, scraperKeysString = GEMMA_SCRAPER_API_KEYS, groqKeysString = GROQ_API_KEYS) {
   rateLimitTracker = new RateLimitTracker(AI_SAFETY_MARGIN);
   circuitBreaker = new CircuitBreaker();
   responseCache = new ResponseCache(RESPONSE_CACHE_SIZE);
@@ -78,7 +96,16 @@ export function initGemma(scoringKeysString = GEMMA_API_KEYS, scraperKeysString 
   scraperKeyManager = new KeyManager(scraperKeysString);
 
   employerCascade = buildCascade({ models: parseList(EMPLOYER_AI_MODELS), keyManager: scoringKeyManager, tier: 'employer' });
-  seekerCascade = buildCascade({ models: parseList(SEEKER_AI_MODELS), keyManager: scoringKeyManager, tier: 'seeker' });
+
+  // Seeker prefers Groq, for latency: resume parsing runs while someone waits
+  // on an upload screen. With no Groq keys configured it falls back to the
+  // Gemini pool, so this is additive — an empty GROQ_API_KEYS changes nothing.
+  groqKeyManager = new KeyManager(groqKeysString);
+  seekerCascade = buildGroqCascade({
+    models: parseList(GROQ_SEEKER_MODELS), keyManager: groqKeyManager, tier: 'seeker',
+  }) || buildCascade({
+    models: parseList(SEEKER_AI_MODELS), keyManager: scoringKeyManager, tier: 'seeker',
+  });
   // The scraper prefers its own pool; with none configured it shares the main
   // pool, exactly as the previous fallback did.
   const scraperPool = scraperKeyManager.hasLiveKeys() ? scraperKeyManager : scoringKeyManager;

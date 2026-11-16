@@ -116,6 +116,23 @@ export class ModelCascade {
     }
 
     const summary = this.rateLimitTracker.summarize();
+
+    // Say WHY it gave up. Running out of valid keys and running out of quota
+    // are different failures with different fixes, and reporting both as
+    // "rate-limited" is actively misleading: a production outage where all
+    // three keys had been rejected as API_KEY_INVALID logged
+    // "exhausted every model x key" next to a usage line reading rpm 0/90 and
+    // rpd 0/43200 — zero requests spent — which sent the investigation after
+    // quota for far longer than it should have.
+    const liveKeys = this.keyManager?.liveKeyCount?.();
+    if (liveKeys === 0) {
+      const message = `[${this.tier}] No usable API keys: every key was rejected by the provider `
+        + '(API_KEY_INVALID) and blacklisted. This is an authentication failure, not a quota one — '
+        + 'replace the keys in GEMMA_API_KEYS.';
+      console.error(`[ai:${this.tier}] ${message}`);
+      throw new Error(message);
+    }
+
     console.warn(`[ai:${this.tier}] exhausted every model x key. Usage: ${summary}`);
     throw new Error(`[${this.tier}] All models rate-limited. Usage: ${summary}`);
   }

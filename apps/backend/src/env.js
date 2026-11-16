@@ -120,6 +120,21 @@ export const GEMMA_SCRAPER_API_KEYS = process.env.GEMMA_SCRAPER_API_KEYS || '';
 export const GEMMA_MODEL = process.env.GEMMA_MODEL || 'gemma-4-26b-a4b-it';
 export const GEMMA_BASE_URL = process.env.GEMMA_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta';
 
+// ─── Groq (seeker tier) ────────────────────────────────────────────
+// The seeker tier runs on Groq when keys are present, and falls back to the
+// Gemini pool when they are not — so an empty GROQ_API_KEYS changes nothing.
+// Why split the providers at all: seeker work is resume parsing and job
+// matching, both of which happen while a person waits on a screen, and Groq
+// returns a full structured parse in well under a second. Employer and scraper
+// work is batch and stays on Gemini.
+export const GROQ_API_KEYS = process.env.GROQ_API_KEYS || '';
+export const GROQ_BASE_URL = process.env.GROQ_BASE_URL || 'https://api.groq.com/openai/v1';
+// Verified against the account's own model list before being set as defaults.
+// gpt-oss-120b leads on quality; qwen3.8-27b answered a full resume extraction
+// correctly in 676ms; gpt-oss-20b is the last resort.
+export const GROQ_SEEKER_MODELS = process.env.GROQ_SEEKER_MODELS
+  || 'openai/gpt-oss-120b,qwen/qwen3.8-27b,openai/gpt-oss-20b';
+
 // ─── AI per-operation switches ─────────────────────────────────────
 // Each operation can be disabled independently without touching keys. Only the
 // scraper defaults OFF — it is the bursty, lowest-value consumer of quota, so

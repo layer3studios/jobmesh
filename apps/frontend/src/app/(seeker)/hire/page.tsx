@@ -33,9 +33,14 @@ export const viewport = LANDING_VIEWPORT;
  * the title of a page that does not exist.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  if (!(await isEmployerSideEnabled())) {
-    return { title: 'Not found', robots: { index: false, follow: false } };
-  }
+  // notFound() here, not a noindex Metadata object. Returning metadata and
+  // letting the component below call notFound() rendered the not-found BODY
+  // with a 200 status — verified against the deployed site, while /employer
+  // (which gates in a layout) correctly returned 404. A soft 404 is worse than
+  // an honest one: Google keeps the URL in the index and distrusts the rest of
+  // the site's 404s. Calling it at metadata time settles the status before the
+  // response is composed.
+  if (!(await isEmployerSideEnabled())) notFound();
   return {
     title: COPY.hire.metaTitle,
     description: COPY.hire.metaDescription,

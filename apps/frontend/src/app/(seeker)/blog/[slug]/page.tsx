@@ -10,7 +10,7 @@ import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { JsonLd } from '../../../../components/schema/JsonLd';
 import { getPublishedBlogPostServer, getPublishedBlogPostsServer } from '../../../../lib/server-api/blog';
-import { buildArticleSchema, buildBreadcrumbListSchema } from '../../../../lib/schema';
+import { buildArticleSchema, buildBreadcrumbListSchema, buildFaqPageSchema } from '../../../../lib/schema';
 import { absoluteUrl } from '../../../../lib/site-url';
 
 // New posts appear without a deploy: pages render on first request, then cache.
@@ -38,14 +38,51 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
+// remark-gfm parses tables, H3s and the rest, but anything not mapped here
+// rendered with bare browser defaults — black-on-white tables on a dark page.
+// The top-ranking competitor page for these queries leads with a
+// quick-reference table, so this is table stakes rather than decoration.
 const components: Components = {
   a: ({ href, children }) => (href?.startsWith('/')
     ? <Link href={href}>{children}</Link>
     : <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>),
   h2: ({ children }) => <h2 style={{ fontSize: '1.4rem', fontWeight: 600, margin: '2em 0 0.6em', letterSpacing: '-0.01em' }}>{children}</h2>,
+  h3: ({ children }) => <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: '1.6em 0 0.5em' }}>{children}</h3>,
   p: ({ children }) => <p style={{ margin: '0 0 1.1em' }}>{children}</p>,
   ul: ({ children }) => <ul style={{ margin: '0 0 1.1em', paddingLeft: '1.3em', display: 'grid', gap: 6 }}>{children}</ul>,
   ol: ({ children }) => <ol style={{ margin: '0 0 1.1em', paddingLeft: '1.3em', display: 'grid', gap: 6 }}>{children}</ol>,
+  strong: ({ children }) => <strong style={{ fontWeight: 600, color: 'var(--ink)' }}>{children}</strong>,
+  blockquote: ({ children }) => (
+    <blockquote style={{
+      margin: '0 0 1.1em', padding: '2px 0 2px 16px',
+      borderLeft: '2px solid var(--accent)', color: 'var(--ink-muted)',
+    }}>{children}</blockquote>
+  ),
+  code: ({ children }) => (
+    <code style={{
+      fontFamily: 'var(--font-jetbrains-mono), monospace', fontSize: '0.88em',
+      background: 'var(--surface-2)', border: '1px solid var(--border)',
+      borderRadius: 4, padding: '1px 5px',
+    }}>{children}</code>
+  ),
+  hr: () => <hr style={{ border: 0, borderTop: '1px solid var(--border)', margin: '2.2em 0' }} />,
+  // The wrapper scrolls instead of the page: a 4-column table has nowhere to go
+  // on a 360px screen, and overflowing the body breaks the whole layout.
+  table: ({ children }) => (
+    <div style={{ overflowX: 'auto', margin: '0 0 1.4em' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>{children}</table>
+    </div>
+  ),
+  th: ({ children }) => (
+    <th style={{
+      textAlign: 'left', padding: '8px 12px', whiteSpace: 'nowrap',
+      borderBottom: '1px solid var(--border-loud)', color: 'var(--ink-2)',
+      fontWeight: 600, fontSize: 13,
+    }}>{children}</th>
+  ),
+  td: ({ children }) => (
+    <td style={{ padding: '8px 12px', borderBottom: '1px solid var(--border)', verticalAlign: 'top' }}>{children}</td>
+  ),
 };
 
 function formatDate(iso: string): string {
@@ -59,6 +96,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   const others = (await getPublishedBlogPostsServer().catch(() => []))
     .filter(other => other.slug !== post.slug).slice(0, 3);
   const publishedAt = post.publishedAt ?? post.updatedAt ?? new Date().toISOString();
+  const faqSchema = buildFaqPageSchema(post.body);
 
   return (
     <main style={{ width: '100%', maxWidth: 760, margin: '0 auto', padding: 'clamp(20px, 4vw, 40px) clamp(16px, 4vw, 24px) 64px' }}>
@@ -70,6 +108,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         { name: 'Blog', path: '/blog' },
         { name: post.title, path: `/blog/${post.slug}` },
       ])} />
+      {/* Emitted only when the post actually has an FAQ section, so the markup
+          always matches what the reader can see. */}
+      {faqSchema && <JsonLd schema={faqSchema} />}
 
       <Link href="/blog" style={{ fontSize: 13, textDecoration: 'none', color: 'var(--ink-muted)' }}>← Blog</Link>
       <article>
