@@ -115,7 +115,13 @@ export async function saveJobs(rawJobs) {
     const job = { ...input };
 
     if (job.Description) {
-      job.DescriptionCleaned = cleanJobDescription(job.Description);
+      // DescriptionCleaned is NOT stored. It is cleanJobDescription(Description)
+      // and nothing more, so storing it meant a third copy of the same text:
+      // measured on live data, the four description fields were 95% of a 19 KB
+      // job document, and this one was 30% of it on its own. The single-job
+      // endpoint cleans on read instead (api/seeker/seeker-jobs-routes.js) —
+      // one document, once, where the formatted body is actually rendered.
+      // Description stays because it is the only copy that cannot be recomputed.
       job.DescriptionPlain = getPlainTextForTagging(job);
       const tags = generateJobTags(job);
       job.autoTags = tags;

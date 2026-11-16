@@ -3,6 +3,7 @@
 // city, tags, salary and recency. Split out of queries.js (section 2) -- this is
 // the shape of a search, and it changes for product reasons; the file it left
 // changes for pagination and caching reasons.
+import { cityMatchTerms } from './city-canonical.js';
 
 
 
@@ -107,13 +108,18 @@ function buildJobsQuery({
   }
 
   // locations: OR across up to 5 cities, matched against Location + AllLocations.
+  //
+  // Each city expands to every spelling that means it (city-canonical.js), which
+  // is what makes the pill honest: the "Bengaluru" pill counts the 711 jobs whose
+  // Location says "Bangalore", so the filter has to return them too. Matching the
+  // label alone showed 1,567 and delivered 856.
   if (Array.isArray(locations) && locations.length > 0) {
     const cities = locations.map(c => c.trim()).filter(Boolean).slice(0, 5);
     if (cities.length > 0) {
-      must.push({ $or: cities.flatMap(city => {
-        const re = { $regex: `\\b${escapeRegex(city)}\\b`, $options: 'i' };
+      must.push({ $or: cities.flatMap(city => cityMatchTerms(city).flatMap(term => {
+        const re = { $regex: `\\b${escapeRegex(term)}\\b`, $options: 'i' };
         return [{ Location: re }, { AllLocations: re }];
-      })});
+      })) });
     }
   }
 

@@ -5,6 +5,7 @@ import { ObjectId } from 'mongodb';
 import { col } from '../connection.js';
 import { buildJobsQuery, hasTextSearch, NOT_ADMIN_HIDDEN } from './jobs-query-builder.js';
 import { FEED_PROJECTION, clampFeedLimit } from './jobs-feed-projection.js';
+import { canonicalCity, canonicalCitiesFrom } from './city-canonical.js';
 
 const JOBS = 'jobs';
 
@@ -91,42 +92,11 @@ export async function getJobsPaginated(
 const FACETS_TTL_MS = 30 * 60 * 1000;
 let facetsCache = { value: null, at: 0 };
 
-/**
- * Segments that appear in a Location string but are not cities: countries,
- * work modes, and the scraper's own leakage. They were reaching the City
- * filter as pills reading "published" and "In-Office".
- */
-const NON_CITY_SEGMENTS = new Set([
-  'remote', 'india', 'n/a', 'na', 'anywhere', 'multiple locations', 'pan india',
-  'hybrid', 'on-site', 'onsite', 'on site', 'in-office', 'in office', 'office',
-  'work from home', 'wfh', 'work from office', 'flexible', 'various', 'other',
-  'remote (india)', 'remote - india', 'all locations', 'any', 'tbd', 'unknown',
-  // Field names and statuses that a broken mapper has written into Location.
-  'published', 'active', 'location', 'null', 'undefined', 'none', '-', '',
-]);
-
-/** A city reads as words — not a number, a code, or a URL fragment. */
-const CITY_SHAPE = /^[\p{L}][\p{L}\p{M}\s.'’-]*$/u;
-/** "example.com" passes CITY_SHAPE; a place name never ends in a bare TLD. */
-const LOOKS_LIKE_DOMAIN = /\.[a-z]{2,}$/i;
-
-function extractCity(raw) {
-  if (typeof raw !== 'string') return null;
-  if (raw.includes('://')) return null;
-  // "Bengaluru, Karnataka, India" → "Bengaluru". Split on the separators that
-  // actually show up, " - " included: "India - Hyderabad" used to survive whole
-  // and became its own pill next to the real "Hyderabad".
-  const segments = raw.split(/[,/|;]|\s[-–—]\s/);
-  for (const part of segments) {
-    const seg = part.trim().replace(/\s+/g, ' ');
-    if (seg.length < 2 || seg.length > 40) continue;
-    if (NON_CITY_SEGMENTS.has(seg.toLowerCase())) continue;
-    if (!CITY_SHAPE.test(seg) || LOOKS_LIKE_DOMAIN.test(seg)) continue;
-    return seg;
-  }
-  // Every segment was a country or a work mode, so this job has no city.
-  return null;
-}
+// City naming — both halves of the City filter now share one table, in
+// ./city-canonical.js. The rules used to live here, which is how the facets and
+// the filter drifted apart: the pills merged on a display string while the
+// filter matched that string literally against Location.
+const extractCity = canonicalCity;
 
 export const __testing = { extractCity };
 
@@ -150,21 +120,39 @@ export async function getJobFacets() {
       { $sort: { count: -1, _id: 1 } },
       { $limit: 30 },
     ]).toArray(),
+    // Location UNION AllLocations — the same pair the filter matches against
+    // (jobs-query-builder.js). Reading only `Location` is what made the pills
+    // lie: measured live, 1,983 active jobs matched the Bengaluru filter while
+    // its pill read 856. Grouping by the whole location SET collapses identical
+    // jobs, so this stays one small aggregation rather than 8,000 documents.
     jobs.aggregate([
       { $match: { Status: 'active', ...NOT_ADMIN_HIDDEN } },
-      { $group: { _id: '$Location', count: { $sum: 1 } } },
+      {
+        $project: {
+          locs: {
+            $setUnion: [
+              [{ $ifNull: ['$Location', ''] }],
+              { $ifNull: ['$AllLocations', []] },
+            ],
+          },
+        },
+      },
+      { $group: { _id: '$locs', count: { $sum: 1 } } },
     ]).toArray(),
   ]);
 
-  // Collapse raw Location strings into city counts (case-insensitive merge).
+  // Count a job under EVERY city it mentions, once each. A job posted in
+  // "Bengaluru, Hyderabad" belongs to both pills, which is already how the
+  // filter treats it — canonicalCitiesFrom returns a Set, so a job whose
+  // Location and AllLocations both say Bengaluru is still counted once.
   const cityCounts = new Map();
-  for (const { _id: locationString, count } of locAgg) {
-    const city = extractCity(locationString);
-    if (!city) continue;
-    const key = city.toLowerCase();
-    const entry = cityCounts.get(key);
-    if (entry) entry.count += count;
-    else cityCounts.set(key, { city, count });
+  for (const { _id: locationStrings, count } of locAgg) {
+    for (const city of canonicalCitiesFrom(locationStrings || [])) {
+      const key = city.toLowerCase();
+      const entry = cityCounts.get(key);
+      if (entry) entry.count += count;
+      else cityCounts.set(key, { city, count });
+    }
   }
   const cities = [...cityCounts.values()]
     .sort((a, b) => b.count - a.count || a.city.localeCompare(b.city))

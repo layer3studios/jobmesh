@@ -34,7 +34,6 @@ export const jobSchemaDefinition = {
 
   // Description variants
   DescriptionPlain: { type: String, default: null },
-  DescriptionLists: { type: Array, default: [] },
   AdditionalInfo: { type: String, default: null },
   DescriptionCleaned: { type: String, default: null },
 

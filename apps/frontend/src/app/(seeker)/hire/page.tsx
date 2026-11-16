@@ -13,24 +13,43 @@ import HireClient from '../../../components/seeker/hire/HireClient';
 import { LANDING_VIEWPORT } from '../../../components/seeker/home/landing-viewport';
 import type { ICompany } from '../../../types';
 
-export const revalidate = 300;
+// force-dynamic, NOT revalidate. employerSideEnabled is a runtime switch an
+// admin flips at /admin/flags, and a statically prerendered page cannot honour
+// it: this route was generated at build time, when the gate said "off", and was
+// then served as 200 with the not-found body — a soft 404, which Google treats
+// worse than an honest one. It also meant turning the flag ON would not have
+// revealed the page until the cache expired, or at all. Rendering per request
+// makes the flag mean what it says in both directions; the page is a handful of
+// company logos over cached directory data, so the cost is small.
+export const dynamic = 'force-dynamic';
 
 // Ink status bar on iOS — see landing-viewport.ts.
 export const viewport = LANDING_VIEWPORT;
 
-export const metadata: Metadata = {
-  title: COPY.hire.metaTitle,
-  description: COPY.hire.metaDescription,
-  alternates: { canonical: absoluteUrl('/hire') },
-  openGraph: {
+/**
+ * Metadata has to be a function for the same reason: while the hire half is
+ * off, this page must not advertise itself. A static export described the live
+ * pitch page even as the body 404'd, so a crawler saw "Hire with JobMesh" as
+ * the title of a page that does not exist.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  if (!(await isEmployerSideEnabled())) {
+    return { title: 'Not found', robots: { index: false, follow: false } };
+  }
+  return {
     title: COPY.hire.metaTitle,
     description: COPY.hire.metaDescription,
-    url: absoluteUrl('/hire'),
-    siteName: BRAND.appName,
-    type: 'website',
-    locale: 'en_IN',
-  },
-};
+    alternates: { canonical: absoluteUrl('/hire') },
+    openGraph: {
+      title: COPY.hire.metaTitle,
+      description: COPY.hire.metaDescription,
+      url: absoluteUrl('/hire'),
+      siteName: BRAND.appName,
+      type: 'website',
+      locale: 'en_IN',
+    },
+  };
+}
 
 export default async function HirePage() {
   // The hire half is written and working but not launched. Until an admin

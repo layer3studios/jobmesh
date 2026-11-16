@@ -31,7 +31,6 @@ export function mapWorkdayJob(raw, companyName, sourceSite) {
     Tags: [],
     Description: null,
     DescriptionPlain: null,
-    DescriptionLists: [],
     AdditionalInfo: null,
     SalaryMin: null,
     SalaryMax: null,

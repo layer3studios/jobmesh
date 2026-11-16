@@ -9,8 +9,10 @@
  *
  * The feed previously shipped whole documents (`.project({ __v: 0 })` excludes one
  * field and keeps every other), which meant every row carried FOUR renderings of
- * the same description — `Description` (raw ATS HTML), `DescriptionCleaned`,
- * `DescriptionPlain` and `DescriptionLists` — for a card that shows none of them.
+ * the same description. Two of those four copies are gone now:
+ * DescriptionCleaned is derived on read and DescriptionLists was never read by
+ * anything. What remains is `Description` (raw ATS HTML, the only unrecoverable
+ * copy) and `DescriptionPlain` — and the feed still ships none of the HTML.
  *
  * `DescriptionPlain` STAYS. The client matches the seeker's skills against it to
  * draw the "N skills match" chip and to power sort-by-match (dashboard/index.tsx,

@@ -46,7 +46,6 @@ export function mapGreenhouseJob(raw, companyName, sourceSite) {
     Tags: [],
     Description: raw.content || null,
     DescriptionPlain: descPlain,
-    DescriptionLists: [],
     AdditionalInfo: null,
     SalaryMin: null,
     SalaryMax: null,

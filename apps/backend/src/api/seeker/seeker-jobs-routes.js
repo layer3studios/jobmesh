@@ -11,6 +11,7 @@ import { getSimilarJobs, getMarketPulse } from '../../Db/analytics/index.js';
 import { asyncHandler } from '../../middleware/async-handler-middleware.js';
 import { requireAdmin } from '../../middleware/require-admin-middleware.js';
 import { HttpError } from '../../middleware/error-handler-middleware.js';
+import { cleanJobDescription } from '../../core/cleanJobDescription/index.js';
 
 export const jobsApiRouter = Router();
 
@@ -87,6 +88,13 @@ jobsApiRouter.get('/:id', asyncHandler(async (req, res) => {
   if (!ObjectId.isValid(id)) throw new HttpError(400, 'Invalid ID');
   const job = await findJobById(id);
   if (!job) throw new HttpError(404, 'Job not found');
+  // Derived here rather than stored. The client renders DescriptionCleaned as
+  // the job body, but it is a pure function of Description, so keeping it in
+  // Mongo cost a third of every job document for no information. This is the
+  // one place the formatted body is needed, and it is one document per request.
+  if (job.Description && !job.DescriptionCleaned) {
+    job.DescriptionCleaned = cleanJobDescription(job.Description);
+  }
   res.json(job);
 }));
 
