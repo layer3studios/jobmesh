@@ -23,6 +23,21 @@ export const MODEL_LIMITS = {
   'gemini-2.5-flash-lite': { rpm: 10, rpd: 20, tpm: 250000 },
   'gemma-4-26b-a4b-it': { rpm: 30, rpd: 14400, tpm: 16000 },
   'gemma-4-31b': { rpm: 30, rpd: 14400, tpm: 16000 },
+
+  // Groq (seeker tier). Read from Groq's own x-ratelimit-* response headers
+  // rather than guessed: rpm 1000, tpm 8000, measured 2026-11-16.
+  //
+  // These MUST be listed. An unlisted model falls back to CONSERVATIVE_LIMIT
+  // at 5 rpm, which would have throttled Groq to 1/200th of its real request
+  // allowance and made the faster provider look slower than the one it replaced.
+  //
+  // tpm is the real governor here, not rpm: a full resume parse is a few
+  // thousand tokens, so the 8,000-token minute budget binds long before the
+  // 1,000-request one. Groq publishes no daily request header, so rpd is set
+  // high enough not to be the binding constraint while still being a backstop.
+  'openai/gpt-oss-120b': { rpm: 1000, rpd: 100000, tpm: 8000 },
+  'openai/gpt-oss-20b': { rpm: 1000, rpd: 100000, tpm: 8000 },
+  'qwen/qwen3.8-27b': { rpm: 1000, rpd: 100000, tpm: 8000 },
 };
 
 /**
