@@ -66,7 +66,22 @@ export function useDashboardFilters(): DashboardFilters {
 
   // Derived, not copied: a URL change re-renders with the new filters.
   const spKey = sp.toString();
-  const filters = useMemo(() => parseFilters(sp), [spKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Keyed on the FILTER params alone, never the whole query string.
+  //
+  // Keying on spKey meant opening a job — which only writes ?selectedJob — gave
+  // `filters` a new object identity with no filter value changed. useDashboardJobs
+  // depends on [filters, search], so it refetched, the list unmounted into its
+  // loading state and remounted, and the scroll position went back to the top.
+  // Clicking the fourth job sent you back to the first.
+  //
+  // So the key is built from the params this hook actually owns. selectedJob,
+  // and anything else that lands in the URL later, cannot invalidate it.
+  const filterKey = useMemo(
+    () => Object.values(PARAM).sort().map((name) => `${name}=${sp.get(name) ?? ''}`).join('&'),
+    [spKey], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const filters = useMemo(() => parseFilters(sp), [filterKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const commit = useCallback((mutate: (next: URLSearchParams) => void) => {
     const next = new URLSearchParams(spKey);
