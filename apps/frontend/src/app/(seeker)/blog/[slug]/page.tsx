@@ -16,10 +16,21 @@ import { absoluteUrl } from '../../../../lib/site-url';
 // New posts appear without a deploy: pages render on first request, then cache.
 export const revalidate = 60;
 
-export async function generateStaticParams() {
-  const posts = await getPublishedBlogPostsServer().catch(() => []);
-  return posts.map(post => ({ slug: post.slug }));
-}
+// There is deliberately NO generateStaticParams here.
+//
+// It used to be present, and it made every published post return 500 with
+// digest DYNAMIC_SERVER_USAGE. The (seeker) layout calls getSeekerMeServer(),
+// which reads the seeker cookie, so every page in this group is inherently
+// dynamic. Declaring generateStaticParams asks Next to render this page
+// statically inside a layout that cannot be static, and the render throws.
+//
+// The sibling listing page never hit this because it declares no params and is
+// simply rendered per request. Nothing is lost by matching it: freshness still
+// comes from the 60-second data cache in publicServerFetch, so repeat renders
+// do not re-hit Express.
+//
+// If this group ever stops reading cookies in its layout, prerendering the
+// published slugs becomes possible again — and only then.
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;

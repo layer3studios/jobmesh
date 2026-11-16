@@ -15,6 +15,9 @@ import { BRAND, COPY } from '../../../theme/brand';
 const LINKS = [
   { href: '/find-work', label: COPY.home.navJobs },
   { href: '/companies', label: COPY.home.navCompanies },
+  // Guides is the blog. A footer link alone meant nobody found it, and a
+  // section nothing links to from the top of the site does not rank.
+  { href: '/blog', label: 'Guides' },
 ] as const;
 
 export default function LandingNav({ employerSideEnabled }: { employerSideEnabled: boolean }) {
