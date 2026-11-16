@@ -65,7 +65,6 @@ export function mapRecruiteeJob(raw, companyName, sourceSite) {
     Tags: Array.isArray(raw.tags) ? raw.tags : [],
     Description: descHtml,
     DescriptionPlain: descPlain,
-    DescriptionLists: [],
     AdditionalInfo: [
       raw.category_code ? `Category: ${raw.category_code}` : null,
       raw.education_code ? `Education: ${raw.education_code}` : null,

@@ -42,7 +42,6 @@ export interface IJob {
   IsRemote?: boolean | null;
 
   DescriptionPlain?: string | null;
-  DescriptionLists?: Array<{ text: string; content: string }>;
   DescriptionCleaned?: string | null;
   AdditionalInfo?: string | null;
 

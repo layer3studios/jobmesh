@@ -43,7 +43,6 @@ export function mapAshbyJob(raw, companyName, sourceSite) {
     Tags: [],
     Description: raw.descriptionHtml || null,
     DescriptionPlain: raw.descriptionPlain || null,
-    DescriptionLists: [],
     AdditionalInfo: null,
     SalaryMin: null,
     SalaryMax: null,

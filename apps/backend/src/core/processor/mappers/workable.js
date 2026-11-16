@@ -37,7 +37,6 @@ export function mapWorkableJob(raw, companyName, sourceSite) {
     Tags: [],
     Description: raw.description || null,
     DescriptionPlain: descPlain,
-    DescriptionLists: [],
     AdditionalInfo: [
       raw.experience ? `Experience: ${raw.experience}` : null,
       raw.education ? `Education: ${raw.education}` : null,

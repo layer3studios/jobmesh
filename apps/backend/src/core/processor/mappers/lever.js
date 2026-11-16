@@ -30,7 +30,6 @@ export function mapLeverJob(raw, companyName, sourceSite) {
     Tags: Array.isArray(raw.tags) ? raw.tags : [],
     Description: raw.description || null,
     DescriptionPlain: raw.descriptionPlain || null,
-    DescriptionLists: Array.isArray(raw.lists) ? raw.lists : [],
     AdditionalInfo: raw.additional || null,
     SalaryMin: salary.min ?? null,
     SalaryMax: salary.max ?? null,
