@@ -8,7 +8,7 @@
 // SeekerContext + ThemeProvider + useViewport here.
 import { useEffect, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
-import { Briefcase, Building2, Home as HomeIcon, User } from 'lucide-react';
+import { Briefcase, Building2, Home as HomeIcon, User, BookOpen } from 'lucide-react';
 import { useTheme } from '../../context/theme/ThemeProvider';
 import { useSeeker } from '../../context/seeker/SeekerContext';
 import SkillsEditor from '../seeker/SkillsEditor';
@@ -47,15 +47,21 @@ export default function SeekerAppShell({ children, employerSideEnabled }: ShellP
   const isLanding = pathname === '/' || pathname === '/hire'
     || pathname === '/find-work' || pathname === '/companies' || pathname === '/login';
 
+  // Blog is in the nav, not only the footer. It was reachable solely through a
+  // footer link, which meant readers never found it and the section earned no
+  // internal link equity — the pages that rank for a job board are the ones the
+  // site itself links to from somewhere people look.
   const navItems: NavItem[] = currentUser ? [
     { to: '/jobs', label: 'Jobs', icon: <Briefcase size={18} /> },
     { to: '/today', label: 'Today', icon: <HomeIcon size={18} /> },
     { to: '/directory', label: 'Companies', icon: <Building2 size={18} /> },
+    { to: '/blog', label: 'Guides', icon: <BookOpen size={18} /> },
     { to: '/profile', label: 'Profile', icon: <User size={18} /> },
   ] : [
     { to: '/', label: 'Home', icon: <HomeIcon size={18} /> },
     { to: '/jobs', label: 'Jobs', icon: <Briefcase size={18} /> },
     { to: '/directory', label: 'Companies', icon: <Building2 size={18} /> },
+    { to: '/blog', label: 'Guides', icon: <BookOpen size={18} /> },
   ];
 
   return (
