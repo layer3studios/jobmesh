@@ -34,10 +34,33 @@ function parseJson(raw) {
   }
 }
 
+// A salary this large is not lakhs. Indian tech CTC in LPA realistically runs
+// from under 1 to a few hundred; 4,500,000 is "45 LPA" written out in rupees.
+const LPA_IMPLAUSIBLE_ABOVE = 1000;
+const RUPEES_PER_LAKH = 100_000;
+
+/**
+ * Normalize CTC to LPA, whatever unit the model used.
+ *
+ * The prompt asks for lakhs per annum and the model obeys most of the time —
+ * but not always: the same prompt returned 38 for "38 LPA" in one run and
+ * 4500000 for "45 LPA" in another, on the same model. Storing both shapes in
+ * one field makes every downstream comparison silently wrong, and a salary
+ * filter cannot tell 45 lakh from 45 rupees.
+ *
+ * So the unit is decided here rather than trusted. Anything at or above a
+ * thousand is read as rupees and converted; anything below is already LPA.
+ * The gap between the two scales is five orders of magnitude, so the
+ * classification is not close to ambiguous.
+ */
 function ctc(value) {
   if (!value || typeof value !== 'object') return null;
-  const amount = numOrNull(value.amount);
-  return amount === null ? null : { amount, currency: 'INR' };
+  const raw = numOrNull(value.amount);
+  if (raw === null) return null;
+  const amount = Math.abs(raw) >= LPA_IMPLAUSIBLE_ABOVE
+    ? Math.round((raw / RUPEES_PER_LAKH) * 100) / 100
+    : raw;
+  return { amount, currency: 'INR' };
 }
 
 function normalize(p) {
@@ -97,3 +120,5 @@ export async function parseResumeText(text) {
 }
 
 export default parseResumeText;
+
+export const __testing = { ctc, normalize, parseJson };
