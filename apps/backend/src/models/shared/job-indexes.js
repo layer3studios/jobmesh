@@ -55,6 +55,12 @@ export async function ensureJobIndexes() {
   const jobs = await col('jobs');
   await safeCreateIndex(jobs, { JobID: 1 }, JOB_ID_UNIQUE_INDEX_OPTIONS);
   await safeCreateIndex(jobs, { Status: 1, PostedDate: -1 });
+  // The feed's ordering index. Every unsearched request sorts on
+  // { shuffleKey: 1, _id: 1 }, so without this Mongo sorts the whole filtered
+  // set in memory — on a shared-tier cluster that is the most expensive thing
+  // the read path could do. Status leads because every feed query filters on
+  // it, which lets one index serve the match and the sort together.
+  await safeCreateIndex(jobs, { Status: 1, shuffleKey: 1, _id: 1 });
   await safeCreateIndex(jobs, { Status: 1, Company: 1 });
   await safeCreateIndex(jobs, { Status: 1, 'autoTags.roleCategory': 1 });
   await safeCreateIndex(jobs, { Status: 1, 'autoTags.experienceBand': 1 });
